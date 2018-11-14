@@ -1,8 +1,8 @@
 using System;
 using System.Reflection;
 using System.Text;
-using NUnit.Framework.Internal;
 using UnityEditor.IMGUI.Controls;
+using UnityEditor.TestTools.TestRunner.Api;
 using UnityEngine.TestTools.TestRunner.GUI;
 
 namespace UnityEditor.TestTools.TestRunner.GUI
@@ -10,7 +10,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
     internal sealed class TestTreeViewItem : TreeViewItem
     {
         public TestRunnerResult result;
-        internal Test m_Test;
+        internal ITestAdaptor m_Test;
 
         public Type type;
         public MethodInfo method;
@@ -21,7 +21,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
 
         public string FullName { get { return m_Test.FullName; } }
 
-        public TestTreeViewItem(Test test, int depth, TreeViewItem parent)
+        public TestTreeViewItem(ITestAdaptor test, int depth, TreeViewItem parent)
             : base(GetId(test), depth, parent, test.Name)
         {
             m_Test = test;
@@ -35,20 +35,13 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                 method = test.Method.MethodInfo;
             }
 
-            var name = test.Name;
-            if (name.Length > 100)
-            {
-                name = name.Substring(0, 100);
-            }
-            name = name.Replace("\n", "");
-
-            displayName = name;
+            displayName = test.Name.Replace("\n", "");
             icon = Icons.s_UnknownImg;
         }
 
-        private static int GetId(Test test)
+        private static int GetId(ITestAdaptor test)
         {
-            return TestRunnerResult.GetId(test).GetHashCode();
+            return test.UniqueName.GetHashCode();
         }
 
         public void SetResult(TestRunnerResult testResult)

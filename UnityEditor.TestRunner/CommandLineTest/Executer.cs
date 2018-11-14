@@ -39,6 +39,7 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
 
             try
             {
+                Debug.Log("Executing tests with settings: " + ExecutionSettingsToString(executionSettings));
                 m_TestRunnerApi.Execute(executionSettings);
             }
             catch (Exception exception)
@@ -68,7 +69,7 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
 
 
             m_TestRunnerApi.RegisterCallbacks(resultSavingCallback);
-            m_TestRunnerApi.RegisterCallbacks(ScriptableObject.CreateInstance<ExitCallbacks>());
+            m_TestRunnerApi.RegisterCallbacks(ScriptableObject.CreateInstance<ExitCallbacks>(), -10);
             var timeoutCallbacks = ScriptableObject.CreateInstance<TimeoutCallbacks>();
             timeoutCallbacks.Init((action, time) => new DelayedCallback(action, time), m_LogErrorFormat, m_ExitEditorApplication);
             m_TestRunnerApi.RegisterCallbacks(timeoutCallbacks);
@@ -110,5 +111,20 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
             new ExceptionHandling(SetupException.ExceptionType.PlatformNotFound, "Test platform not found ({0}).", ReturnCodes.PlatformNotFoundReturnCode),
             new ExceptionHandling(SetupException.ExceptionType.TestSettingsFileNotFound, "Test settings file not found at {0}.", ReturnCodes.RunError)
         };
+
+        private static string ExecutionSettingsToString(Api.ExecutionSettings executionSettings)
+        {
+            if (executionSettings == null)
+            {
+                return "none";
+            }
+
+            if (executionSettings.filter == null)
+            {
+                return "no filter";
+            }
+
+            return "test mode = " + executionSettings.filter.testMode;
+        }
     }
 }

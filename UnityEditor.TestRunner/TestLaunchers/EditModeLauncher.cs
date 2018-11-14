@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using NUnit.Framework.Interfaces;
 using UnityEditor.SceneManagement;
 using UnityEditor.TestTools.TestRunner.Api;
@@ -6,8 +7,6 @@ using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using UnityEngine.TestTools.TestRunner;
 using UnityEngine.TestTools.TestRunner.GUI;
-using ITest = NUnit.Framework.Interfaces.ITest;
-using ITestResult = NUnit.Framework.Interfaces.ITestResult;
 
 namespace UnityEditor.TestTools.TestRunner
 {
@@ -37,7 +36,6 @@ namespace UnityEditor.TestTools.TestRunner
                 CallbacksDelegator.instance.RunFailed("Run Failed: One or more errors in a prebuild setup. See the editor log for details.");
                 return;
             }
-            ExecutePreBuildSetupMethods(m_EditModeRunner.GetLoadedTests(), m_EditModeRunner.GetFilter());
 
             var undoGroup = Undo.GetCurrentGroup();
             SceneSetup[] previousSceneSetup;
@@ -48,7 +46,7 @@ namespace UnityEditor.TestTools.TestRunner
             callback.previousSceneSetup = previousSceneSetup;
             callback.undoGroup = undoGroup;
             callback.runner = m_EditModeRunner;
-            AddEventHandler<CallbackDelegatorListener>();
+            AddEventHandler<CallbacksDelegatorListener>();
 
             m_EditModeRunner.Run();
             AddEventHandler<BackgroundListener>();
@@ -99,14 +97,19 @@ namespace UnityEditor.TestTools.TestRunner
         {
             int sceneCount = SceneManager.sceneCount;
 
+            var scenesToClose = new List<Scene>();
             for (var i = 0; i < sceneCount; i++)
             {
                 var scene = SceneManager.GetSceneAt(i);
                 var isSceneNotPersisted = string.IsNullOrEmpty(scene.path);
                 if (isSceneNotPersisted)
                 {
-                    EditorSceneManager.CloseScene(scene, true);
+                    scenesToClose.Add(scene);
                 }
+            }
+            foreach (Scene scene in scenesToClose)
+            {
+                EditorSceneManager.CloseScene(scene, true);
             }
         }
 

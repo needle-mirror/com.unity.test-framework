@@ -2,13 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using UnityEditor;
 using UnityEditor.TestRunner.TestLaunchers;
 using UnityEditor.TestTools.TestRunner.Api;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools.TestRunner;
 using UnityEngine.TestTools.TestRunner.Callbacks;
-using Object = UnityEngine.Object;
 
 namespace UnityEditor.TestTools.TestRunner
 {
@@ -33,6 +33,11 @@ namespace UnityEditor.TestTools.TestRunner
             m_OverloadTestRunSettings = overloadTestRunSettings;
         }
 
+        protected override RuntimePlatform? TestTargetPlatform
+        {
+            get { return BuildTargetConverter.TryConvertToRuntimePlatform(m_TargetPlatform); }
+        }
+
         public override void Run()
         {
             var editorConnectionTestCollector = RemoteTestRunController.instance;
@@ -46,7 +51,7 @@ namespace UnityEditor.TestTools.TestRunner
 
                 var filter = m_Settings.filter.BuildNUnitFilter();
                 var runner = LoadTests(filter);
-                var exceptionThrown = ExecutePreBuildSetupMethods(runner.LoadedTest, filter, m_TargetPlatform);
+                var exceptionThrown = ExecutePreBuildSetupMethods(runner.LoadedTest, filter);
                 if (exceptionThrown)
                 {
                     ReopenOriginalScene(m_Settings.originalScene);
@@ -59,7 +64,7 @@ namespace UnityEditor.TestTools.TestRunner
 
                 var success = BuildAndRunPlayer(playerBuildOptions);
                 editorConnectionTestCollector.PostBuildAction();
-                ExecutePostBuildCleanupMethods(runner.LoadedTest, filter, m_TargetPlatform);
+                ExecutePostBuildCleanupMethods(runner.LoadedTest, filter);
 
                 ReopenOriginalScene(m_Settings.originalScene);
                 AssetDatabase.DeleteAsset(sceneName);
@@ -78,22 +83,27 @@ namespace UnityEditor.TestTools.TestRunner
         public Scene PrepareScene(string sceneName)
         {
             var scene = CreateBootstrapScene(sceneName, runner =>
-                {
-                    runner.AddEventHandlerMonoBehaviour<PlayModeRunnerCallback>();
-                    runner.settings = m_Settings;
-                    runner.AddEventHandlerMonoBehaviour<RemoteTestResultSender>();
-                });
+            {
+                runner.AddEventHandlerMonoBehaviour<PlayModeRunnerCallback>();
+                runner.settings = m_Settings;
+                runner.AddEventHandlerMonoBehaviour<RemoteTestResultSender>();
+            });
             return scene;
         }
 
         private static bool BuildAndRunPlayer(PlayerLauncherBuildOptions buildOptions)
         {
-            Debug.Log("Building player with following options:\n" + buildOptions);
+            Debug.LogFormat(LogType.Log, LogOption.NoStacktrace, null, "Building player with following options:\n{0}", buildOptions);
 
 
-            // iOS, tvOS and Android have to be in listen mode to establish player connection
-            var buildTarget = buildOptions.BuildPlayerOptions.target;
-            if (buildTarget == BuildTarget.iOS || buildTarget == BuildTarget.tvOS || buildTarget == BuildTarget.Android)
+            // Android has to be in listen mode to establish player connection
+            if (buildOptions.BuildPlayerOptions.target == BuildTarget.Android)
+            {
+                buildOptions.BuildPlayerOptions.options &= ~BuildOptions.ConnectToHost;
+            }
+
+            // For now, so does Lumin
+            if (buildOptions.BuildPlayerOptions.target == BuildTarget.Lumin)
             {
                 buildOptions.BuildPlayerOptions.options &= ~BuildOptions.ConnectToHost;
             }
@@ -108,6 +118,14 @@ namespace UnityEditor.TestTools.TestRunner
         private PlayerLauncherBuildOptions GetBuildOptions(Scene scene)
         {
             var buildOptions = new BuildPlayerOptions();
+            var reduceBuildLocationPathLength = false;
+
+            //Some platforms hit MAX_PATH limits during the build process, in these cases minimize the path length
+            if ((m_TargetPlatform == BuildTarget.WSAPlayer) || (m_TargetPlatform == BuildTarget.XboxOne))
+            {
+                reduceBuildLocationPathLength = true;
+            }
+
             var scenes = new List<string>() { scene.path };
             scenes.AddRange(EditorBuildSettings.scenes.Select(x => x.path));
             buildOptions.scenes = scenes.ToArray();
@@ -115,13 +133,26 @@ namespace UnityEditor.TestTools.TestRunner
             buildOptions.options |= BuildOptions.AutoRunPlayer | BuildOptions.Development | BuildOptions.ConnectToHost | BuildOptions.IncludeTestAssemblies | BuildOptions.StrictMode;
             buildOptions.target = m_TargetPlatform;
 
+            if (EditorUserBuildSettings.waitForPlayerConnection)
+                buildOptions.options |= BuildOptions.WaitForPlayerConnection;
+
             var buildTargetGroup = EditorUserBuildSettings.activeBuildTargetGroup;
             var uniqueTempPathInProject = FileUtil.GetUniqueTempPathInProject();
 
-            //WSA have issues with MAX_PATH, try to minimize the path length
-            if (m_TargetPlatform == BuildTarget.WSAPlayer)
+            if (reduceBuildLocationPathLength)
             {
-                uniqueTempPathInProject = uniqueTempPathInProject.Substring(0, 25);
+                uniqueTempPathInProject = Path.GetTempFileName();
+                File.Delete(uniqueTempPathInProject);
+                Directory.CreateDirectory(uniqueTempPathInProject);
+            }
+
+            //Check if Lz4 is supported for the current buildtargetgroup and enable it if need be
+            if (PostprocessBuildPlayer.SupportsLz4Compression(buildTargetGroup, m_TargetPlatform))
+            {
+                if (EditorUserBuildSettings.GetCompressionType(buildTargetGroup) == Compression.Lz4)
+                    buildOptions.options |= BuildOptions.CompressWithLz4;
+                else if (EditorUserBuildSettings.GetCompressionType(buildTargetGroup) == Compression.Lz4HC)
+                    buildOptions.options |= BuildOptions.CompressWithLz4HC;
             }
 
             m_TempBuildLocation = Path.GetFullPath(uniqueTempPathInProject);
@@ -129,18 +160,22 @@ namespace UnityEditor.TestTools.TestRunner
             string extensionForBuildTarget = PostprocessBuildPlayer.GetExtensionForBuildTarget(buildTargetGroup, buildOptions.target, buildOptions.options);
 
             var playerExecutableName = "PlayerWithTests";
+            var playerDirectoryName = reduceBuildLocationPathLength ? "PwT" : "PlayerWithTests";
+
+            var locationPath = Path.Combine(m_TempBuildLocation, playerDirectoryName);
+
             if (!string.IsNullOrEmpty(extensionForBuildTarget))
             {
                 playerExecutableName += string.Format(".{0}", extensionForBuildTarget);
+                locationPath = Path.Combine(locationPath, playerExecutableName);
             }
-            var locationPath = Path.Combine(Path.Combine(m_TempBuildLocation, "PlayerWithTests"), playerExecutableName);
 
             buildOptions.locationPathName = locationPath;
 
             return new PlayerLauncherBuildOptions
             {
                 BuildPlayerOptions = buildOptions,
-                PlayerDirectory = Path.Combine(m_TempBuildLocation, "PlayerWithTests"),
+                PlayerDirectory = Path.Combine(m_TempBuildLocation, playerDirectoryName),
             };
         }
     }

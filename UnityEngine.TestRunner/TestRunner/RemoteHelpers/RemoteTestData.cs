@@ -1,8 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Serialization;
 using NUnit.Framework.Interfaces;
+using NUnit.Framework.Internal;
+using UnityEngine.TestRunner.NUnitExtensions;
 
 namespace UnityEngine.TestRunner.TestLaunchers
 {
@@ -13,28 +13,42 @@ namespace UnityEngine.TestRunner.TestLaunchers
         public string name;
         public string fullName;
         public int testCaseCount;
+        public int ChildIndex;
         public bool hasChildren;
         public bool isSuite;
         public string[] childrenIds;
         public int testCaseTimeout;
+        public string[] Categories;
+        public bool IsTestAssembly;
+        public RunState RunState;
+        public string Description;
+        public string SkipReason;
+        public string ParentId;
+        public string UniqueName;
+        public string ParentUniqueName;
 
-        private RemoteTestData(ITest test)
+        internal RemoteTestData(ITest test)
         {
             id = test.Id;
             name = test.Name;
             fullName = test.FullName;
             testCaseCount = test.TestCaseCount;
+            ChildIndex = -1;
+            if (test.Properties["childIndex"].Count > 0)
+            {
+                ChildIndex = (int)test.Properties["childIndex"][0];
+            }
             hasChildren = test.HasChildren;
             isSuite = test.IsSuite;
             childrenIds = test.Tests.Select(t => t.Id).ToArray();
-        }
-
-        internal static RemoteTestData[] GetTestDataList(ITest test)
-        {
-            var list = new List<RemoteTestData>();
-            list.Add(new RemoteTestData(test));
-            list.AddRange(test.Tests.SelectMany(GetTestDataList));
-            return list.ToArray();
+            Categories = test.GetAllCategoriesFromTest().ToArray();
+            IsTestAssembly = test is TestAssembly;
+            RunState = (RunState)Enum.Parse(typeof(RunState), test.RunState.ToString());
+            Description = (string)test.Properties.Get(PropertyNames.Description);
+            SkipReason = test.GetSkipReason();
+            ParentId = test.GetParentId();
+            UniqueName = test.GetUniqueName();
+            ParentUniqueName = test.GetParentUniqueName();
         }
     }
 }

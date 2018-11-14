@@ -2,6 +2,7 @@ using System;
 using UnityEditor.Networking.PlayerConnection;
 using UnityEditor.TestTools.TestRunner;
 using UnityEditor.TestTools.TestRunner.Api;
+using UnityEditor.TestTools.TestRunner.UnityTestProtocol;
 using UnityEngine;
 using UnityEngine.Networking.PlayerConnection;
 using UnityEngine.TestRunner.TestLaunchers;
@@ -38,7 +39,6 @@ namespace UnityEditor.TestRunner.TestLaunchers
             m_RegisteredConnectionCallbacks = true;
             //This is needed because RemoteTestResultReciever is not a ScriptableObject
             EditorConnection.instance.Register(PlayerConnectionMessageIds.runStartedMessageId, RunStarted);
-            EditorConnection.instance.Register(PlayerConnectionMessageIds.testResultMessageId, ReceivedTestsData);
             EditorConnection.instance.Register(PlayerConnectionMessageIds.runFinishedMessageId, RunFinished);
             EditorConnection.instance.Register(PlayerConnectionMessageIds.testStartedMessageId, TestStarted);
             EditorConnection.instance.Register(PlayerConnectionMessageIds.testFinishedMessageId, TestFinished);
@@ -48,11 +48,6 @@ namespace UnityEditor.TestRunner.TestLaunchers
         {
             m_RemoteTestResultReciever.RunStarted(messageEventArgs);
             CallbacksDelegator.instance.RunStartedRemotely(messageEventArgs.data);
-        }
-
-        private void ReceivedTestsData(MessageEventArgs messageEventArgs)
-        {
-            m_RemoteTestResultReciever.ReceivedTestsData(messageEventArgs);
         }
 
         private void RunFinished(MessageEventArgs messageEventArgs)

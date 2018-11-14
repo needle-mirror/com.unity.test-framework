@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using NUnit.Framework.Interfaces;
 using UnityEditor.IMGUI.Controls;
+using UnityEditor.TestTools.TestRunner.Api;
 using UnityEngine;
 using UnityEngine.TestTools.TestRunner.GUI;
+using UnityEngine.TestTools;
 
 namespace UnityEditor.TestTools.TestRunner.GUI
 {
@@ -47,6 +48,8 @@ namespace UnityEditor.TestTools.TestRunner.GUI
         protected IAssetsDatabaseHelper AssetsDatabaseHelper { get; private set; }
         protected IGuiHelper GuiHelper { get; private set; }
 
+        public abstract TestMode TestMode { get; }
+
         public virtual void PrintHeadPanel()
         {
             EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
@@ -59,7 +62,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                     GUIUtility.ExitGUI();
                 }
             }
-            using (new EditorGUI.DisabledScope(!m_TestListTree.HasSelection() || IsBusy()))
+            using (new EditorGUI.DisabledScope(m_TestListTree == null || !m_TestListTree.HasSelection() || IsBusy()))
             {
                 if (GUILayout.Button(s_GUIRunSelectedTests, EditorStyles.toolbarButton))
                 {
@@ -95,8 +98,23 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             EditorGUILayout.EndHorizontal();
         }
 
+        public bool HasTreeData()
+        {
+            return m_TestListTree != null;
+        }
+
         public virtual void RenderTestList()
         {
+            if (m_TestListTree == null)
+            {
+                GUILayout.Label("Loading...");
+                return;
+            }
+
+            m_TestListScroll = EditorGUILayout.BeginScrollView(m_TestListScroll,
+                GUILayout.ExpandWidth(true),
+                GUILayout.MaxWidth(2000));
+
             if (m_TestListTree.data.root == null || m_TestListTree.data.rowCount == 0 || (!m_TestListTree.isSearching && !m_TestListTree.data.GetItem(0).hasChildren))
             {
                 if (m_TestRunnerUIFilter.IsFiltering)
@@ -112,17 +130,13 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             }
             else
             {
-                m_TestListScroll = EditorGUILayout.BeginScrollView(m_TestListScroll,
-                        GUILayout.ExpandWidth(true),
-                        GUILayout.MaxWidth(2000));
-
                 var treeRect = EditorGUILayout.GetControlRect(GUILayout.ExpandHeight(true), GUILayout.ExpandWidth(true));
                 var treeViewKeyboardControlId = GUIUtility.GetControlID(FocusType.Keyboard);
 
                 m_TestListTree.OnGUI(treeRect, treeViewKeyboardControlId);
-
-                EditorGUILayout.EndScrollView();
             }
+
+            EditorGUILayout.EndScrollView();
         }
 
         public virtual void RenderNoTestsInfo()
@@ -144,12 +158,13 @@ namespace UnityEditor.TestTools.TestRunner.GUI
 
         public void Reload()
         {
-            m_TestListTree.ReloadData();
+            if (m_TestListTree != null)
+                m_TestListTree.ReloadData();
         }
 
         public void Repaint()
         {
-            if (m_TestListTree.data.root == null)
+            if (m_TestListTree == null || m_TestListTree.data.root == null)
             {
                 return;
             }
@@ -160,7 +175,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             TestSelectionCallback(m_TestListState.selectedIDs.ToArray());
         }
 
-        public void Init(TestRunnerWindow window)
+        public void Init(TestRunnerWindow window, ITestAdaptor rootTest)
         {
             if (m_Window == null)
             {
@@ -182,7 +197,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                 m_TestListTree.itemDoubleClickedCallback += TestDoubleClickCallback;
                 m_TestListTree.contextClickItemCallback += TestContextClickCallback;
 
-                var testListTreeViewDataSource = new TestListTreeViewDataSource(m_TestListTree, this);
+                var testListTreeViewDataSource = new TestListTreeViewDataSource(m_TestListTree, this, rootTest);
 
                 if (!newResultList.Any())
                     testListTreeViewDataSource.ExpandTreeOnCreation();
@@ -202,12 +217,12 @@ namespace UnityEditor.TestTools.TestRunner.GUI
 
         public void UpdateResult(TestRunnerResult result)
         {
-            if (newResultList.All(x => x.id != result.id))
+            if (newResultList.All(x => x.uniqueId != result.uniqueId))
             {
                 return;
             }
 
-            var testRunnerResult = newResultList.FirstOrDefault(x => x.id == result.id);
+            var testRunnerResult = newResultList.FirstOrDefault(x => x.uniqueId == result.uniqueId);
             if (testRunnerResult != null)
             {
                 testRunnerResult.Update(result);
@@ -216,7 +231,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
 
         internal void TestSelectionCallback(int[] selected)
         {
-            if (selected.Length == 1)
+            if (m_TestListTree != null && selected.Length == 1)
             {
                 var node = m_TestListTree.FindItem(selected[0]);
                 if (node is TestTreeViewItem)
@@ -274,6 +289,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                             },
                             "");
                     }
+
                     m.AddItem(s_GUIOpenTest,
                         false,
                         data => GuiHelper.OpenScriptInExternalEditor(testNode.type, testNode.method),
@@ -282,10 +298,15 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                 }
             }
 
-            m.AddItem(multilineSelection ? s_GUIRunSelectedTests : s_GUIRun,
-                false,
-                data => RunTests(testFilter),
-                "");
+            if (!IsBusy())
+            {
+                m.AddItem(multilineSelection ? s_GUIRunSelectedTests : s_GUIRun,
+                    false,
+                    data => RunTests(testFilter),
+                    "");
+            }
+            else
+                m.AddDisabledItem(multilineSelection ? s_GUIRunSelectedTests : s_GUIRun, false);
 
             m.ShowAsContext();
         }
@@ -345,7 +366,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             return null;
         }
 
-        public abstract ITest GetTestListNUnit();
+        public abstract TestPlatform TestPlatform { get; }
 
         public void RebuildUIFilter()
         {

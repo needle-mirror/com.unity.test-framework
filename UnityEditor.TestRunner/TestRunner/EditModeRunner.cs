@@ -24,7 +24,7 @@ namespace UnityEditor.TestTools.TestRunner
     {
         public IUnityTestAssemblyRunner Create(TestPlatform testPlatform, WorkItemFactory factory)
         {
-            return new UnityTestAssemblyRunner(UnityTestAssemblyBuilder.GetNUnitTestBuilder(testPlatform), factory);
+            return new UnityTestAssemblyRunner(new UnityTestAssemblyBuilder(), factory);
         }
     }
 
@@ -77,6 +77,9 @@ namespace UnityEditor.TestTools.TestRunner
         [SerializeField]
         private object m_CurrentYieldObject;
 
+        [SerializeField]
+        private EnumerableSetUpTearDownCommandState m_SetUpTearDownState;
+
         internal IUnityTestAssemblyRunner m_Runner;
 
         private ConstructDelegator m_ConstructDelegator;
@@ -100,10 +103,11 @@ namespace UnityEditor.TestTools.TestRunner
             m_Runner = (UnityTestAssemblyRunnerFactory ?? new UnityTestAssemblyRunnerFactory()).Create(TestPlatform.EditMode, new EditmodeWorkItemFactory());
             var testAssemblyProvider = new EditorLoadedTestAssemblyProvider(new EditorCompilationInterfaceProxy(), new EditorAssembliesProxy());
             var loadedTests = m_Runner.Load(
-                    testAssemblyProvider.GetAssembliesGroupedByType(m_TestPlatform).Select(x => x.Assembly).ToArray(),
-                    UnityTestAssemblyBuilder.GetNUnitTestBuilderSettings(m_TestPlatform));
+                testAssemblyProvider.GetAssembliesGroupedByType(m_TestPlatform).Select(x => x.Assembly).ToArray(),
+                UnityTestAssemblyBuilder.GetNUnitTestBuilderSettings(m_TestPlatform));
             loadedTests.ParseForNameDuplicates();
             hideFlags |= HideFlags.DontSave;
+            EnumerableSetUpTearDownCommand.ActivePcHelper = new EditModePcHelper();
         }
 
         public void OnEnable()
@@ -139,6 +143,11 @@ namespace UnityEditor.TestTools.TestRunner
         public void Run()
         {
             EditModeTestCallbacks.RestoringTestContext += OnRestoringTest;
+            if (m_SetUpTearDownState == null)
+            {
+                m_SetUpTearDownState = CreateInstance<EnumerableSetUpTearDownCommandState>();
+            }
+            m_Runner.GetCurrentContext().SetUpTearDownState = m_SetUpTearDownState;
             m_CleanupVerifier.RegisterExistingFiles();
 
             if (!m_RunningTests)
@@ -178,6 +187,8 @@ namespace UnityEditor.TestTools.TestRunner
 
             if (RunningTests)
             {
+                Debug.LogError("TestRunner: Unexpected assembly reload happened while running tests");
+
                 EditorUtility.ClearProgressBar();
 
                 if (m_Runner.GetCurrentContext() != null && m_Runner.GetCurrentContext().CurrentResult != null)
@@ -249,7 +260,7 @@ namespace UnityEditor.TestTools.TestRunner
         private void CompleteTestRun()
         {
             EditorApplication.update -= TestConsumer;
-            TestLauncherBase.ExecutePostBuildCleanupMethods(GetLoadedTests(), GetFilter());
+            TestLauncherBase.ExecutePostBuildCleanupMethods(this.GetLoadedTests(), this.GetFilter(), Application.platform);
             m_CleanupVerifier.VerifyNoNewFilesAdded();
             m_RunFinishedEvent.Invoke(m_Runner.Result);
 
@@ -285,9 +296,13 @@ namespace UnityEditor.TestTools.TestRunner
                 return;
             }
 
-            if (m_CurrentYieldObject is RestoreTestContextAfterDomainReload && m_TestRunnerStateSerializer.ShouldRestore())
+            if (m_CurrentYieldObject is RestoreTestContextAfterDomainReload)
             {
-                m_TestRunnerStateSerializer.RestoreContext();
+                if (m_TestRunnerStateSerializer.ShouldRestore())
+                {
+                    m_TestRunnerStateSerializer.RestoreContext();
+                }
+
                 return;
             }
 
@@ -352,12 +367,6 @@ namespace UnityEditor.TestTools.TestRunner
             m_TestFinishedEvent.AddListener(eventHandler.TestFinished);
             m_RunStartedEvent.AddListener(eventHandler.RunStarted);
             m_RunFinishedEvent.AddListener(eventHandler.RunFinished);
-        }
-
-        [DidReloadScripts]
-        private static void DidReloadScripts()
-        {
-            EditorApplication.UnlockReloadAssemblies();
         }
 
         public void Dispose()
