@@ -6,7 +6,7 @@ using UnityEngine.TestRunner.NUnitExtensions.Filters;
 
 namespace UnityEngine.TestRunner.NUnitExtensions
 {
-    internal static class ITestExtensions
+    internal static class TestExtensions
     {
         private static IEnumerable<string> GetTestCategories(this ITest test)
         {
