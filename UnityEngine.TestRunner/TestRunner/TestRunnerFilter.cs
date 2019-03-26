@@ -19,7 +19,7 @@ namespace UnityEngine.TestTools.TestRunner.GUI
         public string[] categoryNames;
         public static TestRunnerFilter empty = new TestRunnerFilter();
         public string[] testNames;
-        public string[] testsToSkip;
+        public int testRepetitions = 1;
 
         public static string AssemblyNameFromPath(string path)
         {
@@ -151,12 +151,11 @@ namespace UnityEngine.TestTools.TestRunner.GUI
         public ITestFilter BuildNUnitFilter()
         {
             var filter = TestFilter.Empty;
-            var nameAndAssemblyFilters = new List<ITestFilter>();
 
             if (testNames != null && testNames.Length != 0)
             {
                 var nameFilter = new OrFilter(testNames.Select(n => new FullNameFilter(n)).ToArray());
-                nameAndAssemblyFilters.Add(nameFilter);
+                filter = new AndFilter(nameFilter, filter);
             }
 
             if (groupNames != null && groupNames.Length != 0)
@@ -167,28 +166,19 @@ namespace UnityEngine.TestTools.TestRunner.GUI
                     f.IsRegex = true;
                     return f;
                 }).ToArray());
-                nameAndAssemblyFilters.Add(exactNamesFilter);
+                filter = new AndFilter(exactNamesFilter, filter);
             }
 
             if (assemblyNames != null && assemblyNames.Length != 0)
             {
                 var assemblyFilter = new OrFilter(assemblyNames.Select(c => new AssemblyNameFilter(c)).ToArray());
-                nameAndAssemblyFilters.Add(assemblyFilter);
+                filter = new AndFilter(assemblyFilter, filter);
             }
-
-            if (nameAndAssemblyFilters.Any())
-                filter = new OrFilter(nameAndAssemblyFilters.ToArray());
 
             if (categoryNames != null && categoryNames.Length != 0)
             {
                 var categoryFilter = new OrFilter(categoryNames.Select(c => new CategoryFilterExtended(c) {IsRegex = true}).ToArray());
                 filter = new AndFilter(categoryFilter, filter);
-            }
-
-            if (testsToSkip != null && testsToSkip.Any())
-            {
-                var skipTestsFilter = new AndFilter(testsToSkip.Select(t => new NotFilter(new FullNameFilter(t))).ToArray());
-                filter = new AndFilter(skipTestsFilter, filter);
             }
 
             return filter;

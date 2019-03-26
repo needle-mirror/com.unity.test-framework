@@ -105,7 +105,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
         {
             EditorGUI.BeginChangeCheck();
             m_SearchString = EditorGUILayout.ToolbarSearchField(m_SearchString);
-            if (EditorGUI.EndChangeCheck())
+            if (EditorGUI.EndChangeCheck() && SearchStringChanged != null)
             {
                 SearchStringChanged(m_SearchString);
             }
@@ -114,7 +114,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             {
                 EditorGUI.BeginChangeCheck();
                 selectedCategoryMask = EditorGUILayout.MaskField(selectedCategoryMask, availableCategories, EditorStyles.toolbarDropDown, GUILayout.MaxWidth(150));
-                if (EditorGUI.EndChangeCheck())
+                if (EditorGUI.EndChangeCheck() && RebuildTestList != null)
                 {
                     RebuildTestList();
                 }
@@ -138,7 +138,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                 NotRunHidden = !GUILayout.Toggle(!NotRunHidden, m_NotRunBtn, EditorStyles.toolbarButton, GUILayout.MaxWidth(GetMaxWidth(NotRunCount)));
             }
 
-            if (EditorGUI.EndChangeCheck())
+            if (EditorGUI.EndChangeCheck() && RebuildTestList != null)
             {
                 RebuildTestList();
             }
@@ -158,7 +158,10 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             NotRunHidden = false;
             selectedCategoryMask = 0;
             m_SearchString = "";
-            SearchStringChanged(m_SearchString);
+            if (SearchStringChanged != null)
+            {
+                SearchStringChanged(m_SearchString);
+            }
         }
     }
 }

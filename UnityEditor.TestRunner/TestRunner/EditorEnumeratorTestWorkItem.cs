@@ -153,7 +153,6 @@ namespace UnityEditor.TestTools.TestRunner
                                 {
                                     break;
                                 }
-                                ResultedInDomainReload = editModeTestYieldInstruction.ExpectDomainReload;
                                 yield return null;
                             }
                         }

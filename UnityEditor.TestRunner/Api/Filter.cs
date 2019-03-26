@@ -15,6 +15,8 @@ namespace UnityEditor.TestTools.TestRunner.Api
         public string[] groupNames;
         [SerializeField]
         public string[] categoryNames;
+        [SerializeField]
+        public string[] assemblyNames;
 
         public static Filter empty = new Filter();
 
@@ -24,7 +26,8 @@ namespace UnityEditor.TestTools.TestRunner.Api
             {
                 testNames = testNames,
                 categoryNames = categoryNames,
-                groupNames = groupNames
+                groupNames = groupNames,
+                assemblyNames = assemblyNames
             };
         }
     }

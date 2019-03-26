@@ -8,5 +8,6 @@ using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo("Unity.IntegrationTests")]
 [assembly: InternalsVisibleTo("UnityEditor.TestRunner.Tests")]
 [assembly: InternalsVisibleTo("Unity.TestTools.CodeCoverage.Editor")]
+[assembly: InternalsVisibleTo("Unity.PackageManagerUI.Editor")]
 
 [assembly: AssemblyVersion("1.0.0")]

@@ -17,7 +17,7 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
         protected bool m_DontRunRestoringResult;
         public event EventHandler Completed;
 
-        public bool ResultedInDomainReload { get; protected set; }
+        public bool ResultedInDomainReload { get; internal set; }
 
         public UnityTestExecutionContext Context { get; private set; }
 

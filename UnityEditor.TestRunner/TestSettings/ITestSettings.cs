@@ -8,8 +8,6 @@ namespace UnityEditor.TestTools.TestRunner
 
         string Architecture { get; set; }
 
-        bool? useLatestScriptingRuntimeVersion { get; set; }
-
         ApiCompatibilityLevel? apiProfile { get; set; }
 
         bool? appleEnableAutomaticSigning { get; set; }

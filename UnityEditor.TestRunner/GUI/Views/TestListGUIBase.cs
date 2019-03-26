@@ -15,6 +15,8 @@ namespace UnityEditor.TestTools.TestRunner.GUI
         private static readonly GUIContent s_GUIRunAllTests = EditorGUIUtility.TrTextContent("Run All", "Run all tests");
         private static readonly GUIContent s_GUIRerunFailedTests = EditorGUIUtility.TrTextContent("Rerun Failed", "Rerun all failed tests");
         private static readonly GUIContent s_GUIRun = EditorGUIUtility.TrTextContent("Run");
+        private static readonly GUIContent s_GUIRunUntilFailed = EditorGUIUtility.TrTextContent("Run Until Failed");
+        private static readonly GUIContent s_GUIRun100Times = EditorGUIUtility.TrTextContent("Run 100 times");
         private static readonly GUIContent s_GUIOpenTest = EditorGUIUtility.TrTextContent("Open source code");
         private static readonly GUIContent s_GUIOpenErrorLine = EditorGUIUtility.TrTextContent("Open error line");
 
@@ -35,6 +37,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
 
         private Vector2 m_TestInfoScroll, m_TestListScroll;
         private string m_PreviousProjectPath;
+        private List<TestRunnerResult> m_QueuedResults = new List<TestRunnerResult>();
 
         protected TestListGUI()
         {
@@ -159,7 +162,10 @@ namespace UnityEditor.TestTools.TestRunner.GUI
         public void Reload()
         {
             if (m_TestListTree != null)
+            {
                 m_TestListTree.ReloadData();
+                UpdateQueuedResults();
+            }
         }
 
         public void Repaint()
@@ -217,6 +223,12 @@ namespace UnityEditor.TestTools.TestRunner.GUI
 
         public void UpdateResult(TestRunnerResult result)
         {
+            if (!HasTreeData())
+            {
+                m_QueuedResults.Add(result);
+                return;
+            }
+
             if (newResultList.All(x => x.uniqueId != result.uniqueId))
             {
                 return;
@@ -227,18 +239,40 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             {
                 testRunnerResult.Update(result);
             }
+
+            Repaint();
+            m_Window.Repaint();
+        }
+
+        private void UpdateQueuedResults()
+        {
+            foreach (var testRunnerResult in m_QueuedResults)
+            {
+                var existingResult = newResultList.FirstOrDefault(x => x.uniqueId == testRunnerResult.uniqueId);
+                if (existingResult != null)
+                {
+                    existingResult.Update(testRunnerResult);
+                }
+            }
+            m_QueuedResults.Clear();
+            TestSelectionCallback(m_TestListState.selectedIDs.ToArray());
+            Repaint();
+            m_Window.Repaint();
         }
 
         internal void TestSelectionCallback(int[] selected)
         {
             if (m_TestListTree != null && selected.Length == 1)
             {
-                var node = m_TestListTree.FindItem(selected[0]);
-                if (node is TestTreeViewItem)
+                if (m_TestListTree != null)
                 {
-                    var test = node as TestTreeViewItem;
-                    m_ResultText = test.GetResultText();
-                    m_ResultStacktrace = test.result.stacktrace;
+                    var node = m_TestListTree.FindItem(selected[0]);
+                    if (node is TestTreeViewItem)
+                    {
+                        var test = node as TestTreeViewItem;
+                        m_ResultText = test.GetResultText();
+                        m_ResultStacktrace = test.result.stacktrace;
+                    }
                 }
             }
             else if (selected.Length == 0)
@@ -304,6 +338,27 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                     false,
                     data => RunTests(testFilter),
                     "");
+
+                if (EditorPrefs.GetBool("DeveloperMode", false))
+                {
+                    m.AddItem(multilineSelection ? s_GUIRunSelectedTests : s_GUIRunUntilFailed,
+                        false,
+                        data =>
+                        {
+                            testFilter.testRepetitions = int.MaxValue;
+                            RunTests(testFilter);
+                        },
+                        "");
+
+                    m.AddItem(multilineSelection ? s_GUIRunSelectedTests : s_GUIRun100Times,
+                        false,
+                        data =>
+                        {
+                            testFilter.testRepetitions = 100;
+                            RunTests(testFilter);
+                        },
+                        "");
+                }
             }
             else
                 m.AddDisabledItem(multilineSelection ? s_GUIRunSelectedTests : s_GUIRun, false);

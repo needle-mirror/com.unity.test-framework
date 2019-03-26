@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using UnityEditor.TestRunner.CommandLineParser;
 using UnityEditor.TestTools.TestRunner.Api;
+using UnityEngine.TestTools.TestRunner.GUI;
 
 namespace UnityEditor.TestTools.TestRunner.CommandLineTest
 {
@@ -28,6 +29,7 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
             string[] testFilters = null;
             string[] testCategories = null;
             string testSettingsFilePath = null;
+            int testRepetitions = 1;
 
             var optionSet = new CommandLineOptionSet(
                 new CommandLineOption("quit", () => { quit = true; }),
@@ -36,7 +38,8 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
                 new CommandLineOption("testFilter", filters => { testFilters = filters; }),
                 new CommandLineOption("editorTestsCategories", catagories => { testCategories = catagories; }),
                 new CommandLineOption("testCategory", catagories => { testCategories = catagories; }),
-                new CommandLineOption("testSettingsFile", settingsFilePath => { testSettingsFilePath = settingsFilePath; })
+                new CommandLineOption("testSettingsFile", settingsFilePath => { testSettingsFilePath = settingsFilePath; }),
+                new CommandLineOption("testRepetitions", reps => { testRepetitions = int.Parse(reps); })
             );
             optionSet.Parse(commandLineArgs);
 
@@ -56,6 +59,15 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
 
             var buildTarget = SetFilterAndGetBuildTarget(testPlatform, filter);
 
+            RerunCallbackData.instance.runFilter = new TestRunnerFilter()
+            {
+                categoryNames = filter.categoryNames,
+                groupNames = filter.groupNames,
+                testRepetitions = testRepetitions
+            };
+
+            RerunCallbackData.instance.testMode = filter.testMode;
+
             return new Api.ExecutionSettings()
             {
                 filter = filter,
@@ -67,18 +79,19 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
         public ExecutionSettings BuildExecutionSettings(string[] commandLineArgs)
         {
             string resultFilePath = null;
+            string deviceLogsDirectory = null;
 
             var optionSet = new CommandLineOptionSet(
                 new CommandLineOption("editorTestsResultFile", filePath => { resultFilePath = filePath; }),
-                new CommandLineOption("testResults", filePath => { resultFilePath = filePath; })
+                new CommandLineOption("testResults", filePath => { resultFilePath = filePath; }),
+                new CommandLineOption("deviceLogs", dirPath => { deviceLogsDirectory = dirPath; })
             );
             optionSet.Parse(commandLineArgs);
 
-            var projectPath = Path.GetDirectoryName(resultFilePath);
             return new ExecutionSettings()
             {
                 TestResultsFile = resultFilePath,
-                ProjectPath = projectPath
+                DeviceLogsDirectory = deviceLogsDirectory
             };
         }
 

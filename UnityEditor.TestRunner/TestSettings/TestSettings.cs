@@ -24,10 +24,6 @@ namespace UnityEditor.TestTools.TestRunner
                         }
                     }
                 }),
-            new TestSetting<bool?>(
-                settings => settings.useLatestScriptingRuntimeVersion,
-                () => PlayerSettings.scriptingRuntimeVersion == ScriptingRuntimeVersion.Latest,
-                useLatest => PlayerSettings.scriptingRuntimeVersion = useLatest.Value ? ScriptingRuntimeVersion.Latest : ScriptingRuntimeVersion.Legacy),
             new TestSetting<ApiCompatibilityLevel?>(
                 settings => settings.apiProfile,
                 () => PlayerSettings.GetApiCompatibilityLevel(EditorUserBuildSettings.activeBuildTargetGroup),
@@ -94,8 +90,6 @@ namespace UnityEditor.TestTools.TestRunner
         public ScriptingImplementation? scriptingBackend { get; set; }
 
         public string Architecture { get; set; }
-
-        public bool? useLatestScriptingRuntimeVersion { get; set; }
 
         public ApiCompatibilityLevel? apiProfile { get; set; }
 

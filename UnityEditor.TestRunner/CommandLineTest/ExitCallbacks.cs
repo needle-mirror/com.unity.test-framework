@@ -9,10 +9,15 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
     {
         private bool m_AnyTestsExecuted;
         private bool m_RunFailed;
-
+        internal static bool preventExit;
 
         public void RunFinished(ITestResultAdaptor testResults)
         {
+            if (preventExit)
+            {
+                return;
+            }
+
             if (!m_AnyTestsExecuted)
             {
                 Debug.LogFormat(LogType.Warning, LogOption.NoStacktrace, null, "No tests were executed");

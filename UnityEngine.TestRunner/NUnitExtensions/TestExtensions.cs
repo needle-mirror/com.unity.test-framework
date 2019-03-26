@@ -71,9 +71,23 @@ namespace UnityEngine.TestRunner.NUnitExtensions
             return index.Count > 0;
         }
 
+        static string GetAncestorPath(ITest test)
+        {
+            var path = "";
+            var testParent = test.Parent;
+
+            while (testParent != null && !string.IsNullOrEmpty(testParent.Name))
+            {
+                path = testParent.Name + "/" + path;
+                testParent = testParent.Parent;
+            }
+
+            return path;
+        }
+
         public static string GetUniqueName(this ITest test)
         {
-            var id = GetFullName(test);
+            var id = GetAncestorPath(test) + GetFullName(test);
             if (test.HasChildIndex())
             {
                 var index = test.GetChildIndex();

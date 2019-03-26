@@ -65,7 +65,17 @@ namespace UnityEditor.TestTools.TestRunner
         public static void ShowPlaymodeTestsRunnerWindowCodeBased()
         {
             if (s_Instance != null)
-                s_Instance.Close();
+            {
+                try
+                {
+                    s_Instance.Close();
+                }
+                catch (Exception exception)
+                {
+                    Debug.LogException(exception);
+                }
+            }
+
             s_Instance = GetWindow<TestRunnerWindow>("Test Runner");
             s_Instance.Show();
         }

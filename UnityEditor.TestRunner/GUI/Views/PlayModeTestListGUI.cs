@@ -73,6 +73,9 @@ namespace UnityEditor.TestTools.TestRunner.GUI
 
             filter.ClearResults(newResultList.OfType<TestRunnerFilter.IClearableResult>().ToList());
 
+            RerunCallbackData.instance.runFilter = filter;
+            RerunCallbackData.instance.testMode = TestMode.PlayMode;
+
             var testRunnerApi = ScriptableObject.CreateInstance<TestRunnerApi>();
             testRunnerApi.Execute(new ExecutionSettings()
             {

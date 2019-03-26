@@ -67,7 +67,7 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
 
         internal void SetUpCallbacks(ExecutionSettings executionSettings)
         {
-            RemotePlayerLogController.instance.SetProjectPath(executionSettings.ProjectPath);
+            RemotePlayerLogController.instance.SetLogsDirectory(executionSettings.DeviceLogsDirectory);
 
             var resultSavingCallback = ScriptableObject.CreateInstance<ResultsSavingCallbacks>();
             resultSavingCallback.m_ResultFilePath = executionSettings.TestResultsFile;

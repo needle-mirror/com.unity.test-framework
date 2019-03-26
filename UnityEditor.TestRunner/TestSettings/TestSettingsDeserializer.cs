@@ -15,7 +15,6 @@ namespace UnityEditor.TestTools.TestRunner
         {
             new SettingsMap<ScriptingImplementation>("scriptingBackend", (settings, value) => settings.scriptingBackend = value),
             new SettingsMap<string>("architecture", (settings, value) => settings.Architecture = value),
-            new SettingsMap<bool>("useLatestScriptingRuntimeVersion", (settings, value) => settings.useLatestScriptingRuntimeVersion = value),
             new SettingsMap<ApiCompatibilityLevel>("apiProfile", (settings, value) => settings.apiProfile = value),
             new SettingsMap<bool>("appleEnableAutomaticSigning", (settings, value) => settings.appleEnableAutomaticSigning = value),
             new SettingsMap<string>("appleDeveloperTeamID", (settings, value) => settings.appleDeveloperTeamID = value),

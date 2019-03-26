@@ -94,7 +94,7 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
                             {
                                 break;
                             }
-                            ResultedInDomainReload = editModeTestYieldInstruction.ExpectDomainReload;
+
                             yield return null;
                         }
                     }

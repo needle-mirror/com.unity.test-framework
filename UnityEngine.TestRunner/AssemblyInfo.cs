@@ -11,5 +11,6 @@ using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo("Assembly-CSharp-Editor-testable")]
 [assembly: InternalsVisibleTo("UnityEngine.TestRunner.Tests")]
 [assembly: InternalsVisibleTo("UnityEditor.TestRunner.Tests")]
+[assembly: InternalsVisibleTo("Unity.PackageManagerUI.Editor")]
 
 [assembly: AssemblyVersion("1.0.0")]

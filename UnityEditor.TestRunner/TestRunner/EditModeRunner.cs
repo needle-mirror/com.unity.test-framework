@@ -196,6 +196,9 @@ namespace UnityEditor.TestTools.TestRunner
                 return;
             }
 
+            if (m_Runner != null && m_Runner.TopLevelWorkItem != null)
+                m_Runner.TopLevelWorkItem.ResultedInDomainReload = true;
+
             if (RunningTests)
             {
                 Debug.LogError("TestRunner: Unexpected assembly reload happened while running tests");

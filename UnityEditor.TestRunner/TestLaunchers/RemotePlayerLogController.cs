@@ -13,28 +13,28 @@ namespace UnityEditor.TestRunner.TestLaunchers
 
         private Dictionary<string, DeploymentTargetLogger> m_Loggers;
 
-        private string m_ProjectPath;
+        private string m_DeviceLogsDirectory;
 
         public void SetBuildTarget(BuildTarget buildTarget)
         {
             m_Loggers = GetDeploymentTargetLoggers(buildTarget);
         }
 
-        public void SetProjectPath(string path)
+        public void SetLogsDirectory(string dir)
         {
-            m_ProjectPath = path;
+            m_DeviceLogsDirectory = dir;
         }
 
         public void StartLogWriters()
         {
-            if (m_ProjectPath == null || m_Loggers == null)
+            if (m_DeviceLogsDirectory == null || m_Loggers == null)
                 return;
 
             m_LogWriters = new List<LogWriter>();
 
             foreach (var logger in m_Loggers)
             {
-                m_LogWriters.Add(new LogWriter(m_ProjectPath, logger.Key, logger.Value));
+                m_LogWriters.Add(new LogWriter(m_DeviceLogsDirectory, logger.Key, logger.Value));
                 logger.Value.Start();
             }
         }

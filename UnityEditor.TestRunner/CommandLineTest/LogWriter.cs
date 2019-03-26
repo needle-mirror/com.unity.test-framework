@@ -9,16 +9,16 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
 {
     internal class LogWriter : IDisposable
     {
-        private string m_ProjectPath;
+        private string m_LogsDirectory;
         private string m_DeviceID;
         private Dictionary<string, StreamWriter> m_LogStreams;
         private DeploymentTargetLogger m_Logger;
 
-        internal LogWriter(string projectPath, string deviceID, DeploymentTargetLogger logger)
+        internal LogWriter(string logsDirectory, string deviceID, DeploymentTargetLogger logger)
         {
             m_LogStreams = new Dictionary<string, StreamWriter>();
             m_Logger = logger;
-            m_ProjectPath = projectPath;
+            m_LogsDirectory = logsDirectory;
             m_DeviceID = deviceID;
 
             logger.logMessage += WriteLogToFile;
@@ -30,7 +30,7 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
             var streamExists = m_LogStreams.TryGetValue(id, out logStream);
             if (!streamExists)
             {
-                var filePath = GetLogFilePath(m_ProjectPath, m_DeviceID, id);
+                var filePath = GetLogFilePath(m_LogsDirectory, m_DeviceID, id);
                 logStream = CreateLogFile(filePath);
 
                 m_LogStreams.Add(id, logStream);
@@ -82,10 +82,11 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
             return streamWriter;
         }
 
-        private string GetLogFilePath(string projectPath, string deviceID, string logID)
+        private string GetLogFilePath(string lgosDirectory, string deviceID, string logID)
         {
             var fileName = "Device-" + deviceID + "-" + logID + ".txt";
-            return Paths.Combine(projectPath, fileName);
+            fileName = string.Join("_", fileName.Split(Path.GetInvalidFileNameChars()));
+            return Paths.Combine(lgosDirectory, fileName);
         }
     }
 }
