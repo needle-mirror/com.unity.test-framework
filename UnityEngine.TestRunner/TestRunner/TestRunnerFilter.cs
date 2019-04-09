@@ -150,12 +150,12 @@ namespace UnityEngine.TestTools.TestRunner.GUI
 
         public ITestFilter BuildNUnitFilter()
         {
-            var filter = TestFilter.Empty;
+            var filters = new List<ITestFilter>();
 
             if (testNames != null && testNames.Length != 0)
             {
                 var nameFilter = new OrFilter(testNames.Select(n => new FullNameFilter(n)).ToArray());
-                filter = new AndFilter(nameFilter, filter);
+                filters.Add(nameFilter);
             }
 
             if (groupNames != null && groupNames.Length != 0)
@@ -166,22 +166,22 @@ namespace UnityEngine.TestTools.TestRunner.GUI
                     f.IsRegex = true;
                     return f;
                 }).ToArray());
-                filter = new AndFilter(exactNamesFilter, filter);
+                filters.Add(exactNamesFilter);
             }
 
             if (assemblyNames != null && assemblyNames.Length != 0)
             {
                 var assemblyFilter = new OrFilter(assemblyNames.Select(c => new AssemblyNameFilter(c)).ToArray());
-                filter = new AndFilter(assemblyFilter, filter);
+                filters.Add(assemblyFilter);
             }
 
             if (categoryNames != null && categoryNames.Length != 0)
             {
                 var categoryFilter = new OrFilter(categoryNames.Select(c => new CategoryFilterExtended(c) {IsRegex = true}).ToArray());
-                filter = new AndFilter(categoryFilter, filter);
+                filters.Add(categoryFilter);
             }
 
-            return filter;
+            return filters.Count == 0 ? TestFilter.Empty : new AndFilter(filters.ToArray());
         }
 
         internal interface IClearableResult

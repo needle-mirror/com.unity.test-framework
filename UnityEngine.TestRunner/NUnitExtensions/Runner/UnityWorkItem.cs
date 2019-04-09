@@ -47,7 +47,7 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
 
         protected bool ShouldExecuteStartEvent()
         {
-            return UnityWorkItemDataHolder.alreadyStartedTests != null && UnityWorkItemDataHolder.alreadyStartedTests.All(x => x != Test.FullName);
+            return UnityWorkItemDataHolder.alreadyStartedTests != null && UnityWorkItemDataHolder.alreadyStartedTests.All(x => x != Test.FullName) && !ShouldRestore(Test);
         }
 
         protected abstract IEnumerable PerformWork();

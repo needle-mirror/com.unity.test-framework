@@ -10,7 +10,7 @@ namespace UnityEngine.TestTools
     internal class OuterUnityTestActionCommand : BeforeAfterTestCommandBase<IOuterUnityTestAction>
     {
         public OuterUnityTestActionCommand(TestCommand innerCommand)
-            : base(innerCommand)
+            : base(innerCommand, "BeforeTest", "AfterTest")
         {
             if (Test.TypeInfo.Type != null)
             {

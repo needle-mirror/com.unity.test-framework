@@ -9,9 +9,9 @@ namespace UnityEngine.TestTools
         public bool ExpectDomainReload { get; }
         public bool ExpectedPlaymodeState { get; private set; }
 
-        public EnterPlayMode()
+        public EnterPlayMode(bool expectDomainReload = true)
         {
-            ExpectDomainReload = true;
+            ExpectDomainReload = expectDomainReload;
         }
 
         public IEnumerator Perform()

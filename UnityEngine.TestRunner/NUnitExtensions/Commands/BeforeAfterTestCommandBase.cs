@@ -4,6 +4,7 @@ using System.Linq;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
 using NUnit.Framework.Internal.Commands;
+using UnityEngine.TestRunner.NUnitExtensions;
 using UnityEngine.TestRunner.NUnitExtensions.Runner;
 using UnityEngine.TestTools.Logging;
 using UnityEngine.TestTools.TestRunner;
@@ -12,10 +13,14 @@ namespace UnityEngine.TestTools
 {
     internal abstract class BeforeAfterTestCommandBase<T> : DelegatingTestCommand, IEnumerableTestMethodCommand
     {
+        private string m_BeforeErrorPrefix;
+        private string m_AfterErrorPrefix;
         private bool m_SkipYieldAfterActions;
-        protected BeforeAfterTestCommandBase(TestCommand innerCommand, bool skipYieldAfterActions = false)
+        protected BeforeAfterTestCommandBase(TestCommand innerCommand, string beforeErrorPrefix, string afterErrorPrefix, bool skipYieldAfterActions = false)
             : base(innerCommand)
         {
+            m_BeforeErrorPrefix = beforeErrorPrefix;
+            m_AfterErrorPrefix = afterErrorPrefix;
             m_SkipYieldAfterActions = skipYieldAfterActions;
         }
 
@@ -62,7 +67,7 @@ namespace UnityEngine.TestTools
                         catch (Exception ex)
                         {
                             state.TestHasRun = true;
-                            context.CurrentResult.RecordException(ex);
+                            context.CurrentResult.RecordPrefixedException(m_BeforeErrorPrefix, ex);
                             state.StoreTestResult(context.CurrentResult);
                             break;
                         }
@@ -82,7 +87,7 @@ namespace UnityEngine.TestTools
                     if (logScope.AnyFailingLogs())
                     {
                         state.TestHasRun = true;
-                        context.CurrentResult.RecordException(new UnhandledLogMessageException(logScope.FailingLogs.First()));
+                        context.CurrentResult.RecordPrefixedError(m_BeforeErrorPrefix, new UnhandledLogMessageException(logScope.FailingLogs.First()).Message);
                         state.StoreTestResult(context.CurrentResult);
                     }
                 }
@@ -131,7 +136,7 @@ namespace UnityEngine.TestTools
                         }
                         catch (Exception ex)
                         {
-                            context.CurrentResult.RecordException(ex);
+                            context.CurrentResult.RecordPrefixedException(m_AfterErrorPrefix, ex);
                             state.StoreTestResult(context.CurrentResult);
                             break;
                         }
@@ -152,7 +157,7 @@ namespace UnityEngine.TestTools
                     if (logScope.AnyFailingLogs())
                     {
                         state.TestHasRun = true;
-                        context.CurrentResult.RecordException(new UnhandledLogMessageException(logScope.FailingLogs.First()));
+                        context.CurrentResult.RecordPrefixedError(m_AfterErrorPrefix, new UnhandledLogMessageException(logScope.FailingLogs.First()).Message);
                         state.StoreTestResult(context.CurrentResult);
                     }
                 }

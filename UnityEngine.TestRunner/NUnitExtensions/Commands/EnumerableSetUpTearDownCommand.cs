@@ -11,12 +11,12 @@ namespace UnityEngine.TestTools
     internal class EnumerableSetUpTearDownCommand : BeforeAfterTestCommandBase<MethodInfo>
     {
         public EnumerableSetUpTearDownCommand(TestCommand innerCommand)
-            : base(innerCommand)
+            : base(innerCommand, "SetUp", "TearDown")
         {
             if (Test.TypeInfo.Type != null)
             {
                 BeforeActions = GetMethodsWithAttributeFromFixture(Test.TypeInfo.Type, typeof(UnitySetUpAttribute));
-                AfterActions = GetMethodsWithAttributeFromFixture(Test.TypeInfo.Type, typeof(UnityTearDownAttribute));
+                AfterActions = GetMethodsWithAttributeFromFixture(Test.TypeInfo.Type, typeof(UnityTearDownAttribute)).Reverse().ToArray();
             }
         }
 

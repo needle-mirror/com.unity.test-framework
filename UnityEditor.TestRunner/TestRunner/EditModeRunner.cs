@@ -140,6 +140,7 @@ namespace UnityEditor.TestTools.TestRunner
 
         public void TestFinishedEvent(ITestResult testResult)
         {
+            m_AlreadyStartedTests.Remove(testResult.FullName);
             m_ExecutedTests.Add(TestResultSerializer.MakeFromTestResult(testResult));
         }
 

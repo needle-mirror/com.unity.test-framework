@@ -12,15 +12,12 @@ namespace UnityEngine.TestTools
     internal class TestActionCommand : BeforeAfterTestCommandBase<ITestAction>
     {
         public TestActionCommand(TestCommand innerCommand)
-            : base(innerCommand, true)
+            : base(innerCommand, "BeforeTest", "AfterTest", true)
         {
             if (Test.TypeInfo.Type != null)
             {
-                if (Test.Method.MethodInfo.ReturnType == typeof(IEnumerator))
-                {
-                    BeforeActions = GetTestActionsFromMethod(Test.Method.MethodInfo);
-                    AfterActions = BeforeActions;
-                }
+                BeforeActions = GetTestActionsFromMethod(Test.Method.MethodInfo);
+                AfterActions = BeforeActions;
             }
         }
 

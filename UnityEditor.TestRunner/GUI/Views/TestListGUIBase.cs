@@ -377,7 +377,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                 if (line is TestTreeViewItem)
                 {
                     var testLine = line as TestTreeViewItem;
-                    if (testLine.IsGroupNode)
+                    if (testLine.IsGroupNode && !testLine.FullName.Contains("+")) 
                     {
                         if (testLine.parent != null && testLine.parent.displayName == "Invisible Root Item")
                         {
