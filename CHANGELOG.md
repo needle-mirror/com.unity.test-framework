@@ -1,4 +1,6 @@
 # Changelog
+## [1.0.12] - 2019-04-16
+
 ## [1.0.11] - 2019-04-10
 - Fixed a regression from 1.0.10 where test-started events were triggered multiple times after a domain reload.
 
