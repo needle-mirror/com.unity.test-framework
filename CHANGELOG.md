@@ -1,5 +1,9 @@
 # Changelog
+## [1.0.13] - 2019-05-07
+- Fixed a regression where results from the player would no longer update correctly in the UI (case 1151147).
+
 ## [1.0.12] - 2019-04-16
+- Added specific unity release to the package information.
 
 ## [1.0.11] - 2019-04-10
 - Fixed a regression from 1.0.10 where test-started events were triggered multiple times after a domain reload.

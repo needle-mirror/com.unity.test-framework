@@ -76,7 +76,7 @@ namespace UnityEngine.TestRunner.NUnitExtensions
             var path = "";
             var testParent = test.Parent;
 
-            while (testParent != null && !string.IsNullOrEmpty(testParent.Name))
+            while (testParent != null && testParent.Parent != null && !string.IsNullOrEmpty(testParent.Name))
             {
                 path = testParent.Name + "/" + path;
                 testParent = testParent.Parent;
