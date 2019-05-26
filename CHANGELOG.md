@@ -1,4 +1,11 @@
 # Changelog
+## [1.0.14] - 2019-05-27
+- Fixed issue preventing scene creation in IPrebuildSetup.Setup callback when running standalone playmode tests.
+- Fixed an issue where test assemblies would sometimes not be ordered alphabetically.
+- Added module references to the package for the required modules: imgui and jsonserialize.
+- Added a ConditionalIgnore attribute to help ignoring tests only under specific conditions.
+- Fixed a typo in the player test window (case 1148671).
+
 ## [1.0.13] - 2019-05-07
 - Fixed a regression where results from the player would no longer update correctly in the UI (case 1151147).
 

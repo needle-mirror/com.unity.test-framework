@@ -10,5 +10,6 @@ using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo("Unity.TestTools.CodeCoverage.Editor")]
 [assembly: InternalsVisibleTo("Unity.PackageManagerUI.Develop.Editor")]
 [assembly: InternalsVisibleTo("Unity.PackageManagerUI.Develop.EditorTests")]
+[assembly: InternalsVisibleTo("Unity.PackageValidationSuite.Editor")]
 
 [assembly: AssemblyVersion("1.0.0")]

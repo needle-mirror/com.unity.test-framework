@@ -104,8 +104,8 @@ namespace UnityEditor.TestTools.TestRunner
             //We give the EditMode platform here so we dont suddenly create Playmode work items in the test Runner.
             m_Runner = (UnityTestAssemblyRunnerFactory ?? new UnityTestAssemblyRunnerFactory()).Create(TestPlatform.EditMode, new EditmodeWorkItemFactory());
             var testAssemblyProvider = new EditorLoadedTestAssemblyProvider(new EditorCompilationInterfaceProxy(), new EditorAssembliesProxy());
-            var loadedTests = m_Runner.Load(
-                testAssemblyProvider.GetAssembliesGroupedByType(m_TestPlatform).Select(x => x.Assembly).ToArray(),
+            var assemblies = testAssemblyProvider.GetAssembliesGroupedByType(m_TestPlatform).Select(x => x.Assembly).ToArray();
+            var loadedTests = m_Runner.Load(assemblies,
                 UnityTestAssemblyBuilder.GetNUnitTestBuilderSettings(m_TestPlatform));
             loadedTests.ParseForNameDuplicates();
             hideFlags |= HideFlags.DontSave;

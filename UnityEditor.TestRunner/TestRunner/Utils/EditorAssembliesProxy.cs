@@ -7,7 +7,7 @@ namespace UnityEditor.TestTools.TestRunner
     {
         public IAssemblyWrapper[] loadedAssemblies
         {
-            get { return EditorAssemblies.loadedAssemblies.Select(x => new EditorAssemblyWrapper(x)).ToArray(); }
+            get { return EditorAssemblies.loadedAssemblies.OrderBy(a => a.FullName).Select(x => new EditorAssemblyWrapper(x)).ToArray(); }
         }
     }
 }

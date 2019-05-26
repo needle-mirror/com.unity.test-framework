@@ -51,6 +51,7 @@ namespace UnityEditor.TestTools.TestRunner
             {
                 var sceneName = CreateSceneName();
                 var scene = PrepareScene(sceneName);
+                string scenePath = scene.path;
 
                 var filter = m_Settings.filter.BuildNUnitFilter();
                 var runner = LoadTests(filter);
@@ -63,7 +64,7 @@ namespace UnityEditor.TestTools.TestRunner
                     return;
                 }
 
-                var playerBuildOptions = GetBuildOptions(scene);
+                var playerBuildOptions = GetBuildOptions(scenePath);
 
                 var success = BuildAndRunPlayer(playerBuildOptions);
                 editorConnectionTestCollector.PostBuildAction();
@@ -118,7 +119,7 @@ namespace UnityEditor.TestTools.TestRunner
             return result.summary.result == Build.Reporting.BuildResult.Succeeded;
         }
 
-        private PlayerLauncherBuildOptions GetBuildOptions(Scene scene)
+        private PlayerLauncherBuildOptions GetBuildOptions(string scenePath)
         {
             var buildOptions = new BuildPlayerOptions();
             var reduceBuildLocationPathLength = false;
@@ -129,7 +130,7 @@ namespace UnityEditor.TestTools.TestRunner
                 reduceBuildLocationPathLength = true;
             }
 
-            var scenes = new List<string>() { scene.path };
+            var scenes = new List<string>() { scenePath };
             scenes.AddRange(EditorBuildSettings.scenes.Select(x => x.path));
             buildOptions.scenes = scenes.ToArray();
 

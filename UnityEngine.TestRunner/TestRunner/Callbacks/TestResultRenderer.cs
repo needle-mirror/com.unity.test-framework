@@ -69,7 +69,7 @@ namespace UnityEngine.TestTools.TestRunner.Callbacks
             if (!m_ShowResults) return;
             if (m_FailedTestCollection.Count == 0)
             {
-                GUILayout.Label("All test succeeded", Styles.SucceedLabelStyle, GUILayout.Width(600));
+                GUILayout.Label("All test(s) succeeded", Styles.SucceedLabelStyle, GUILayout.Width(600));
             }
             else
             {
