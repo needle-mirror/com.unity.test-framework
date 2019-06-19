@@ -59,18 +59,18 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
 
             var buildTarget = SetFilterAndGetBuildTarget(testPlatform, filter);
 
-            RerunCallbackData.instance.runFilter = new TestRunnerFilter()
+            RerunCallbackData.instance.runFilters = new []{new TestRunnerFilter()
             {
                 categoryNames = filter.categoryNames,
                 groupNames = filter.groupNames,
                 testRepetitions = testRepetitions
-            };
+            }};
 
             RerunCallbackData.instance.testMode = filter.testMode;
 
             return new Api.ExecutionSettings()
             {
-                filter = filter,
+                filters = new []{filter},
                 overloadTestRunSettings = new RunSettings(testSettings),
                 targetPlatform = buildTarget
             };

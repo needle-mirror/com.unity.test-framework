@@ -57,7 +57,8 @@ namespace UnityEditor.TestTools.TestRunner.Api
                 throw new ArgumentException("Callback is undefined.");
             }
 
-            var platform = ParseTestMode(executionSettings.filter.testMode);
+            var firstFilter = executionSettings.filters?.FirstOrDefault() ?? executionSettings.filter;
+            var platform = ParseTestMode(firstFilter?.testMode ?? TestMode.EditMode);
             var testAssemblyProvider = new EditorLoadedTestAssemblyProvider(new EditorCompilationInterfaceProxy(), new EditorAssembliesProxy());
             var testAdaptorFactory = new TestAdaptorFactory();
             var testListCache = new TestListCache(testAdaptorFactory, new RemoteTestResultDataFactory(), TestListCacheData.instance);

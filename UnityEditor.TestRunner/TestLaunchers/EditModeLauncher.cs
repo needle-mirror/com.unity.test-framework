@@ -4,6 +4,7 @@ using UnityEditor.SceneManagement;
 using UnityEditor.TestTools.TestRunner.Api;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.TestRunner.Utils;
 using UnityEngine.TestTools;
 using UnityEngine.TestTools.TestRunner;
 using UnityEngine.TestTools.TestRunner.GUI;
@@ -15,11 +16,11 @@ namespace UnityEditor.TestTools.TestRunner
         public static bool IsRunning;
         private readonly EditModeRunner m_EditModeRunner;
 
-        public EditModeLauncher(TestRunnerFilter filter, TestPlatform platform)
+        public EditModeLauncher(Filter[] filters, TestPlatform platform)
         {
             m_EditModeRunner = ScriptableObject.CreateInstance<EditModeRunner>();
             m_EditModeRunner.UnityTestAssemblyRunnerFactory = new UnityTestAssemblyRunnerFactory();
-            m_EditModeRunner.Init(filter, platform);
+            m_EditModeRunner.Init(filters, platform);
         }
 
         public override void Run()
@@ -50,6 +51,7 @@ namespace UnityEditor.TestTools.TestRunner
 
             m_EditModeRunner.Run();
             AddEventHandler<BackgroundListener>();
+            AddEventHandler<TestRunCallbackListener>();
         }
 
         private static bool OpenNewScene(out SceneSetup[] previousSceneSetup)

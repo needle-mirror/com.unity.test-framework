@@ -4,12 +4,14 @@ using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
+using NUnit.Framework.Internal.Filters;
 using UnityEngine;
 using UnityEngine.TestTools.NUnitExtensions;
 using UnityEngine.TestTools.TestRunner;
 using UnityEngine.TestTools;
 using UnityEngine.TestTools.TestRunner.GUI;
 using UnityEditor.Callbacks;
+using UnityEditor.TestTools.TestRunner.Api;
 using UnityEngine.TestRunner.NUnitExtensions;
 using UnityEngine.TestRunner.NUnitExtensions.Runner;
 
@@ -32,7 +34,7 @@ namespace UnityEditor.TestTools.TestRunner
     internal class EditModeRunner : ScriptableObject, IDisposable
     {
         [SerializeField]
-        private TestRunnerFilter m_Filter;
+        private Filter[] m_Filters;
 
         //The counter from the IEnumerator object
         [SerializeField]
@@ -90,9 +92,9 @@ namespace UnityEditor.TestTools.TestRunner
 
         public IUnityTestAssemblyRunnerFactory UnityTestAssemblyRunnerFactory { get; set; }
 
-        public void Init(TestRunnerFilter filter, TestPlatform platform)
+        public void Init(Filter[] filters, TestPlatform platform)
         {
-            m_Filter = filter;
+            m_Filters = filters;
             m_TestPlatform = platform;
             m_AlreadyStartedTests = new List<string>();
             m_ExecutedTests = new List<TestResultSerializer>();
@@ -181,7 +183,7 @@ namespace UnityEditor.TestTools.TestRunner
             EditorApplication.LockReloadAssemblies();
 
             var testListenerWrapper = new TestListenerWrapper(m_TestStartedEvent, m_TestFinishedEvent);
-            m_RunStep = m_Runner.Run(testListenerWrapper, m_Filter.BuildNUnitFilter()).GetEnumerator();
+            m_RunStep = m_Runner.Run(testListenerWrapper, new OrFilter(m_Filters.Select(filter => filter.BuildNUnitFilter()).ToArray())).GetEnumerator();
             m_RunningTests = true;
 
             EditorApplication.update += TestConsumer;
@@ -417,7 +419,7 @@ namespace UnityEditor.TestTools.TestRunner
 
         public ITestFilter GetFilter()
         {
-            return m_Filter.BuildNUnitFilter();
+            return new OrFilter(m_Filters.Select(filter => filter.BuildNUnitFilter()).ToArray());
         }
     }
 }

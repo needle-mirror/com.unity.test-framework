@@ -290,7 +290,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             GUIUtility.ExitGUI();
         }
 
-        protected virtual void RunTests(TestRunnerFilter filter)
+        protected virtual void RunTests(params TestRunnerFilter[] filters)
         {
             throw new NotImplementedException();
         }
@@ -301,7 +301,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                 return;
 
             var m = new GenericMenu();
-            var testFilter = GetSelectedTestsAsFilter(m_TestListState.selectedIDs);
+            var testFilters = GetSelectedTestsAsFilter(m_TestListState.selectedIDs);
             var multilineSelection = m_TestListState.selectedIDs.Count > 1;
 
             if (!multilineSelection)
@@ -336,7 +336,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             {
                 m.AddItem(multilineSelection ? s_GUIRunSelectedTests : s_GUIRun,
                     false,
-                    data => RunTests(testFilter),
+                    data => RunTests(testFilters),
                     "");
 
                 if (EditorPrefs.GetBool("DeveloperMode", false))
@@ -345,8 +345,12 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                         false,
                         data =>
                         {
-                            testFilter.testRepetitions = int.MaxValue;
-                            RunTests(testFilter);
+                            foreach (var filter in testFilters)
+                            {
+                                filter.testRepetitions = int.MaxValue;
+                            }
+                            
+                            RunTests(testFilters);
                         },
                         "");
 
@@ -354,8 +358,12 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                         false,
                         data =>
                         {
-                            testFilter.testRepetitions = 100;
-                            RunTests(testFilter);
+                            foreach (var filter in testFilters)
+                            {
+                                filter.testRepetitions = 100;
+                            }
+                            
+                            RunTests(testFilters);
                         },
                         "");
                 }
@@ -366,7 +374,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             m.ShowAsContext();
         }
 
-        private TestRunnerFilter GetSelectedTestsAsFilter(IEnumerable<int> selectedIDs)
+        private TestRunnerFilter[] GetSelectedTestsAsFilter(IEnumerable<int> selectedIDs)
         {
             var namesToRun = new List<string>();
             var exactNamesToRun = new List<string>();
@@ -382,10 +390,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                         if (testLine.parent != null && testLine.parent.displayName == "Invisible Root Item")
                         {
                             //Root node selected. Use an empty TestRunnerFilter to run every test
-                            namesToRun.Clear();
-                            exactNamesToRun.Clear();
-                            assembliesToRun.Clear();
-                            break;
+                            return new[] {new TestRunnerFilter()};
                         }
 
                         if (testLine.FullName.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
@@ -398,14 +403,47 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                 }
             }
 
-            var filter = new TestRunnerFilter
+            var filters = new List<TestRunnerFilter>();
+
+            if (assembliesToRun.Count > 0)
             {
-                assemblyNames = assembliesToRun.ToArray(),
-                groupNames = namesToRun.ToArray(),
-                testNames = exactNamesToRun.ToArray(),
-                categoryNames = m_TestRunnerUIFilter.CategoryFilter
-            };
-            return filter;
+                filters.Add(new TestRunnerFilter()
+                {
+                    assemblyNames = assembliesToRun.ToArray()
+                });
+            }
+            
+            if (namesToRun.Count > 0)
+            {
+                filters.Add(new TestRunnerFilter()
+                {
+                    groupNames = namesToRun.ToArray()
+                });
+            }
+            
+            if (exactNamesToRun.Count > 0)
+            {
+                filters.Add(new TestRunnerFilter()
+                {
+                    testNames = exactNamesToRun.ToArray()
+                });
+            }
+
+            var categories = m_TestRunnerUIFilter.CategoryFilter;
+            if (categories.Length > 0)
+            {
+                filters.Add(new TestRunnerFilter()
+                {
+                    categoryNames = categories.ToArray()
+                });
+            }
+
+            if (filters.Count == 0)
+            {
+                filters.Add(new TestRunnerFilter());
+            }
+            
+            return filters.ToArray();
         }
 
         private TestTreeViewItem GetSelectedTest()

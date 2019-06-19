@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework.Interfaces;
+using NUnit.Framework.Internal.Filters;
 using UnityEditor.TestTools.TestRunner.Api;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.TestRunner.Utils;
 using UnityEngine.TestTools.TestRunner;
 using UnityEngine.TestTools.TestRunner.Callbacks;
 
@@ -37,6 +40,7 @@ namespace UnityEditor.TestTools.TestRunner
                 runner.AddEventHandlerMonoBehaviour<PlayModeRunnerCallback>();
                 runner.AddEventHandlerScriptableObject<TestRunnerCallback>();
                 runner.AddEventHandlerScriptableObject<CallbacksDelegatorListener>();
+                runner.AddEventHandlerScriptableObject<TestRunCallbackListener>();
 
                 foreach (var eventHandler in m_EventHandlers)
                 {
@@ -69,7 +73,7 @@ namespace UnityEditor.TestTools.TestRunner
             }
             else
             {
-                testFilter = m_Settings.filter.BuildNUnitFilter();
+                testFilter = m_Settings.BuildNUnitFilter();
                 var runner = LoadTests(testFilter);
 
                 var exceptionThrown = ExecutePreBuildSetupMethods(runner.LoadedTest, testFilter);
@@ -105,7 +109,7 @@ namespace UnityEditor.TestTools.TestRunner
                 if (state == PlayModeStateChange.ExitingPlayMode)
                 {
                     AssetDatabase.DeleteAsset(runner.settings.bootstrapScene);
-                    ExecutePostBuildCleanupMethods(runner.m_Runner.LoadedTest, runner.settings.filter.BuildNUnitFilter(), Application.platform);
+                    ExecutePostBuildCleanupMethods(runner.m_Runner.LoadedTest, runner.settings.BuildNUnitFilter(), Application.platform);
                     IsRunning = false;
                 }
                 else if (state == PlayModeStateChange.EnteredEditMode)

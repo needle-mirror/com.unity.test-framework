@@ -18,7 +18,8 @@ namespace UnityEngine.TestTools
 
         public void ApplyToTest(Test test)
         {
-            if (m_ConditionMap[m_ConditionKey.ToLowerInvariant()])
+            var key = m_ConditionKey.ToLowerInvariant();
+            if (m_ConditionMap.ContainsKey(key) && m_ConditionMap[key])
             {
                 test.RunState = RunState.Ignored;
                 string skipReason = string.Format(m_IgnoreReason);

@@ -126,12 +126,12 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
                 return "none";
             }
 
-            if (executionSettings.filter == null)
+            if (executionSettings.filters == null || executionSettings.filters.Length == 0)
             {
                 return "no filter";
             }
 
-            return "test mode = " + executionSettings.filter.testMode;
+            return "test mode = " + executionSettings.filters[0].testMode;
         }
     }
 }

@@ -7,7 +7,7 @@ namespace UnityEditor.TestTools.TestRunner
     internal class RerunCallbackData : ScriptableSingleton<RerunCallbackData>
     {
         [SerializeField]
-        internal TestRunnerFilter runFilter;
+        internal TestRunnerFilter[] runFilters;
 
         [SerializeField]
         internal TestMode testMode;

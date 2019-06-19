@@ -1,4 +1,15 @@
 # Changelog
+## [1.0.16] - 2019-06-20
+- Fixed an issue where the Test Runner window popped out if it was docked, or if something else was docked next to it, when re-opened (case 1158961)
+- Fixed a regression where the running standalone playmode tests from the ui would result in an error.
+
+## [1.0.15] - 2019-06-18
+- Added new `[TestMustExpectAllLogs]` attribute, which automatically does `LogAssert.NoUnexpectedReceived()` at the end of affected tests. See docs for this attribute for more info on usage.
+- Fixed a regression where no tests would be run if multiple filters are specified. E.g. selecting both a whole assembly and an individual test in the ui.
+- Fixed an issue where performing `Run Selected` on a selected assembly would run all assemblies.
+- Introduced the capability to do a split build and run, when running playmode tests on standalone devices.
+- Fixed an error in ConditionalIgnore, if the condition were not set.
+
 ## [1.0.14] - 2019-05-27
 - Fixed issue preventing scene creation in IPrebuildSetup.Setup callback when running standalone playmode tests.
 - Fixed an issue where test assemblies would sometimes not be ordered alphabetically.

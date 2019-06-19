@@ -64,18 +64,6 @@ namespace UnityEditor.TestTools.TestRunner
         [MenuItem("Window/General/Test Runner", false, 201, false)]
         public static void ShowPlaymodeTestsRunnerWindowCodeBased()
         {
-            if (s_Instance != null)
-            {
-                try
-                {
-                    s_Instance.Close();
-                }
-                catch (Exception exception)
-                {
-                    Debug.LogException(exception);
-                }
-            }
-
             s_Instance = GetWindow<TestRunnerWindow>("Test Runner");
             s_Instance.Show();
         }
@@ -165,7 +153,7 @@ namespace UnityEditor.TestTools.TestRunner
         {
             if (!m_SelectedTestTypes.HasTreeData())
             {
-                m_testRunnerApi.RetrieveTestList(new ExecutionSettings() { filter = new Filter() { testMode = m_SelectedTestTypes.TestMode } }, (rootTest) =>
+                m_testRunnerApi.RetrieveTestList(new ExecutionSettings() { filters = new []{new Filter() { testMode = m_SelectedTestTypes.TestMode } }}, (rootTest) =>
                 {
                     m_SelectedTestTypes.Init(this, rootTest);
                     m_SelectedTestTypes.Reload();

@@ -1,13 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.TestTools.TestRunner;
 
 namespace UnityEngine.TestTools.Logging
 {
-    internal class LogScope : IDisposable
+    sealed class LogScope : IDisposable
     {
-        private bool m_Disposed;
-        private readonly object _lock = new object();
+        static List<LogScope> s_ActiveScopes = new List<LogScope>();
+        
+        readonly object m_Lock = new object();
+        bool m_Disposed;
+        bool m_NeedToProcessLogs;
 
         public Queue<LogMatch> ExpectedLogs { get; set; }
         public List<LogEvent> AllLogs { get; }
@@ -18,11 +22,8 @@ namespace UnityEngine.TestTools.Logging
         public bool IsNUnitInconclusiveException { get; private set; }
         public bool IsNUnitIgnoreException { get; private set; }
         public string NUnitExceptionMessage { get; private set; }
-
-        private bool m_NeedToProcessLogs;
-        private static List<LogScope> s_ActiveScopes = new List<LogScope>();
-
-        internal static LogScope Current
+        
+        public static LogScope Current
         {
             get
             {
@@ -32,7 +33,7 @@ namespace UnityEngine.TestTools.Logging
             }
         }
 
-        internal static bool HasCurrentLogScope()
+        public static bool HasCurrentLogScope()
         {
             return s_ActiveScopes.Count > 0;
         }
@@ -46,7 +47,7 @@ namespace UnityEngine.TestTools.Logging
             Activate();
         }
 
-        private void Activate()
+        void Activate()
         {
             s_ActiveScopes.Insert(0, this);
             RegisterScope(this);
@@ -54,26 +55,26 @@ namespace UnityEngine.TestTools.Logging
             Application.logMessageReceivedThreaded += AddLog;
         }
 
-        private void Deactivate()
+        void Deactivate()
         {
             Application.logMessageReceivedThreaded -= AddLog;
             s_ActiveScopes.Remove(this);
             UnregisterScope(this);
         }
 
-        private static void RegisterScope(LogScope logScope)
+        static void RegisterScope(LogScope logScope)
         {
             Application.logMessageReceivedThreaded += logScope.AddLog;
         }
 
-        private static void UnregisterScope(LogScope logScope)
+        static void UnregisterScope(LogScope logScope)
         {
             Application.logMessageReceivedThreaded -= logScope.AddLog;
         }
 
         public void AddLog(string message, string stacktrace, LogType type)
         {
-            lock (_lock)
+            lock (m_Lock)
             {
                 m_NeedToProcessLogs = true;
                 var log = new LogEvent
@@ -126,23 +127,7 @@ namespace UnityEngine.TestTools.Logging
             }
         }
 
-        public bool IsAllLogsHandled()
-        {
-            lock (_lock)
-            {
-                return AllLogs.All(x => x.IsHandled);
-            }
-        }
-
-        public LogEvent GetUnhandledLog()
-        {
-            lock (_lock)
-            {
-                return AllLogs.First(x => !x.IsHandled);
-            }
-        }
-
-        private static bool IsNUnitResultStateException(string stacktrace, LogType logType)
+        static bool IsNUnitResultStateException(string stacktrace, LogType logType)
         {
             if (logType != LogType.Exception)
                 return false;
@@ -150,7 +135,7 @@ namespace UnityEngine.TestTools.Logging
             return string.IsNullOrEmpty(stacktrace) || stacktrace.StartsWith("NUnit.Framework.Assert.");
         }
 
-        private static bool IsFailingLog(LogType type)
+        static bool IsFailingLog(LogType type)
         {
             switch (type)
             {
@@ -169,7 +154,7 @@ namespace UnityEngine.TestTools.Logging
             GC.SuppressFinalize(this);
         }
 
-        protected virtual void Dispose(bool disposing)
+        void Dispose(bool disposing)
         {
             if (m_Disposed)
             {
@@ -184,15 +169,15 @@ namespace UnityEngine.TestTools.Logging
             }
         }
 
-        internal bool AnyFailingLogs()
+        public bool AnyFailingLogs()
         {
             ProcessExpectedLogs();
             return FailingLogs.Any();
         }
 
-        internal void ProcessExpectedLogs()
+        public void ProcessExpectedLogs()
         {
-            lock (_lock)
+            lock (m_Lock)
             {
                 if (!m_NeedToProcessLogs || !ExpectedLogs.Any())
                     return;
@@ -218,6 +203,20 @@ namespace UnityEngine.TestTools.Logging
                     }
                 }
                 m_NeedToProcessLogs = false;
+            }
+        }
+
+        public void NoUnexpectedReceived()
+        {
+            lock (m_Lock)
+            {
+                ProcessExpectedLogs();
+
+                var unhandledLog = AllLogs.FirstOrDefault(x => !x.IsHandled);
+                if (unhandledLog != null)
+                {
+                    throw new UnhandledLogMessageException(unhandledLog);
+                }
             }
         }
     }

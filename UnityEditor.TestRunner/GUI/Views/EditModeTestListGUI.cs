@@ -53,7 +53,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             DrawFilters();
         }
 
-        protected override void RunTests(TestRunnerFilter filter)
+        protected override void RunTests(params TestRunnerFilter[] filters)
         {
             if (EditorUtility.scriptCompilationFailed)
             {
@@ -61,21 +61,25 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                 return;
             }
 
-            filter.ClearResults(newResultList.OfType<TestRunnerFilter.IClearableResult>().ToList());
+            foreach (var filter in filters)
+            {
+                filter.ClearResults(newResultList.OfType<TestRunnerFilter.IClearableResult>().ToList());                
+            }
 
-            RerunCallbackData.instance.runFilter = filter;
+            RerunCallbackData.instance.runFilters = filters;
             RerunCallbackData.instance.testMode = TestMode.EditMode;
 
             var testRunnerApi = ScriptableObject.CreateInstance<TestRunnerApi>();
             testRunnerApi.Execute(new ExecutionSettings()
             {
-                filter = new Filter()
+                filters = filters.Select(filter => new Filter()
                 {
+                    assemblyNames = filter.assemblyNames,
                     categoryNames = filter.categoryNames,
                     groupNames =  filter.groupNames,
                     testMode = TestMode,
                     testNames = filter.testNames
-                }
+                }).ToArray()
             });
         }
 

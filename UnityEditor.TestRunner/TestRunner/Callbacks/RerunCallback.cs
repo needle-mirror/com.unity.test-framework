@@ -12,10 +12,10 @@ namespace UnityEditor.TestTools.TestRunner
 
         public void RunFinished(ITestResultAdaptor result)
         {
-            if (RerunCallbackData.instance.runFilter == null)
-                RerunCallbackData.instance.runFilter = new TestRunnerFilter(); 
+            if (RerunCallbackData.instance.runFilters == null)
+                RerunCallbackData.instance.runFilters = new[] {new TestRunnerFilter()};
 
-            var runFilter = RerunCallbackData.instance.runFilter;
+            var runFilter = RerunCallbackData.instance.runFilters[0];
 
             if (useMockRunFilter)
             {
@@ -52,18 +52,21 @@ namespace UnityEditor.TestTools.TestRunner
 
         private static void ExecuteTestRunnerAPI()
         {
-            var runFilter = RerunCallbackData.instance.runFilter;
+            var runFilter = RerunCallbackData.instance.runFilters[0];
             var testMode = RerunCallbackData.instance.testMode;
 
             var testRunnerApi = ScriptableObject.CreateInstance<TestRunnerApi>();
             testRunnerApi.Execute(new Api.ExecutionSettings()
             {
-                filter = new Filter()
+                filters = new[]
                 {
-                    categoryNames = runFilter.categoryNames,
-                    groupNames = runFilter.groupNames,
-                    testMode = testMode,
-                    testNames = runFilter.testNames
+                    new Filter()
+                    {
+                        categoryNames = runFilter.categoryNames,
+                        groupNames = runFilter.groupNames,
+                        testMode = testMode,
+                        testNames = runFilter.testNames
+                    }
                 }
             });
         }

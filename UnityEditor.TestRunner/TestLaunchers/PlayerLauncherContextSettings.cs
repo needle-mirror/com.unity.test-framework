@@ -18,7 +18,9 @@ namespace UnityEditor.TestTools.TestRunner
         private bool m_ShowUnitySplashScreen;
         private string m_OldproductName;
         private string m_OldAotOptions;
+#pragma warning disable 618
         private Lightmapping.GIWorkflowMode m_OldLightmapping;
+#pragma warning restore 618
         private bool m_explicitNullChecks;
 
         private bool m_Disposed;
@@ -77,8 +79,10 @@ namespace UnityEditor.TestTools.TestRunner
             m_OldproductName = PlayerSettings.productName;
             PlayerSettings.productName = "UnityTestFramework";
 
+#pragma warning disable 618
             m_OldLightmapping = Lightmapping.giWorkflowMode;
             Lightmapping.giWorkflowMode = Lightmapping.GIWorkflowMode.OnDemand;
+#pragma warning restore 618
 
             m_explicitNullChecks = EditorUserBuildSettings.explicitNullChecks;
             EditorUserBuildSettings.explicitNullChecks = true;
@@ -97,7 +101,9 @@ namespace UnityEditor.TestTools.TestRunner
             PlayerSettings.SplashScreen.show = m_ShowUnitySplashScreen;
             PlayerSettings.productName = m_OldproductName;
             PlayerSettings.aotOptions = m_OldAotOptions;
+#pragma warning disable 618
             Lightmapping.giWorkflowMode = m_OldLightmapping;
+#pragma warning restore 618
             EditorUserBuildSettings.explicitNullChecks = m_explicitNullChecks;
 
             EditorApplication.UnlockReloadAssemblies();

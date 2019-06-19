@@ -24,7 +24,7 @@ namespace UnityEngine.TestTools.TestRunner.Callbacks
 
         public void Start()
         {
-            PlayerConnection.instance.Register(PlayerConnectionMessageIds.runFinishedMessageId, EditorProccessedTheResult);
+            PlayerConnection.instance.Register(PlayerConnectionMessageIds.quitPlayerMessageId, EditorProccessedTheResult);
             StartCoroutine(SendDataRoutine());
         }
 

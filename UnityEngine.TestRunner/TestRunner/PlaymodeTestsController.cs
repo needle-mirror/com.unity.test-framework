@@ -64,7 +64,7 @@ namespace UnityEngine.TestTools.TestRunner
             return GameObject.Find(kPlaymodeTestControllerName).GetComponent<PlaymodeTestsController>();
         }
 
-        public IEnumerator TestRunnerCorotine()
+        public IEnumerator TestRunnerCoroutine()
         {
             while (m_TestSteps.MoveNext())
             {
@@ -99,9 +99,9 @@ namespace UnityEngine.TestTools.TestRunner
             runStartedEvent.Invoke(m_Runner.LoadedTest);
 
             var testListenerWrapper = new TestListenerWrapper(testStartedEvent, testFinishedEvent);
-            m_TestSteps = m_Runner.Run(testListenerWrapper, settings.filter.BuildNUnitFilter()).GetEnumerator();
+            m_TestSteps = m_Runner.Run(testListenerWrapper, settings.BuildNUnitFilter()).GetEnumerator();
 
-            yield return TestRunnerCorotine();
+            yield return TestRunnerCoroutine();
         }
 
         public void Cleanup()

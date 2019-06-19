@@ -76,10 +76,14 @@ namespace UnityEditor.TestTools.TestRunner
 
         private IEnumerable<Type> GetTypesFromPrebuildAttributes(IEnumerable<ITest> tests)
         {
+            var allAssemblies = AppDomain.CurrentDomain.GetAssemblies();
+            allAssemblies = allAssemblies.Where(x => x.GetReferencedAssemblies().Any(z => z.Name == "UnityEditor.TestRunner")).ToArray();
+            var attributesFromAssemblies = allAssemblies.SelectMany(assembly => assembly.GetCustomAttributes(typeof(T2), true).OfType<T2>());
             var attributesFromMethods = tests.SelectMany(t => t.Method.GetCustomAttributes<T2>(true).Select(attribute => attribute));
             var attributesFromTypes = tests.SelectMany(t => t.Method.TypeInfo.GetCustomAttributes<T2>(true).Select(attribute => attribute));
 
             var result = new List<T2>();
+            result.AddRange(attributesFromAssemblies);
             result.AddRange(attributesFromMethods);
             result.AddRange(attributesFromTypes);
 

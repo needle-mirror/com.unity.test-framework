@@ -23,7 +23,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             base.PrintHeadPanel();
             if (GUILayout.Button("Run all in player (" + EditorUserBuildSettings.activeBuildTarget + ")", EditorStyles.toolbarButton))
             {
-                RunTestsInPlayer(null);
+                RunTestsInPlayer();
             }
             EditorGUILayout.EndHorizontal();
             DrawFilters();
@@ -64,36 +64,46 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             UnityEngine.GUI.enabled = true;
         }
 
-        protected override void RunTests(TestRunnerFilter filter)
+        protected override void RunTests(TestRunnerFilter[] filters)
         {
             // Give user chance to save the changes to their currently open scene because we close it and load our own
             var cancelled = !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo();
             if (cancelled)
                 return;
 
-            filter.ClearResults(newResultList.OfType<TestRunnerFilter.IClearableResult>().ToList());
+            foreach (var filter in filters)
+            {
+                filter.ClearResults(newResultList.OfType<TestRunnerFilter.IClearableResult>().ToList());                
+            }
 
-            RerunCallbackData.instance.runFilter = filter;
+            RerunCallbackData.instance.runFilters = filters;
             RerunCallbackData.instance.testMode = TestMode.PlayMode;
 
             var testRunnerApi = ScriptableObject.CreateInstance<TestRunnerApi>();
             testRunnerApi.Execute(new ExecutionSettings()
             {
-                filter = new Filter()
+                filters = filters.Select(filter => new Filter()
                 {
+                    assemblyNames = filter.assemblyNames,
                     categoryNames = filter.categoryNames,
                     groupNames =  filter.groupNames,
                     testMode = TestMode,
                     testNames = filter.testNames
-                }
+                }).ToArray()
             });
         }
 
-        protected void RunTestsInPlayer(TestRunnerFilter filter)
+        protected void RunTestsInPlayer()
         {
-            var settings = PlaymodeTestsControllerSettings.CreateRunnerSettings(filter);
-            var testExecutor = new PlayerLauncher(settings, null, null);
-            testExecutor.Run();
+            var testRunnerApi = ScriptableObject.CreateInstance<TestRunnerApi>();
+            testRunnerApi.Execute(new ExecutionSettings()
+            {
+                filters = new [] { new Filter()
+                {
+                    testMode = TestMode,
+                }},
+                targetPlatform = EditorUserBuildSettings.activeBuildTarget
+            });
             GUIUtility.ExitGUI();
         }
 

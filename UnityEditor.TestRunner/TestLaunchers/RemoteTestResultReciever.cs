@@ -15,7 +15,7 @@ namespace UnityEditor.TestTools.TestRunner
 
         public void RunFinished(MessageEventArgs messageEventArgs)
         {
-            EditorConnection.instance.Send(PlayerConnectionMessageIds.runFinishedMessageId, null, messageEventArgs.playerId);
+            EditorConnection.instance.Send(PlayerConnectionMessageIds.quitPlayerMessageId, null, messageEventArgs.playerId);
             EditorConnection.instance.DisconnectAll();
         }
     }
