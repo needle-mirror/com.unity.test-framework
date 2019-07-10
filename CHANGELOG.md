@@ -1,4 +1,8 @@
 # Changelog
+## [1.0.17] - 2019-07-11
+- Fixed an issue where the Test Runner window wouldn’t frame selected items after search filter is cleared.
+- Fixed a regression where playmode test application on the IOS platform would not quit after the tests are done.
+
 ## [1.0.16] - 2019-06-20
 - Fixed an issue where the Test Runner window popped out if it was docked, or if something else was docked next to it, when re-opened (case 1158961)
 - Fixed a regression where the running standalone playmode tests from the ui would result in an error.

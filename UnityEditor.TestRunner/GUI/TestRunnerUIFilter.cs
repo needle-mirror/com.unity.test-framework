@@ -40,6 +40,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
 
         public Action RebuildTestList;
         public Action<string> SearchStringChanged;
+        public Action SearchStringCleared;
         public bool IsFiltering
         {
             get
@@ -108,6 +109,8 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             if (EditorGUI.EndChangeCheck() && SearchStringChanged != null)
             {
                 SearchStringChanged(m_SearchString);
+                if (String.IsNullOrEmpty(m_SearchString))
+                    SearchStringCleared();
             }
 
             if (availableCategories != null && availableCategories.Any())
@@ -161,6 +164,10 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             if (SearchStringChanged != null)
             {
                 SearchStringChanged(m_SearchString);
+            }
+            if (SearchStringCleared != null)
+            {
+                SearchStringCleared();
             }
         }
     }

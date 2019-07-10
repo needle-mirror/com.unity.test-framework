@@ -219,6 +219,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             m_TestRunnerUIFilter.UpdateCounters(newResultList);
             m_TestRunnerUIFilter.RebuildTestList = () => m_TestListTree.ReloadData();
             m_TestRunnerUIFilter.SearchStringChanged = s => m_TestListTree.searchString = s;
+            m_TestRunnerUIFilter.SearchStringCleared = () => FrameSelection();
         }
 
         public void UpdateResult(TestRunnerResult result)
@@ -457,6 +458,15 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                 }
             }
             return null;
+        }
+
+        private void FrameSelection()
+        {
+            if (m_TestListTree.HasSelection())
+            {
+                var firstClickedID = m_TestListState.selectedIDs.First<int>() == m_TestListState.lastClickedID ? m_TestListState.selectedIDs.Last<int>() : m_TestListState.selectedIDs.First<int>();
+                m_TestListTree.Frame(firstClickedID, true, false);
+            }
         }
 
         public abstract TestPlatform TestPlatform { get; }

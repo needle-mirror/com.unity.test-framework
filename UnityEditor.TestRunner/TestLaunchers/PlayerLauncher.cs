@@ -104,7 +104,7 @@ namespace UnityEditor.TestTools.TestRunner
 
 
             // Android has to be in listen mode to establish player connection
-            if (buildOptions.BuildPlayerOptions.target == BuildTarget.Android || buildOptions.BuildPlayerOptions.target == BuildTarget.iOS)
+            if (buildOptions.BuildPlayerOptions.target == BuildTarget.Android)
             {
                 buildOptions.BuildPlayerOptions.options &= ~BuildOptions.ConnectToHost;
             }
