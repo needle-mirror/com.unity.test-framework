@@ -1,4 +1,7 @@
 # Changelog
+## [1.0.18] - 2019-07-15
+- Included new full documentation of the test framework.
+
 ## [1.0.17] - 2019-07-11
 - Fixed an issue where the Test Runner window wouldn’t frame selected items after search filter is cleared.
 - Fixed a regression where playmode test application on the IOS platform would not quit after the tests are done.
