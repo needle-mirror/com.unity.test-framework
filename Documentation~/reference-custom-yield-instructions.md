@@ -8,6 +8,8 @@ In an Edit Mode test, you can use `IEditModeTestYieldInstruction` interface to i
 
 - [EnterPlayMode](#enterplaymode)
 - [ExitPlayMode](#exitplaymode)
+- [RecompileScripts](./reference-recompile-scripts.md)
+- [WaitForDomainReload](./reference-wait-for-domain-reload.md)
 
 ## Example
 

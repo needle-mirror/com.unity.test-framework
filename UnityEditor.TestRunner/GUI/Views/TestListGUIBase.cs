@@ -19,6 +19,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
         private static readonly GUIContent s_GUIRun100Times = EditorGUIUtility.TrTextContent("Run 100 times");
         private static readonly GUIContent s_GUIOpenTest = EditorGUIUtility.TrTextContent("Open source code");
         private static readonly GUIContent s_GUIOpenErrorLine = EditorGUIUtility.TrTextContent("Open error line");
+        private static readonly GUIContent s_GUIClearResults = EditorGUIUtility.TrTextContent("Clear Results", "Clear all test results");
 
         [SerializeField]
         protected TestRunnerWindow m_Window;
@@ -87,6 +88,17 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                             failedTestnames.Add(result.fullName);
                     }
                     RunTests(new TestRunnerFilter() {testNames = failedTestnames.ToArray(), categoryNames = m_TestRunnerUIFilter.CategoryFilter});
+                    GUIUtility.ExitGUI();
+                }
+            }
+            using (new EditorGUI.DisabledScope(IsBusy()))
+            {
+                if (GUILayout.Button(s_GUIClearResults, EditorStyles.toolbarButton))
+                {
+                    foreach (var result in newResultList)
+                    {
+                        result.Clear();
+                    }
                     GUIUtility.ExitGUI();
                 }
             }

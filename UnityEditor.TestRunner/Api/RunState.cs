@@ -1,6 +1,6 @@
 namespace UnityEditor.TestTools.TestRunner.Api
 {
-    internal enum RunState
+    public enum RunState
     {
         NotRunnable,
         Runnable,

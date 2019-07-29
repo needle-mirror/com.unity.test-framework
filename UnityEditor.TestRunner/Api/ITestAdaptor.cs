@@ -3,7 +3,7 @@ using NUnit.Framework.Interfaces;
 
 namespace UnityEditor.TestTools.TestRunner.Api
 {
-    internal interface ITestAdaptor
+    public interface ITestAdaptor
     {
         string Id { get; }
         string Name { get; }
@@ -12,6 +12,7 @@ namespace UnityEditor.TestTools.TestRunner.Api
         bool HasChildren { get; }
         bool IsSuite { get; }
         IEnumerable<ITestAdaptor> Children { get; }
+        ITestAdaptor Parent { get; }
         int TestCaseTimeout { get; }
         ITypeInfo TypeInfo { get; }
         IMethodInfo Method { get; }
@@ -21,7 +22,10 @@ namespace UnityEditor.TestTools.TestRunner.Api
         string Description { get; }
         string SkipReason { get; }
         string ParentId { get; }
+        string ParentFullName { get; }
         string UniqueName { get; }
         string ParentUniqueName { get; }
+        int ChildIndex { get; }
+        TestMode TestMode { get; }
     }
 }

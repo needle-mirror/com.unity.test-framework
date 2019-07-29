@@ -1,6 +1,6 @@
 # Unity Test Framework manual
 
-This is the manual for the Unity Test Framework:
+This is the manual for the Unity Test Framework (UTF):
 
 ## **Introduction**
 
@@ -18,7 +18,16 @@ This is the manual for the Unity Test Framework:
     * [How to run a Play Mode test as standalone](./workflow-run-playmode-test-standalone.md)
 * [Resources](./resources.md)
 
-## **Reference**
+## Extending UTF
+
+* [Extending UTF](./extending.md)
+  * Workflows:
+    * [How to split the build and run process for standalone Play Mode tests](./reference-attribute-testplayerbuildmodifier.md#split-build-and-run-for-player-mode-tests)
+    * [How to run tests programmatically](./extension-run-tests.md)
+    * [How to get test results](./extension-get-test-results.md)
+    * [How to retrieve the list of tests](./extension-retrieve-test-list.md)
+
+## Reference
 
 * [Running tests from the command-line](./reference-command-line.md)
 * [UnityTest attribute](./reference-attribute-unitytest.md)
@@ -62,3 +71,10 @@ This is the manual for the Unity Test Framework:
 * [MonoBehaviour tests](./reference-tests-monobehaviour.md)
   * [MonoBehaviourTest&lt;T&gt;](./reference-tests-monobehaviour.md#monobehaviourtestt)
   * [IMonoBehaviourTest](./reference-tests-monobehaviour.md#imonobehaviourtest)
+
+* [TestRunnerApi](./reference-test-runner-api.md)
+    * [ExecutionSettings](./reference-execution-settings.md)
+    * [Filter](./reference-filter.md)
+    * [ITestRunSettings](./reference-itest-run-settings.md)
+    * [ICallbacks](./reference-icallbacks.md)
+    * [IErrorCallbacks](./reference-ierror-callbacks.md)

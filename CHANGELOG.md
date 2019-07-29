@@ -1,4 +1,9 @@
 # Changelog
+## [1.1.0] - 2019-07-30
+- Introduced the TestRunnerApi for running tests programmatically from elsewhere inside the Editor.
+- Introduced yield instructions for recompiling scripts and awaiting a domain reload in Edit Mode tests.
+- Added a button to the Test Runner UI for clearing the results.
+
 ## [1.0.18] - 2019-07-15
 - Included new full documentation of the test framework.
 

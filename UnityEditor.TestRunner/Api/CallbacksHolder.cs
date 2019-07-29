@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace UnityEditor.TestTools.TestRunner.Api
 {
-    internal class CallbacksHolder : ScriptableSingleton<CallbacksHolder>
+    internal class CallbacksHolder : ScriptableSingleton<CallbacksHolder>, ICallbacksHolder
     {
         private List<CallbackWithPriority> m_Callbacks = new List<CallbackWithPriority>();
         public void Add(ICallbacks callback, int priority)

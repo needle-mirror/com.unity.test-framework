@@ -1,10 +1,10 @@
 namespace UnityEditor.TestTools.TestRunner.Api
 {
-    internal enum TestStatus
+    public enum TestStatus
     {
+        Inconclusive,
         Skipped,
         Passed,
-        Failed,
-        Inconclusive
+        Failed
     }
 }

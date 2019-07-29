@@ -153,7 +153,7 @@ namespace UnityEditor.TestTools.TestRunner
         {
             if (!m_SelectedTestTypes.HasTreeData())
             {
-                m_testRunnerApi.RetrieveTestList(new ExecutionSettings() { filters = new []{new Filter() { testMode = m_SelectedTestTypes.TestMode } }}, (rootTest) =>
+                m_testRunnerApi.RetrieveTestList(m_SelectedTestTypes.TestMode, (rootTest) =>
                 {
                     m_SelectedTestTypes.Init(this, rootTest);
                     m_SelectedTestTypes.Reload();

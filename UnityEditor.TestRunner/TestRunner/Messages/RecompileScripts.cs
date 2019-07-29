@@ -4,7 +4,7 @@ using UnityEditor;
 
 namespace UnityEngine.TestTools
 {
-    internal class RecompileScripts : IEditModeTestYieldInstruction
+    public class RecompileScripts : IEditModeTestYieldInstruction
     {
         public RecompileScripts() : this(true)
         {

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using NUnit.Framework.Interfaces;
 using UnityEngine;
 using UnityEngine.TestRunner.TestLaunchers;
 using UnityEngine.TestTools;
@@ -11,14 +12,14 @@ namespace UnityEditor.TestTools.TestRunner
         private List<TestPlatform> m_Platforms = new List<TestPlatform>();
 
         [SerializeField]
-        private List<RemoteTestResultDataWithTestData> m_CachedData = new List<RemoteTestResultDataWithTestData>();
+        private List<ITest> m_CachedData = new List<ITest>();
 
         public List<TestPlatform> platforms
         {
             get { return m_Platforms; }
         }
 
-        public List<RemoteTestResultDataWithTestData> cachedData
+        public List<ITest> cachedData
         {
             get { return m_CachedData; }
         }

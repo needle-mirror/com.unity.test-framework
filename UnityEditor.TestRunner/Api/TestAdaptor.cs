@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
 using UnityEngine.TestRunner.NUnitExtensions;
@@ -12,11 +13,11 @@ namespace UnityEditor.TestTools.TestRunner.Api
 {
     internal class TestAdaptor : ITestAdaptor
     {
-        internal TestAdaptor(ITest test) : this(test, new ITest[0])
+        internal TestAdaptor(ITest test) : this(test,null)
         {
         }
 
-        internal TestAdaptor(ITest test, ITest[] additionalChildren)
+        protected TestAdaptor(ITest test, ITestAdaptor parent)
         {
             Id = test.Id;
             Name = test.Name;
@@ -29,7 +30,8 @@ namespace UnityEditor.TestTools.TestRunner.Api
             TestCaseCount = test.TestCaseCount;
             HasChildren = test.HasChildren;
             IsSuite = test.IsSuite;
-            Children = new[] {test.Tests, additionalChildren}.SelectMany(t => t).Select(t => new TestAdaptor(t)).ToArray();
+            Children = test.Tests.Select(t => new TestAdaptor(t, this)).ToArray();
+            Parent = parent;
             if (UnityTestExecutionContext.CurrentContext != null)
             {
                 TestCaseTimeout = UnityTestExecutionContext.CurrentContext.TestCaseTimeout;
@@ -41,15 +43,17 @@ namespace UnityEditor.TestTools.TestRunner.Api
 
             TypeInfo = test.TypeInfo;
             Method = test.Method;
-            FullPath = GetFullPath(test);
             Categories = test.GetAllCategoriesFromTest().Distinct().ToArray();
             IsTestAssembly = test is TestAssembly;
             RunState = (RunState)Enum.Parse(typeof(RunState), test.RunState.ToString());
             Description = (string)test.Properties.Get(PropertyNames.Description);
             SkipReason = test.GetSkipReason();
             ParentId = test.GetParentId();
+            ParentFullName = test.GetParentFullName();
             UniqueName = test.GetUniqueName();
             ParentUniqueName = test.GetParentUniqueName();
+            ChildIndex = childIndex;
+            TestMode = (TestMode)Enum.Parse(typeof(TestMode),TestContext.Parameters.Get("platform"));
         }
 
         internal TestAdaptor(RemoteTestData test)
@@ -70,11 +74,18 @@ namespace UnityEditor.TestTools.TestRunner.Api
             ParentId = test.ParentId;
             UniqueName = test.UniqueName;
             ParentUniqueName = test.ParentUniqueName;
+            ParentFullName = test.ParentFullName;
+            ChildIndex = test.ChildIndex;
+            TestMode = TestMode.PlayMode;
         }
 
         internal void ApplyChildren(IEnumerable<TestAdaptor> allTests)
         {
             Children = m_ChildrenIds.Select(id => allTests.First(t => t.Id == id)).ToArray();
+            if (!string.IsNullOrEmpty(ParentId))
+            {
+                Parent = allTests.FirstOrDefault(t => t.Id == ParentId);
+            }
         }
 
         public string Id { get; private set; }
@@ -84,10 +95,10 @@ namespace UnityEditor.TestTools.TestRunner.Api
         public bool HasChildren { get; private set; }
         public bool IsSuite { get; private set; }
         public IEnumerable<ITestAdaptor> Children { get; private set; }
+        public ITestAdaptor Parent { get; private set; }
         public int TestCaseTimeout { get; private set; }
         public ITypeInfo TypeInfo { get; private set; }
         public IMethodInfo Method { get; private set; }
-        public string FullPath { get; private set; }
         private string[] m_ChildrenIds;
         public string[] Categories { get; private set; }
         public bool IsTestAssembly { get; private set; }
@@ -95,16 +106,12 @@ namespace UnityEditor.TestTools.TestRunner.Api
         public string Description { get; }
         public string SkipReason { get; }
         public string ParentId { get; }
+        public string ParentFullName { get; }
         public string UniqueName { get; }
         public string ParentUniqueName { get; }
-
-        private static string GetFullPath(ITest test)
-        {
-            if (test.Parent != null && test.Parent.Parent != null)
-                return GetFullPath(test.Parent) + "/" + test.Name;
-            return test.Name;
-        }
-
+        public int ChildIndex { get; }
+        public TestMode TestMode { get; }
+        
         private static string GetIndexedTestCaseName(string fullName, int index)
         {
             var generatedTestSuffix = " GeneratedTestCase" + index;

@@ -5,12 +5,12 @@ using UnityEngine.TestTools.TestRunner;
 
 namespace UnityEditor.TestTools.TestRunner.Api
 {
-    internal class TestLauncherFactory
+    internal class TestLauncherFactory : ITestLauncherFactory
     {
-        internal TestLauncherBase GetLauncher(ExecutionSettings executionSettings)
+        public TestLauncherBase GetLauncher(ExecutionSettings executionSettings)
         {
             var filters = GetFilters(executionSettings);
-            if (filters[0].testMode == TestMode.EditMode)
+            if (filters[0].testMode == TestMode.EditMode || filters[0].testMode == 0)
             {
                 return GetEditModeLauncher(GetFilters(executionSettings));
             }
@@ -23,7 +23,7 @@ namespace UnityEditor.TestTools.TestRunner.Api
 
         static Filter[] GetFilters(ExecutionSettings executionSettings)
         {
-            if (executionSettings.filters.Length > 0)
+            if (executionSettings.filters != null && executionSettings.filters.Length > 0)
             {
                 return executionSettings.filters;
             }

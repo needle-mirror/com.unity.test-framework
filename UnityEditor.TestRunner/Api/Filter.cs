@@ -11,7 +11,7 @@ using UnityEngine.TestTools.TestRunner.GUI;
 namespace UnityEditor.TestTools.TestRunner.Api
 {
     [Serializable]
-    internal class Filter
+    public class Filter
     {
         [SerializeField]
         public TestMode testMode;
@@ -23,8 +23,8 @@ namespace UnityEditor.TestTools.TestRunner.Api
         public string[] categoryNames;
         [SerializeField]
         public string[] assemblyNames;
-
-        public static Filter empty = new Filter();
+        [SerializeField]
+        public BuildTarget? targetPlatform;
 
         internal TestRunnerFilter ToTestRunnerFilter()
         {

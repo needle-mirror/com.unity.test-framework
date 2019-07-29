@@ -26,6 +26,7 @@ namespace UnityEngine.TestRunner.TestLaunchers
         public string ParentId;
         public string UniqueName;
         public string ParentUniqueName;
+        public string ParentFullName;
 
         internal RemoteTestData(ITest test)
         {
@@ -49,6 +50,7 @@ namespace UnityEngine.TestRunner.TestLaunchers
             ParentId = test.GetParentId();
             UniqueName = test.GetUniqueName();
             ParentUniqueName = test.GetParentUniqueName();
+            ParentFullName = test.GetParentFullName();
         }
     }
 }

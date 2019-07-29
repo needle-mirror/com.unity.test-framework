@@ -1,6 +1,6 @@
 namespace UnityEditor.TestTools.TestRunner.Api
 {
-    internal interface ICallbacks
+    public interface ICallbacks
     {
         void RunStarted(ITestAdaptor testsToRun);
         void RunFinished(ITestResultAdaptor result);

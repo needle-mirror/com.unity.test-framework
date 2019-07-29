@@ -63,7 +63,7 @@ namespace UnityEditor.TestTools.TestRunner
                 }
             }
 
-            yield return result[mode];
+            yield return result.Where(pair => (mode & pair.Key) == pair.Key).SelectMany(v => v.Value).ToList();
         }
     }
 }

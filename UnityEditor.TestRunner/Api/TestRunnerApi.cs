@@ -8,16 +8,37 @@ using UnityEngine.TestTools.NUnitExtensions;
 
 namespace UnityEditor.TestTools.TestRunner.Api
 {
-    internal class TestRunnerApi : ScriptableObject, ITestRunnerApi
+    public class TestRunnerApi : ScriptableObject, ITestRunnerApi
     {
+        internal ITestLauncherFactory launcherFactory = new TestLauncherFactory();
+        internal ICallbacksHolder callbacksHolder;
+
+        private ICallbacksHolder m_CallbacksHolder
+        {
+            get
+            {
+                if (callbacksHolder == null)
+                {
+                    return CallbacksHolder.instance;
+                }
+
+                return callbacksHolder;
+            }
+        }
+
         public void Execute(ExecutionSettings executionSettings)
         {
             if (executionSettings == null)
             {
-                throw new ArgumentException("Filter for execution is undefined.");
+                throw new ArgumentNullException(nameof(executionSettings));
             }
 
-            var launcherFactory = new TestLauncherFactory();
+            if (executionSettings.targetPlatform == null && executionSettings.filters != null &&
+                executionSettings.filters.Length > 0)
+            {
+                executionSettings.targetPlatform = executionSettings.filters[0].targetPlatform;
+            }
+            
             var data = TestRunData.instance;
             data.executionSettings = executionSettings;
 
@@ -29,36 +50,41 @@ namespace UnityEditor.TestTools.TestRunner.Api
         {
             if (testCallbacks == null)
             {
-                throw new ArgumentException("TestCallbacks for execution is undefined.");
+                throw new ArgumentNullException(nameof(testCallbacks));
             }
 
-            CallbacksHolder.instance.Add(testCallbacks, priority);
+            m_CallbacksHolder.Add(testCallbacks, priority);
         }
 
         public void UnregisterCallbacks<T>(T testCallbacks) where T : ICallbacks
         {
             if (testCallbacks == null)
             {
-                throw new ArgumentException("TestCallbacks for execution is undefined.");
+                throw new ArgumentNullException(nameof(testCallbacks));
             }
 
-            CallbacksHolder.instance.Remove(testCallbacks);
+            m_CallbacksHolder.Remove(testCallbacks);
         }
 
-        public void RetrieveTestList(ExecutionSettings executionSettings, Action<ITestAdaptor> callback)
+        internal void RetrieveTestList(ExecutionSettings executionSettings, Action<ITestAdaptor> callback)
         {
             if (executionSettings == null)
             {
-                throw new ArgumentException("Filter for execution is undefined.");
+                throw new ArgumentNullException(nameof(executionSettings));
             }
+            
+            var firstFilter = executionSettings.filters?.FirstOrDefault() ?? executionSettings.filter;
+            RetrieveTestList(firstFilter.testMode, callback);
+        }
 
+        public void RetrieveTestList(TestMode testMode, Action<ITestAdaptor> callback)
+        {
             if (callback == null)
             {
-                throw new ArgumentException("Callback is undefined.");
+                throw new ArgumentNullException(nameof(callback));
             }
 
-            var firstFilter = executionSettings.filters?.FirstOrDefault() ?? executionSettings.filter;
-            var platform = ParseTestMode(firstFilter?.testMode ?? TestMode.EditMode);
+            var platform = ParseTestMode(testMode);
             var testAssemblyProvider = new EditorLoadedTestAssemblyProvider(new EditorCompilationInterfaceProxy(), new EditorAssembliesProxy());
             var testAdaptorFactory = new TestAdaptorFactory();
             var testListCache = new TestListCache(testAdaptorFactory, new RemoteTestResultDataFactory(), TestListCacheData.instance);
@@ -69,14 +95,9 @@ namespace UnityEditor.TestTools.TestRunner.Api
             job.Start();
         }
 
-        private static TestPlatform ParseTestMode(TestMode testmode)
+        private static TestPlatform ParseTestMode(TestMode testMode)
         {
-            if (testmode == TestMode.EditMode)
-            {
-                return TestPlatform.EditMode;
-            }
-
-            return TestPlatform.PlayMode;
+            return (((testMode & TestMode.EditMode) == TestMode.EditMode) ? TestPlatform.EditMode : 0) | (((testMode & TestMode.PlayMode) == TestMode.PlayMode) ? TestPlatform.PlayMode : 0);
         }
     }
 }

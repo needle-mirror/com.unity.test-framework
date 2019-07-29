@@ -4,7 +4,7 @@ using UnityEditor;
 
 namespace UnityEngine.TestTools
 {
-    internal class WaitForDomainReload : IEditModeTestYieldInstruction
+    public class WaitForDomainReload : IEditModeTestYieldInstruction
     {
         public WaitForDomainReload()
         {

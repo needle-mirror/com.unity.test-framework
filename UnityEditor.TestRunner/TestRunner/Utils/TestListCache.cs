@@ -21,17 +21,15 @@ namespace UnityEditor.TestTools.TestRunner
 
         public void CacheTest(TestPlatform platform, ITest test)
         {
-            var data = m_TestResultDataFactory.CreateFromTest(test);
-
             var index = m_TestListCacheData.platforms.IndexOf(platform);
             if (index < 0)
             {
-                m_TestListCacheData.cachedData.Add(data);
+                m_TestListCacheData.cachedData.Add(test);
                 m_TestListCacheData.platforms.Add(platform);
             }
             else
             {
-                m_TestListCacheData.cachedData[index] = data;
+                m_TestListCacheData.cachedData[index] = test;
             }
         }
 
@@ -45,13 +43,7 @@ namespace UnityEditor.TestTools.TestRunner
             }
 
             var testData = m_TestListCacheData.cachedData[index];
-            var test = m_TestAdaptorFactory.BuildTreeAsync(testData);
-            while (test.MoveNext())
-            {
-                yield return null;
-            }
-
-            yield return test.Current;
+            yield return m_TestAdaptorFactory.Create(testData);
         }
 
         [Callbacks.DidReloadScripts]

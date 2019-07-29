@@ -126,6 +126,14 @@ namespace UnityEngine.TestRunner.NUnitExtensions
 
             return null;
         }
+        
+        public static string GetParentFullName(this ITest test)
+        {
+            if (test.Parent != null)
+                return test.Parent.FullName;
+
+            return null;
+        }
 
         public static string GetParentUniqueName(this ITest test)
         {

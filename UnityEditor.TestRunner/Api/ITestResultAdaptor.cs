@@ -4,7 +4,7 @@ using NUnit.Framework.Interfaces;
 
 namespace UnityEditor.TestTools.TestRunner.Api
 {
-    internal interface ITestResultAdaptor
+    public interface ITestResultAdaptor
     {
         ITestAdaptor Test { get; }
         string Name { get; }

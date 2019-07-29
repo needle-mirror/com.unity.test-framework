@@ -12,7 +12,7 @@ namespace UnityEditor.TestTools.TestRunner
 
         public void RunFinished(ITestResultAdaptor result)
         {
-            if (RerunCallbackData.instance.runFilters == null)
+            if (RerunCallbackData.instance.runFilters == null || RerunCallbackData.instance.runFilters.Length == 0)
                 RerunCallbackData.instance.runFilters = new[] {new TestRunnerFilter()};
 
             var runFilter = RerunCallbackData.instance.runFilters[0];

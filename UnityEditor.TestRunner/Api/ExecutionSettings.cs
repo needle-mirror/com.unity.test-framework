@@ -2,9 +2,14 @@ using System;
 
 namespace UnityEditor.TestTools.TestRunner.Api
 {
-    internal class ExecutionSettings
+    public class ExecutionSettings
     {
-        public BuildTarget? targetPlatform;
+        public ExecutionSettings(params Filter[] filtersToExecute)
+        {
+            filters = filtersToExecute;
+        }
+        
+        internal BuildTarget? targetPlatform;
         public ITestRunSettings overloadTestRunSettings;
         internal Filter filter;
         public Filter[] filters;

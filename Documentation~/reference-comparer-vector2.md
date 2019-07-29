@@ -18,7 +18,7 @@ Use this class to compare two [Vector2](https://docs.unity3d.com/ScriptReference
 
 | Syntax                                     | Description                                                  |
 | ------------------------------------------ | ------------------------------------------------------------ |
-| `Equals(Vector2 expected, Vector2 actual)` | Compares the `actual` and `expected` `Vector2` objects for equality using the [Utils.AreFloatsEqual](http://todo) method. |
+| `Equals(Vector2 expected, Vector2 actual)` | Compares the `actual` and `expected` `Vector2` objects for equality using the [Utils.AreFloatsEqual](./reference-test-utils.md) method. |
 
 ## Example
 
