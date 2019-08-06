@@ -1,9 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using NUnit;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
+using UnityEngine.TestTools;
 using UnityEngine.TestTools.NUnitExtensions;
 
 namespace UnityEngine.TestRunner.NUnitExtensions.Runner
@@ -17,7 +19,7 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
         bool IsTestComplete { get; }
         UnityWorkItem TopLevelWorkItem { get; set; }
         UnityTestExecutionContext GetCurrentContext();
-        ITest Load(Assembly[] assemblies, IDictionary<string, object> settings);
+        ITest Load(Assembly[] assemblies, TestPlatform testPlatform, IDictionary<string, object> settings);
         IEnumerable Run(ITestListener listener, ITestFilter filter);
         void StopRun();
     }
@@ -63,14 +65,14 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
             Context = new UnityTestExecutionContext();
         }
 
-        public ITest Load(Assembly[] assemblies, IDictionary<string, object> settings)
+        public ITest Load(Assembly[] assemblies, TestPlatform testPlatform, IDictionary<string, object> settings)
         {
             Settings = settings;
 
             if (settings.ContainsKey(FrameworkPackageSettings.RandomSeed))
                 Randomizer.InitialSeed = (int)settings[FrameworkPackageSettings.RandomSeed];
 
-            return LoadedTest = unityBuilder.Build(assemblies, settings);
+            return LoadedTest = unityBuilder.Build(assemblies, Enumerable.Repeat(testPlatform, assemblies.Length).ToArray(), settings);
         }
 
         public IEnumerable Run(ITestListener listener, ITestFilter filter)

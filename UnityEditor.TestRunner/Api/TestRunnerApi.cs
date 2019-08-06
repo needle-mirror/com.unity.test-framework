@@ -91,7 +91,10 @@ namespace UnityEditor.TestTools.TestRunner.Api
             var testListProvider = new TestListProvider(testAssemblyProvider, new UnityTestAssemblyBuilder());
             var cachedTestListProvider = new CachingTestListProvider(testListProvider, testListCache, testAdaptorFactory);
 
-            var job = new TestListJob(cachedTestListProvider, platform, callback);
+            var job = new TestListJob(cachedTestListProvider, platform, (testRoot) =>
+            {
+                callback(testRoot);
+            });
             job.Start();
         }
 

@@ -1,4 +1,8 @@
 # Changelog
+## [1.1.1] - 2019-08-07
+- Tests retrieved as a test list with the test runner api incorrectly showed both mode as their TestMode.
+- Fixed a compatibility issue with running tests from rider.
+
 ## [1.1.0] - 2019-07-30
 - Introduced the TestRunnerApi for running tests programmatically from elsewhere inside the Editor.
 - Introduced yield instructions for recompiling scripts and awaiting a domain reload in Edit Mode tests.

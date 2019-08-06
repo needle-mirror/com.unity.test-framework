@@ -107,7 +107,7 @@ namespace UnityEditor.TestTools.TestRunner
             m_Runner = (UnityTestAssemblyRunnerFactory ?? new UnityTestAssemblyRunnerFactory()).Create(TestPlatform.EditMode, new EditmodeWorkItemFactory());
             var testAssemblyProvider = new EditorLoadedTestAssemblyProvider(new EditorCompilationInterfaceProxy(), new EditorAssembliesProxy());
             var assemblies = testAssemblyProvider.GetAssembliesGroupedByType(m_TestPlatform).Select(x => x.Assembly).ToArray();
-            var loadedTests = m_Runner.Load(assemblies,
+            var loadedTests = m_Runner.Load(assemblies, TestPlatform.EditMode,
                 UnityTestAssemblyBuilder.GetNUnitTestBuilderSettings(m_TestPlatform));
             loadedTests.ParseForNameDuplicates();
             hideFlags |= HideFlags.DontSave;

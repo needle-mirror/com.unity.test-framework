@@ -16,9 +16,9 @@ namespace UnityEngine.TestTools.NUnitExtensions
             m_ProductName = Application.productName;
         }
 
-        public ITest Build(Assembly[] assemblies, IDictionary<string, object> options)
+        public ITest Build(Assembly[] assemblies, TestPlatform[] testPlatforms, IDictionary<string, object> options)
         {
-            var test = BuildAsync(assemblies, options);
+            var test = BuildAsync(assemblies, testPlatforms, options);
             while (test.MoveNext())
             {
             }
@@ -26,19 +26,25 @@ namespace UnityEngine.TestTools.NUnitExtensions
             return test.Current;
         }
 
-        public IEnumerator<ITest> BuildAsync(Assembly[] assemblies, IDictionary<string, object> options)
+        public IEnumerator<ITest> BuildAsync(Assembly[] assemblies, TestPlatform[] testPlatforms, IDictionary<string, object> options)
         {
             var productName = string.Join("_", m_ProductName.Split(Path.GetInvalidFileNameChars()));
             var suite = new TestSuite(productName);
-            foreach (var assembly in assemblies)
+            for (var index = 0; index < assemblies.Length; index++)
             {
+                var assembly = assemblies[index];
+                var platform = testPlatforms[index];
+                
                 var assemblySuite = Build(assembly, options) as TestSuite;
                 if (assemblySuite != null && assemblySuite.HasChildren)
                 {
+                    assemblySuite.Properties.Set("platform", platform);
                     suite.Add(assemblySuite);
                 }
+
                 yield return null;
             }
+
             yield return suite;
         }
 

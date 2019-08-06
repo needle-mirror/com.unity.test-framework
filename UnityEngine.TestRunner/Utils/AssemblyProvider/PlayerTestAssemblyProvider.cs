@@ -35,7 +35,7 @@ namespace UnityEngine.TestTools.Utils
         {
             var settings = UnityTestAssemblyBuilder.GetNUnitTestBuilderSettings(testPlatform);
             var builder = new UnityTestAssemblyBuilder();
-            return builder.Build(assemblies.Select(a => a.Assembly).ToArray(), settings);
+            return builder.Build(assemblies.Select(a => a.Assembly).ToArray(), Enumerable.Repeat(testPlatform, assemblies.Length).ToArray(), settings);
         }
 
         private void LoadAssemblies()

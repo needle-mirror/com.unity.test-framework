@@ -30,7 +30,6 @@ namespace UnityEditor.TestTools.TestRunner.Api
             TestCaseCount = test.TestCaseCount;
             HasChildren = test.HasChildren;
             IsSuite = test.IsSuite;
-            Children = test.Tests.Select(t => new TestAdaptor(t, this)).ToArray();
             Parent = parent;
             if (UnityTestExecutionContext.CurrentContext != null)
             {
@@ -53,7 +52,20 @@ namespace UnityEditor.TestTools.TestRunner.Api
             UniqueName = test.GetUniqueName();
             ParentUniqueName = test.GetParentUniqueName();
             ChildIndex = childIndex;
-            TestMode = (TestMode)Enum.Parse(typeof(TestMode),TestContext.Parameters.Get("platform"));
+            
+            if (test.Parent != null)
+            {
+                if (test.Parent.Parent == null) // Assembly level
+                {
+                    TestMode = (TestMode)Enum.Parse(typeof(TestMode),test.Properties.Get("platform").ToString());        
+                }
+                else if (parent != null)
+                {
+                    TestMode = parent.TestMode;
+                }
+            }
+            
+            Children = test.Tests.Select(t => new TestAdaptor(t, this)).ToArray();
         }
 
         internal TestAdaptor(RemoteTestData test)

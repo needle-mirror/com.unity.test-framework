@@ -16,6 +16,20 @@ namespace UnityEditor.TestTools.TestRunner
         public static bool IsRunning;
         private readonly EditModeRunner m_EditModeRunner;
 
+        // provided for backward compatibility with Rider UnitTesting prior to Rider package v.1.1.1
+        public EditModeLauncher(TestRunnerFilter filter, TestPlatform platform) : this(new[]
+        {
+            new Filter()
+            {
+                testNames = filter.testNames,
+                categoryNames = filter.categoryNames,
+                groupNames = filter.groupNames,
+                assemblyNames = filter.assemblyNames
+            }
+        }, platform)
+        {
+        }
+
         public EditModeLauncher(Filter[] filters, TestPlatform platform)
         {
             m_EditModeRunner = ScriptableObject.CreateInstance<EditModeRunner>();

@@ -20,14 +20,17 @@ namespace UnityEditor.TestTools.TestRunner
 
         public IEnumerator<ITest> GetTestListAsync(TestPlatform platform)
         {
-            var assemblies = m_AssemblyProvider.GetAssembliesGroupedByTypeAsync(platform);
-            while (assemblies.MoveNext())
+            var assembliesTask = m_AssemblyProvider.GetAssembliesGroupedByTypeAsync(platform);
+            while (assembliesTask.MoveNext())
             {
                 yield return null;
             }
 
+            var assemblies = assembliesTask.Current.Where(pair => platform.IsFlagIncluded(pair.Key))
+                .SelectMany(pair => pair.Value.Select(assemblyInfo => Tuple.Create(assemblyInfo.Assembly, pair.Key))).ToArray();
+
             var settings = UnityTestAssemblyBuilder.GetNUnitTestBuilderSettings(platform);
-            var test =  m_AssemblyBuilder.BuildAsync(assemblies.Current.Select(x => x.Assembly).ToArray(), settings);
+            var test =  m_AssemblyBuilder.BuildAsync(assemblies.Select(a => a.Item1).ToArray(), assemblies.Select(a => a.Item2).ToArray(), settings);
             while (test.MoveNext())
             {
                 yield return null;

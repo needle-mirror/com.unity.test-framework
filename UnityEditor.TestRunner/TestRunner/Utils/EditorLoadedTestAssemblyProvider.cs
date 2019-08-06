@@ -31,10 +31,10 @@ namespace UnityEditor.TestTools.TestRunner
             {
             }
 
-            return assemblies.Current;
+            return assemblies.Current.Where(pair => mode.IsFlagIncluded(pair.Key)).SelectMany(pair => pair.Value).ToList();
         }
 
-        public IEnumerator<List<IAssemblyWrapper>> GetAssembliesGroupedByTypeAsync(TestPlatform mode)
+        public IEnumerator<IDictionary<TestPlatform, List<IAssemblyWrapper>>> GetAssembliesGroupedByTypeAsync(TestPlatform mode)
         {
             IAssemblyWrapper[] loadedAssemblies = m_EditorAssembliesProxy.loadedAssemblies;
 
@@ -63,7 +63,7 @@ namespace UnityEditor.TestTools.TestRunner
                 }
             }
 
-            yield return result.Where(pair => (mode & pair.Key) == pair.Key).SelectMany(v => v.Value).ToList();
+            yield return result;
         }
     }
 }
