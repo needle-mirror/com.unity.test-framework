@@ -20,6 +20,7 @@ namespace UnityEngine.TestTools.TestRunner.GUI
         public static TestRunnerFilter empty = new TestRunnerFilter();
         public string[] testNames;
         public int testRepetitions = 1;
+        public bool synchronousOnly = false;
 
         public static string AssemblyNameFromPath(string path)
         {
@@ -179,6 +180,11 @@ namespace UnityEngine.TestTools.TestRunner.GUI
             {
                 var categoryFilter = new OrFilter(categoryNames.Select(c => new CategoryFilterExtended(c) {IsRegex = true}).ToArray());
                 filters.Add(categoryFilter);
+            }
+
+            if (synchronousOnly)
+            {
+                filters.Add(new SynchronousFilter());
             }
 
             return filters.Count == 0 ? TestFilter.Empty : new AndFilter(filters.ToArray());

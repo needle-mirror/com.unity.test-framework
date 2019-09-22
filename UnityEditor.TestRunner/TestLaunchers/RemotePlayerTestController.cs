@@ -60,7 +60,7 @@ namespace UnityEditor.TestRunner.TestLaunchers
 
         private void RunFinished(MessageEventArgs messageEventArgs)
         {
-            m_TimeoutCallback.Reset();
+            m_TimeoutCallback.Clear();
             m_RemoteTestResultReciever.RunFinished(messageEventArgs);
             m_PlatformSpecificSetup.CleanUp();
 

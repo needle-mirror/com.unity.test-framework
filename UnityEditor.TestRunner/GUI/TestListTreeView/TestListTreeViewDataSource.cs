@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using NUnit.Framework.Interfaces;
 using UnityEditor.IMGUI.Controls;
 using UnityEditor.TestTools.TestRunner.Api;
 using UnityEngine.SceneManagement;
@@ -18,6 +19,11 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             showRootItem = false;
             rootIsCollapsable = false;
             m_TestListGUI = testListGUI;
+            m_RootTest = rootTest;
+        }
+
+        public void UpdateRootTest(ITestAdaptor rootTest)
+        {
             m_RootTest = rootTest;
         }
 

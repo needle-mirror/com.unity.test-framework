@@ -37,7 +37,7 @@ namespace UnityEditor.TestTools.TestRunner.Api
             };
         }
         
-        internal ITestFilter BuildNUnitFilter()
+        internal ITestFilter BuildNUnitFilter(bool synchronousOnly)
         {
             var filters = new List<ITestFilter>();
 
@@ -68,6 +68,11 @@ namespace UnityEditor.TestTools.TestRunner.Api
             {
                 var categoryFilter = new OrFilter(categoryNames.Select(c => new CategoryFilterExtended(c) {IsRegex = true}).ToArray());
                 filters.Add(categoryFilter);
+            }
+
+            if (synchronousOnly)
+            {
+                filters.Add(new SynchronousFilter());
             }
 
             return filters.Count == 0 ? TestFilter.Empty : new AndFilter(filters.ToArray());

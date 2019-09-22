@@ -1,5 +1,10 @@
 # Changelog
-## [1.1.2] - 2019-11-19
+## [1.1.3] - 2019-09-23
+- Fixed a regression where tests in a player would report a timeout after a test run is finished.
+- Made it possible for the ui to change its test items when the test tree changes without script compilation.
+- Added syncronious runs as an option to the TestRunnerApi.
+
+## [1.1.2] - 2019-09-11
 - Fixed an issue where Run Selected would run all tests in the category, if a category filter was selected, regardless of what tests were selected.
 - Unsupported attributes used in UnityTests now give an explicit error.
 - Added support for the Repeat and Retry attributes in UnityTests (case 1131940).

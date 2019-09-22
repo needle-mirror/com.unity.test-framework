@@ -12,10 +12,13 @@ namespace UnityEditor.TestTools.TestRunner.Api
             var filters = GetFilters(executionSettings);
             if (filters[0].testMode == TestMode.EditMode || filters[0].testMode == 0)
             {
-                return GetEditModeLauncher(GetFilters(executionSettings));
+                return GetEditModeLauncher(GetFilters(executionSettings), executionSettings.runSynchronously);
             }
             else
             {
+                if (executionSettings.runSynchronously)
+                    throw new NotSupportedException("Playmode tests cannot be run synchronously.");
+                
                 var settings = PlaymodeTestsControllerSettings.CreateRunnerSettings(filters.Select(filter => filter.ToTestRunnerFilter()).ToArray());
                 return GetPlayModeLauncher(settings, executionSettings);
             }
@@ -31,9 +34,9 @@ namespace UnityEditor.TestTools.TestRunner.Api
             return new[] {executionSettings.filter ?? new Filter()};
         }
 
-        static TestLauncherBase GetEditModeLauncher(Filter[] filters)
+        static TestLauncherBase GetEditModeLauncher(Filter[] filters, bool runSynchronously)
         {
-            return GetEditModeLauncherForProvidedAssemblies(filters);
+            return GetEditModeLauncherForProvidedAssemblies(filters, TestPlatform.EditMode, runSynchronously);
         }
 
         static TestLauncherBase GetPlayModeLauncher(PlaymodeTestsControllerSettings settings, ExecutionSettings executionSettings)
@@ -45,15 +48,15 @@ namespace UnityEditor.TestTools.TestRunner.Api
 
             if (PlayerSettings.runPlayModeTestAsEditModeTest)
             {
-                return GetEditModeLauncherForProvidedAssemblies(executionSettings.filters, TestPlatform.PlayMode);
+                return GetEditModeLauncherForProvidedAssemblies(executionSettings.filters, TestPlatform.PlayMode, false);
             }
 
             return GetPlayModeLauncher(settings);
         }
 
-        static TestLauncherBase GetEditModeLauncherForProvidedAssemblies(Filter[] filters, TestPlatform testPlatform = TestPlatform.EditMode)
+        static TestLauncherBase GetEditModeLauncherForProvidedAssemblies(Filter[] filters, TestPlatform testPlatform, bool runSynchronously)
         {
-            return new EditModeLauncher(filters, testPlatform);
+            return new EditModeLauncher(filters, testPlatform, runSynchronously);
         }
 
         static TestLauncherBase GetPlayModeLauncher(PlaymodeTestsControllerSettings settings)

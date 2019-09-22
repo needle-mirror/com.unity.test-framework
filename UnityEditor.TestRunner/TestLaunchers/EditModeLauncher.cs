@@ -26,15 +26,15 @@ namespace UnityEditor.TestTools.TestRunner
                 groupNames = filter.groupNames,
                 assemblyNames = filter.assemblyNames
             }
-        }, platform)
+        }, platform, false)
         {
         }
 
-        public EditModeLauncher(Filter[] filters, TestPlatform platform)
+        public EditModeLauncher(Filter[] filters, TestPlatform platform, bool runSynchronously)
         {
             m_EditModeRunner = ScriptableObject.CreateInstance<EditModeRunner>();
             m_EditModeRunner.UnityTestAssemblyRunnerFactory = new UnityTestAssemblyRunnerFactory();
-            m_EditModeRunner.Init(filters, platform);
+            m_EditModeRunner.Init(filters, platform, runSynchronously);
         }
 
         public override void Run()
@@ -66,6 +66,9 @@ namespace UnityEditor.TestTools.TestRunner
             m_EditModeRunner.Run();
             AddEventHandler<BackgroundListener>();
             AddEventHandler<TestRunCallbackListener>();
+            
+            if (m_EditModeRunner.RunningSynchronously)
+                m_EditModeRunner.CompleteSynchronously();
         }
 
         private static bool OpenNewScene(out SceneSetup[] previousSceneSetup)

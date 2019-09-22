@@ -99,6 +99,20 @@ namespace UnityEditor.TestTools.TestRunner.Api
             TryInvokeAllCallbacks(callbacks => callbacks.TestFinished(testResult));
         }
 
+        public void TestTreeRebuild(ITest test)
+        {
+            m_AdaptorFactory.ClearTestsCache();
+            var testAdaptor = m_AdaptorFactory.Create(test);
+            TryInvokeAllCallbacks(callbacks =>
+            {
+                var rebuildCallbacks = callbacks as ITestTreeRebuildCallbacks;
+                if (rebuildCallbacks != null)
+                {
+                    rebuildCallbacks.TestTreeRebuild(testAdaptor);
+                }
+            });
+        }
+
         private void TryInvokeAllCallbacks(Action<ICallbacks> callbackAction)
         {
             foreach (var testRunnerApiCallback in m_CallbacksProvider())

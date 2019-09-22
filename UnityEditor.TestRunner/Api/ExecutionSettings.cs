@@ -13,5 +13,6 @@ namespace UnityEditor.TestTools.TestRunner.Api
         public ITestRunSettings overloadTestRunSettings;
         internal Filter filter;
         public Filter[] filters;
+        public bool runSynchronously;
     }
 }

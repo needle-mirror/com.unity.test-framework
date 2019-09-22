@@ -2,7 +2,7 @@ using UnityEditor.TestTools.TestRunner.Api;
 
 namespace UnityEditor.TestTools.TestRunner.GUI
 {
-    internal class WindowResultUpdater : ICallbacks
+    internal class WindowResultUpdater : ICallbacks, ITestTreeRebuildCallbacks
     {
         public void RunStarted(ITestAdaptor testsToRun)
         {
@@ -23,10 +23,22 @@ namespace UnityEditor.TestTools.TestRunner.GUI
         public void TestFinished(ITestResultAdaptor test)
         {
             if (TestRunnerWindow.s_Instance == null)
+            {
                 return;
+            }   
 
             var result = new TestRunnerResult(test);
             TestRunnerWindow.s_Instance.m_SelectedTestTypes.UpdateResult(result);
+        }
+
+        public void TestTreeRebuild(ITestAdaptor test)
+        {
+            if (TestRunnerWindow.s_Instance == null)
+            {
+                return;
+            }
+            
+            TestRunnerWindow.s_Instance.m_SelectedTestTypes.UpdateTestTree(test);
         }
     }
 }

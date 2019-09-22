@@ -83,6 +83,8 @@ namespace UnityEditor.TestTools.TestRunner
         private BeforeAfterTestCommandState m_SetUpTearDownState;
         [SerializeField]
         private BeforeAfterTestCommandState m_OuterUnityTestActionState;
+        
+        public bool RunningSynchronously { get; private set; }
 
         internal IUnityTestAssemblyRunner m_Runner;
 
@@ -92,12 +94,13 @@ namespace UnityEditor.TestTools.TestRunner
 
         public IUnityTestAssemblyRunnerFactory UnityTestAssemblyRunnerFactory { get; set; }
 
-        public void Init(Filter[] filters, TestPlatform platform)
+        public void Init(Filter[] filters, TestPlatform platform, bool runningSynchronously)
         {
             m_Filters = filters;
             m_TestPlatform = platform;
             m_AlreadyStartedTests = new List<string>();
             m_ExecutedTests = new List<TestResultSerializer>();
+            RunningSynchronously = runningSynchronously;
             InitRunner();
         }
 
@@ -110,6 +113,7 @@ namespace UnityEditor.TestTools.TestRunner
             var loadedTests = m_Runner.Load(assemblies, TestPlatform.EditMode,
                 UnityTestAssemblyBuilder.GetNUnitTestBuilderSettings(m_TestPlatform));
             loadedTests.ParseForNameDuplicates();
+            CallbacksDelegator.instance.TestTreeRebuild(loadedTests);
             hideFlags |= HideFlags.DontSave;
             EnumerableSetUpTearDownCommand.ActivePcHelper = new EditModePcHelper();
             OuterUnityTestActionCommand.ActivePcHelper = new EditModePcHelper();
@@ -183,10 +187,17 @@ namespace UnityEditor.TestTools.TestRunner
             EditorApplication.LockReloadAssemblies();
 
             var testListenerWrapper = new TestListenerWrapper(m_TestStartedEvent, m_TestFinishedEvent);
-            m_RunStep = m_Runner.Run(testListenerWrapper, new OrFilter(m_Filters.Select(filter => filter.BuildNUnitFilter()).ToArray())).GetEnumerator();
+            m_RunStep = m_Runner.Run(testListenerWrapper, GetFilter()).GetEnumerator();
             m_RunningTests = true;
 
-            EditorApplication.update += TestConsumer;
+            if (!RunningSynchronously) 
+                EditorApplication.update += TestConsumer;
+        }
+
+        public void CompleteSynchronously()
+        {
+            while (!m_Runner.IsTestComplete)
+                TestConsumer();
         }
 
         private void OnBeforeAssemblyReload()
@@ -276,7 +287,9 @@ namespace UnityEditor.TestTools.TestRunner
 
         private void CompleteTestRun()
         {
-            EditorApplication.update -= TestConsumer;
+            if (!RunningSynchronously)
+                EditorApplication.update -= TestConsumer;
+   
             TestLauncherBase.ExecutePostBuildCleanupMethods(this.GetLoadedTests(), this.GetFilter(), Application.platform);
             m_CleanupVerifier.VerifyNoNewFilesAdded();
             m_RunFinishedEvent.Invoke(m_Runner.Result);
@@ -419,7 +432,7 @@ namespace UnityEditor.TestTools.TestRunner
 
         public ITestFilter GetFilter()
         {
-            return new OrFilter(m_Filters.Select(filter => filter.BuildNUnitFilter()).ToArray());
+            return new OrFilter(m_Filters.Select(filter => filter.BuildNUnitFilter(RunningSynchronously)).ToArray());
         }
     }
 }

@@ -259,6 +259,20 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             m_Window.Repaint();
         }
 
+        public void UpdateTestTree(ITestAdaptor test)
+        {
+            if (!HasTreeData())
+            {
+                return;
+            }
+            
+            (m_TestListTree.data as TestListTreeViewDataSource).UpdateRootTest(test);
+            
+            m_TestListTree.ReloadData();
+            Repaint();
+            m_Window.Repaint();
+        }
+
         private void UpdateQueuedResults()
         {
             foreach (var testRunnerResult in m_QueuedResults)

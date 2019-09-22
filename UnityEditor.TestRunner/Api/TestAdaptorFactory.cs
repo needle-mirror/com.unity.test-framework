@@ -82,5 +82,10 @@ namespace UnityEditor.TestTools.TestRunner.Api
         {
             m_TestResultAdaptorCache.Clear();
         }
+
+        public void ClearTestsCache()
+        {
+            m_TestAdaptorCache.Clear();
+        }
     }
 }
