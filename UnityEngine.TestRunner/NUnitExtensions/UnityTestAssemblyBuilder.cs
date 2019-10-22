@@ -8,7 +8,7 @@ using NUnit.Framework.Internal;
 
 namespace UnityEngine.TestTools.NUnitExtensions
 {
-    internal class UnityTestAssemblyBuilder : DefaultTestAssemblyBuilder
+    internal class UnityTestAssemblyBuilder : DefaultTestAssemblyBuilder, IAsyncTestAssemblyBuilder
     {
         private readonly string m_ProductName;
         public UnityTestAssemblyBuilder()

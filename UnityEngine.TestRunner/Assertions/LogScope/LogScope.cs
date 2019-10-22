@@ -5,7 +5,7 @@ using UnityEngine.TestTools.TestRunner;
 
 namespace UnityEngine.TestTools.Logging
 {
-    sealed class LogScope : IDisposable
+    sealed class LogScope : ILogScope
     {
         static List<LogScope> s_ActiveScopes = new List<LogScope>();
         

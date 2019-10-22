@@ -7,7 +7,7 @@ using UnityEngine.TestTools.Utils;
 
 namespace UnityEditor.TestTools.TestRunner
 {
-    internal class EditorLoadedTestAssemblyProvider
+    internal class EditorLoadedTestAssemblyProvider : IEditorLoadedTestAssemblyProvider
     {
         private const string k_NunitAssemblyName = "nunit.framework";
         private const string k_TestRunnerAssemblyName = "UnityEngine.TestRunner";

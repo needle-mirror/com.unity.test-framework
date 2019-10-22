@@ -1,8 +1,16 @@
 # Changelog
+## [1.1.5] - 2019-10-23
+- Fixed a regression to synchronous runs introduced in 1.1.4.
+
+## [1.1.4] - 2019-10-15
+- Running tests in batch mode now correctly returns error code 3 (RunError) when a timeout or a build error occurs.
+- Fixed an issue where a test run in a player would time out, if the player takes longer than 10 minutes to run.
+- Added command line argument and api setting for specifying custom heartbeat timeout for running on players.
+
 ## [1.1.3] - 2019-09-23
 - Fixed a regression where tests in a player would report a timeout after a test run is finished.
 - Made it possible for the ui to change its test items when the test tree changes without script compilation.
-- Added syncronious runs as an option to the TestRunnerApi.
+- Added synchronous runs as an option to the TestRunnerApi.
 
 ## [1.1.2] - 2019-09-11
 - Fixed an issue where Run Selected would run all tests in the category, if a category filter was selected, regardless of what tests were selected.

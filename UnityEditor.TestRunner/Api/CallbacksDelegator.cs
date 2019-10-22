@@ -8,7 +8,7 @@ using UnityEngine.TestRunner.TestLaunchers;
 
 namespace UnityEditor.TestTools.TestRunner.Api
 {
-    internal class CallbacksDelegator
+    internal class CallbacksDelegator : ICallbacksDelegator
     {
         private static CallbacksDelegator s_instance;
         public static CallbacksDelegator instance

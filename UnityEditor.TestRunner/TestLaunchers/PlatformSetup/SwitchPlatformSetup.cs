@@ -6,7 +6,11 @@ namespace UnityEditor.TestTools.TestRunner
         {
             EditorUserBuildSettings.switchCreateRomFile = true;
             EditorUserBuildSettings.switchNVNGraphicsDebugger = false;
+#if UNITY_2020_1_OR_NEWER
+            EditorUserBuildSettings.switchNVNDrawValidation_Heavy = true; // catches more graphics errors
+#else
             EditorUserBuildSettings.switchNVNDrawValidation = true; // catches more graphics errors
+#endif
             EditorUserBuildSettings.development = true;
             EditorUserBuildSettings.switchRedirectWritesToHostMount = true;
 

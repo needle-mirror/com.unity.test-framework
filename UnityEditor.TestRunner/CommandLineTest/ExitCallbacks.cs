@@ -47,7 +47,7 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
 
         public void OnError(string message)
         {
-            EditorApplication.Exit((int)Executer.ReturnCodes.Failed);
+            EditorApplication.Exit((int)Executer.ReturnCodes.RunError);
         }
     }
 }

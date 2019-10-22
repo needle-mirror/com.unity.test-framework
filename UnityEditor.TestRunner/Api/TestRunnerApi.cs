@@ -1,6 +1,8 @@
 using System;
 using System.Linq;
 using System.Threading;
+using UnityEditor.TestTools.TestRunner.CommandLineTest;
+using UnityEditor.TestTools.TestRunner.TestRun;
 using UnityEngine;
 using UnityEngine.TestRunner.TestLaunchers;
 using UnityEngine.TestTools;
@@ -10,7 +12,6 @@ namespace UnityEditor.TestTools.TestRunner.Api
 {
     public class TestRunnerApi : ScriptableObject, ITestRunnerApi
     {
-        internal ITestLauncherFactory launcherFactory = new TestLauncherFactory();
         internal ICallbacksHolder callbacksHolder;
 
         private ICallbacksHolder m_CallbacksHolder
@@ -26,6 +27,12 @@ namespace UnityEditor.TestTools.TestRunner.Api
             }
         }
 
+        internal Action<ExecutionSettings> ScheduleJob = (executionSettings) =>
+        {
+            var runner = new TestJobRunner();
+            runner.RunJob(new TestJobData(executionSettings));
+        };
+        
         public void Execute(ExecutionSettings executionSettings)
         {
             if (executionSettings == null)
@@ -33,17 +40,19 @@ namespace UnityEditor.TestTools.TestRunner.Api
                 throw new ArgumentNullException(nameof(executionSettings));
             }
 
+            if ((executionSettings.filters == null || executionSettings.filters.Length == 0) && executionSettings.filter != null)
+            {
+                // Map filter (singular) to filters (plural), for backwards compatibility.
+                executionSettings.filters = new [] {executionSettings.filter};
+            }
+
             if (executionSettings.targetPlatform == null && executionSettings.filters != null &&
                 executionSettings.filters.Length > 0)
             {
                 executionSettings.targetPlatform = executionSettings.filters[0].targetPlatform;
             }
-            
-            var data = TestRunData.instance;
-            data.executionSettings = executionSettings;
 
-            var testLauncher = launcherFactory.GetLauncher(executionSettings);
-            testLauncher.Run();
+            ScheduleJob(executionSettings);
         }
 
         public void RegisterCallbacks<T>(T testCallbacks, int priority = 0) where T : ICallbacks
@@ -96,6 +105,11 @@ namespace UnityEditor.TestTools.TestRunner.Api
                 callback(testRoot);
             });
             job.Start();
+        }
+
+        internal static bool IsRunActive()
+        {
+            return RunData.instance.isRunning;
         }
 
         private static TestPlatform ParseTestMode(TestMode testMode)

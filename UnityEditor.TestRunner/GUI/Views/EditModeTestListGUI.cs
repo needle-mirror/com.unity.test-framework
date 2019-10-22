@@ -84,9 +84,10 @@ namespace UnityEditor.TestTools.TestRunner.GUI
         }
 
         public override TestPlatform TestPlatform { get { return TestPlatform.EditMode; } }
+
         protected override bool IsBusy()
         {
-            return EditModeLauncher.IsRunning || EditorApplication.isCompiling || EditorApplication.isPlaying;
+            return TestRunnerApi.IsRunActive() || EditorApplication.isCompiling || EditorApplication.isPlaying;
         }
     }
 }

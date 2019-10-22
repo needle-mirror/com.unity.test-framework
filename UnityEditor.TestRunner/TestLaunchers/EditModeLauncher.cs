@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using NUnit.Framework.Interfaces;
 using UnityEditor.SceneManagement;
@@ -14,20 +15,26 @@ namespace UnityEditor.TestTools.TestRunner
     internal class EditModeLauncher : TestLauncherBase
     {
         public static bool IsRunning;
-        private readonly EditModeRunner m_EditModeRunner;
+        internal readonly EditModeRunner m_EditModeRunner;
+        public bool launchedOutsideApi;
 
         // provided for backward compatibility with Rider UnitTesting prior to Rider package v.1.1.1
-        public EditModeLauncher(TestRunnerFilter filter, TestPlatform platform) : this(new[]
+        public EditModeLauncher(TestRunnerFilter filter, TestPlatform platform)
         {
-            new Filter()
+            launchedOutsideApi = true;
+            var apiFilter = new[]
             {
-                testNames = filter.testNames,
-                categoryNames = filter.categoryNames,
-                groupNames = filter.groupNames,
-                assemblyNames = filter.assemblyNames
-            }
-        }, platform, false)
-        {
+                new Filter()
+                {
+                    testMode = TestMode.EditMode,
+                    testNames = filter.testNames,
+                    categoryNames = filter.categoryNames,
+                    groupNames = filter.groupNames,
+                    assemblyNames = filter.assemblyNames
+                }
+            };
+            
+            ScriptableObject.CreateInstance<TestRunnerApi>().Execute(new ExecutionSettings(apiFilter));
         }
 
         public EditModeLauncher(Filter[] filters, TestPlatform platform, bool runSynchronously)
@@ -39,27 +46,20 @@ namespace UnityEditor.TestTools.TestRunner
 
         public override void Run()
         {
-            // Give user chance to save the changes to their currently open scene because we close it and load our own
-            var cancelled = !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo();
-            if (cancelled)
-                return;
-
-            IsRunning = true;
-            var exceptionThrown = ExecutePreBuildSetupMethods(m_EditModeRunner.GetLoadedTests(), m_EditModeRunner.GetFilter());
-            if (exceptionThrown)
+            if (launchedOutsideApi)
             {
-                CallbacksDelegator.instance.RunFailed("Run Failed: One or more errors in a prebuild setup. See the editor log for details.");
+                // Do not use the launcher, as it will be relaunched trough the api. See ctor.
                 return;
             }
 
-            var undoGroup = Undo.GetCurrentGroup();
+            IsRunning = true;
+            
             SceneSetup[] previousSceneSetup;
             if (!OpenNewScene(out previousSceneSetup))
                 return;
 
             var callback = AddEventHandler<EditModeRunnerCallback>();
             callback.previousSceneSetup = previousSceneSetup;
-            callback.undoGroup = undoGroup;
             callback.runner = m_EditModeRunner;
             AddEventHandler<CallbacksDelegatorListener>();
 

@@ -68,9 +68,6 @@ namespace UnityEditor.TestTools.TestRunner
         private TestRunnerStateSerializer m_TestRunnerStateSerializer = new TestRunnerStateSerializer();
 
         [SerializeField]
-        private TestFileCleanupVerifier m_CleanupVerifier = new TestFileCleanupVerifier();
-
-        [SerializeField]
         private bool m_RunningTests;
 
         [SerializeField]
@@ -83,7 +80,10 @@ namespace UnityEditor.TestTools.TestRunner
         private BeforeAfterTestCommandState m_SetUpTearDownState;
         [SerializeField]
         private BeforeAfterTestCommandState m_OuterUnityTestActionState;
-        
+
+        [SerializeField] 
+        public bool RunFinished = false;
+
         public bool RunningSynchronously { get; private set; }
 
         internal IUnityTestAssemblyRunner m_Runner;
@@ -165,8 +165,6 @@ namespace UnityEditor.TestTools.TestRunner
                 m_OuterUnityTestActionState = CreateInstance<BeforeAfterTestCommandState>();
             }
             context.OuterUnityTestActionState = m_OuterUnityTestActionState;
-
-            m_CleanupVerifier.RegisterExistingFiles();
 
             if (!m_RunningTests)
             {
@@ -291,8 +289,9 @@ namespace UnityEditor.TestTools.TestRunner
                 EditorApplication.update -= TestConsumer;
    
             TestLauncherBase.ExecutePostBuildCleanupMethods(this.GetLoadedTests(), this.GetFilter(), Application.platform);
-            m_CleanupVerifier.VerifyNoNewFilesAdded();
+            
             m_RunFinishedEvent.Invoke(m_Runner.Result);
+            RunFinished = true;
 
             if (m_ConstructDelegator != null)
                 m_ConstructDelegator.DestroyCurrentTestObjectIfExists();
@@ -423,6 +422,7 @@ namespace UnityEditor.TestTools.TestRunner
             UnityWorkItemDataHolder.alreadyExecutedTests = null;
             m_ExecuteOnEnable = false;
             m_Runner.StopRun();
+            RunFinished = true;
         }
 
         public ITest GetLoadedTests()

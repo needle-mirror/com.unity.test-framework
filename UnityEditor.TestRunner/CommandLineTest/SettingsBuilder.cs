@@ -30,6 +30,7 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
             string[] testCategories = null;
             string testSettingsFilePath = null;
             int testRepetitions = 1;
+            int? playerHeartbeatTimeout = null;
 
             var optionSet = new CommandLineOptionSet(
                 new CommandLineOption("quit", () => { quit = true; }),
@@ -39,7 +40,8 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
                 new CommandLineOption("editorTestsCategories", catagories => { testCategories = catagories; }),
                 new CommandLineOption("testCategory", catagories => { testCategories = catagories; }),
                 new CommandLineOption("testSettingsFile", settingsFilePath => { testSettingsFilePath = settingsFilePath; }),
-                new CommandLineOption("testRepetitions", reps => { testRepetitions = int.Parse(reps); })
+                new CommandLineOption("testRepetitions", reps => { testRepetitions = int.Parse(reps); }),
+                new CommandLineOption("playerHeartbeatTimeout", timeout => { playerHeartbeatTimeout = int.Parse(timeout); })
             );
             optionSet.Parse(commandLineArgs);
 
@@ -68,12 +70,19 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
 
             RerunCallbackData.instance.testMode = filter.testMode;
 
-            return new Api.ExecutionSettings()
+            var settings = new Api.ExecutionSettings()
             {
                 filters = new []{filter},
                 overloadTestRunSettings = new RunSettings(testSettings),
                 targetPlatform = buildTarget
             };
+
+            if (playerHeartbeatTimeout != null)
+            {
+                settings.playerHeartbeatTimeout = playerHeartbeatTimeout.Value;    
+            }
+
+            return settings;
         }
 
         public ExecutionSettings BuildExecutionSettings(string[] commandLineArgs)

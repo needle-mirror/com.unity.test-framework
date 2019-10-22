@@ -14,7 +14,6 @@ namespace UnityEditor.TestTools.TestRunner
     {
         private EditModeLauncherContextSettings m_Settings;
         public SceneSetup[] previousSceneSetup;
-        public int undoGroup;
         public EditModeRunner runner;
 
         private bool m_Canceled;
@@ -119,7 +118,6 @@ namespace UnityEditor.TestTools.TestRunner
                 EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
             }
             CleanUp();
-            PerformUndo(undoGroup);
         }
 
         private void CleanUp()
@@ -156,16 +154,6 @@ namespace UnityEditor.TestTools.TestRunner
             {
                 m_PendingTests.Remove(result.Test.FullName);
             }
-        }
-
-        private static void PerformUndo(int undoGroup)
-        {
-            EditorUtility.DisplayProgressBar("Undo", "Reverting changes to the scene", 0);
-            var undoStartTime = DateTime.Now;
-            Undo.RevertAllDownToGroup(undoGroup);
-            if ((DateTime.Now - undoStartTime).TotalSeconds > 1)
-                Debug.LogWarning("Undo after editor test run took " + (DateTime.Now - undoStartTime).Seconds + " seconds.");
-            EditorUtility.ClearProgressBar();
         }
 
         private static List<string> GetTestsExpectedToRun(ITest test, ITestFilter filter)

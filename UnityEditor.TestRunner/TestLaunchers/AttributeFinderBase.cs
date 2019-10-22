@@ -7,9 +7,14 @@ using UnityEngine.TestTools;
 
 namespace UnityEditor.TestTools.TestRunner
 {
-    internal abstract class AttributeFinderBase
+    internal abstract class AttributeFinderBase : IAttributeFinder
     {
         public abstract IEnumerable<Type> Search(ITest tests, ITestFilter filter, RuntimePlatform testTargetPlatform);
+    }
+
+    internal interface IAttributeFinder
+    {
+        IEnumerable<Type> Search(ITest tests, ITestFilter filter, RuntimePlatform testTargetPlatform);
     }
 
     internal abstract class AttributeFinderBase<T1, T2> : AttributeFinderBase where T2 : Attribute

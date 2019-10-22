@@ -51,6 +51,10 @@ Platform/Type convention is from the [BuildTarget](https://docs.unity3d.com/Scri
 
 The path where Unity should save the result file. By default, Unity saves it in the Project’s root folder.
 
+### playerHeartbeatTimeout
+
+The time, in seconds, the editor should wait for heartbeats after starting a test run on a player. This defaults to 10 minutes.
+
 ### testSettingsFile 
 
 Path to a *TestSettings.json* file that allows you to set up extra options for your test run. An example of the *TestSettings.json* file could look like this:

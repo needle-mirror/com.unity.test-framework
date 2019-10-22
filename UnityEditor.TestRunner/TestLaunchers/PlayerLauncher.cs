@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using NUnit.Framework.Internal.Filters;
 using UnityEditor;
 using UnityEditor.TestRunner.TestLaunchers;
@@ -27,12 +28,14 @@ namespace UnityEditor.TestTools.TestRunner
         private readonly BuildTarget m_TargetPlatform;
         private ITestRunSettings m_OverloadTestRunSettings;
         private string m_SceneName;
+        private int m_HeartbeatTimeout;
 
-        public PlayerLauncher(PlaymodeTestsControllerSettings settings, BuildTarget? targetPlatform, ITestRunSettings overloadTestRunSettings)
+        public PlayerLauncher(PlaymodeTestsControllerSettings settings, BuildTarget? targetPlatform, ITestRunSettings overloadTestRunSettings, int heartbeatTimeout)
         {
             m_Settings = settings;
             m_TargetPlatform = targetPlatform ?? EditorUserBuildSettings.activeBuildTarget;
             m_OverloadTestRunSettings = overloadTestRunSettings;
+            m_HeartbeatTimeout = heartbeatTimeout;
         }
 
         protected override RuntimePlatform? TestTargetPlatform
@@ -44,7 +47,7 @@ namespace UnityEditor.TestTools.TestRunner
         {
             var editorConnectionTestCollector = RemoteTestRunController.instance;
             editorConnectionTestCollector.hideFlags = HideFlags.HideAndDontSave;
-            editorConnectionTestCollector.Init(m_TargetPlatform);
+            editorConnectionTestCollector.Init(m_TargetPlatform, m_HeartbeatTimeout);
 
             var remotePlayerLogController = RemotePlayerLogController.instance;
             remotePlayerLogController.hideFlags = HideFlags.HideAndDontSave;

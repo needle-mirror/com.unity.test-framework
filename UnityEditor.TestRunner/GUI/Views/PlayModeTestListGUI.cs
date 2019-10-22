@@ -4,8 +4,6 @@ using UnityEditor.SceneManagement;
 using UnityEditor.TestTools.TestRunner.Api;
 using UnityEngine;
 using UnityEngine.TestTools;
-using UnityEngine.SceneManagement;
-using UnityEngine.TestTools.TestRunner;
 using UnityEngine.TestTools.TestRunner.GUI;
 
 namespace UnityEditor.TestTools.TestRunner.GUI
@@ -66,11 +64,6 @@ namespace UnityEditor.TestTools.TestRunner.GUI
 
         protected override void RunTests(TestRunnerFilter[] filters)
         {
-            // Give user chance to save the changes to their currently open scene because we close it and load our own
-            var cancelled = !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo();
-            if (cancelled)
-                return;
-
             foreach (var filter in filters)
             {
                 filter.ClearResults(newResultList.OfType<TestRunnerFilter.IClearableResult>().ToList());                
@@ -108,9 +101,10 @@ namespace UnityEditor.TestTools.TestRunner.GUI
         }
 
         public override TestPlatform TestPlatform { get { return TestPlatform.PlayMode; } }
+
         protected override bool IsBusy()
         {
-            return PlaymodeLauncher.IsRunning  || EditorApplication.isCompiling || EditorApplication.isPlaying;
+            return TestRunnerApi.IsRunActive() || PlaymodeLauncher.IsRunning  || EditorApplication.isCompiling || EditorApplication.isPlaying;
         }
     }
 }
