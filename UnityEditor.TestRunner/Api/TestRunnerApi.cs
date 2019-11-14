@@ -4,6 +4,7 @@ using System.Threading;
 using UnityEditor.TestTools.TestRunner.CommandLineTest;
 using UnityEditor.TestTools.TestRunner.TestRun;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.TestRunner.TestLaunchers;
 using UnityEngine.TestTools;
 using UnityEngine.TestTools.NUnitExtensions;
@@ -27,13 +28,15 @@ namespace UnityEditor.TestTools.TestRunner.Api
             }
         }
 
-        internal Action<ExecutionSettings> ScheduleJob = (executionSettings) =>
+        internal Func<ExecutionSettings, string> ScheduleJob = (executionSettings) =>
         {
             var runner = new TestJobRunner();
-            runner.RunJob(new TestJobData(executionSettings));
+            var jobData = new TestJobData(executionSettings);
+            runner.RunJob(jobData);
+            return jobData.guid;
         };
         
-        public void Execute(ExecutionSettings executionSettings)
+        public string Execute(ExecutionSettings executionSettings)
         {
             if (executionSettings == null)
             {
@@ -52,7 +55,7 @@ namespace UnityEditor.TestTools.TestRunner.Api
                 executionSettings.targetPlatform = executionSettings.filters[0].targetPlatform;
             }
 
-            ScheduleJob(executionSettings);
+            return ScheduleJob(executionSettings);
         }
 
         public void RegisterCallbacks<T>(T testCallbacks, int priority = 0) where T : ICallbacks
@@ -116,5 +119,8 @@ namespace UnityEditor.TestTools.TestRunner.Api
         {
             return (((testMode & TestMode.EditMode) == TestMode.EditMode) ? TestPlatform.EditMode : 0) | (((testMode & TestMode.PlayMode) == TestMode.PlayMode) ? TestPlatform.PlayMode : 0);
         }
+
+        internal class RunProgressChangedEvent : UnityEvent<TestRunProgress> {}
+        internal static RunProgressChangedEvent runProgressChanged = new RunProgressChangedEvent();
     }
 }

@@ -191,7 +191,7 @@ namespace UnityEditor.TestTools.TestRunner
 
         private BuildPlayerOptions ModifyBuildOptions(BuildPlayerOptions buildOptions)
         {
-            var allAssemblies = AppDomain.CurrentDomain.GetAssemblies();
+            var allAssemblies = AppDomain.CurrentDomain.GetAssemblies().Where(x => x.GetReferencedAssemblies().Any(z => z.Name == "UnityEngine.TestRunner")).ToArray();
             var attributes = allAssemblies.SelectMany(assembly => assembly.GetCustomAttributes(typeof(TestPlayerBuildModifierAttribute), true).OfType<TestPlayerBuildModifierAttribute>()).ToArray();
             var modifiers = attributes.Select(attribute => attribute.ConstructModifier()).ToArray();
 

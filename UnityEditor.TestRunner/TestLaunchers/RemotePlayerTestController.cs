@@ -94,12 +94,12 @@ namespace UnityEditor.TestRunner.TestLaunchers
         public void PostBuildAction()
         {
             m_PlatformSpecificSetup.PostBuildAction();
-            m_TimeoutCallback = new DelayedCallback(TimeoutCallback, m_HearbeatTimeOut);
         }
 
         public void PostSuccessfulBuildAction()
         {
             m_PlatformSpecificSetup.PostSuccessfulBuildAction();
+            m_TimeoutCallback = new DelayedCallback(TimeoutCallback, m_HearbeatTimeOut);
         }
     }
 }

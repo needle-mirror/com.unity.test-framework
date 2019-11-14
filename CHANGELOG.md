@@ -1,4 +1,10 @@
 # Changelog
+## [1.1.8] - 2019-11-15
+- Ensured that a resumed test run is continued instantly. 
+
+## [1.1.6] - 2019-11-12
+- Building a player for test will no longer look in unrelated assemblies for relevant attributes.
+
 ## [1.1.5] - 2019-10-23
 - Fixed a regression to synchronous runs introduced in 1.1.4.
 
