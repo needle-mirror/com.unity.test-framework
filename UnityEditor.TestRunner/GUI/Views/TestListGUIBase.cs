@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using UnityEditor.IMGUI.Controls;
 using UnityEditor.TestTools.TestRunner.Api;
 using UnityEngine;
@@ -99,6 +100,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                     {
                         result.Clear();
                     }
+                    m_TestRunnerUIFilter.UpdateCounters(newResultList);
                     GUIUtility.ExitGUI();
                 }
             }
@@ -409,7 +411,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                         if (testLine.FullName.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
                             assembliesToRun.Add(TestRunnerFilter.AssemblyNameFromPath(testLine.FullName));
                         else
-                            namesToRun.Add(string.Format("^{0}$", testLine.FullName));
+                            namesToRun.Add(string.Format("^{0}$", Regex.Escape(testLine.FullName)));
                     }
                     else
                         exactNamesToRun.Add(testLine.FullName);
@@ -441,19 +443,19 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                     testNames = exactNamesToRun.ToArray()
                 });
             }
-
-            var categories = m_TestRunnerUIFilter.CategoryFilter;
-            if (categories.Length > 0)
-            {
-                filters.Add(new TestRunnerFilter()
-                {
-                    categoryNames = categories.ToArray()
-                });
-            }
-
+            
             if (filters.Count == 0)
             {
                 filters.Add(new TestRunnerFilter());
+            }
+
+            var categories = m_TestRunnerUIFilter.CategoryFilter.ToArray();
+            if (categories.Length > 0)
+            {
+                foreach (var filter in filters)
+                {
+                    filter.categoryNames = categories;
+                }
             }
             
             return filters.ToArray();

@@ -3,7 +3,7 @@
 It’s pretty simple to run a test project from the command line. Here is an example in Windows:
 
 ```bash
-Unity.exe -runTests -projectPath PATH_TO_YOUR_PROJECT -testResults C:\temp\results.xml -testPlatform PS4
+Unity.exe -runTests -batchmode -projectPath PATH_TO_YOUR_PROJECT -testResults C:\temp\results.xml -testPlatform PS4
 ```
 
 For more information, see [Command line arguments](https://docs.unity3d.com/Manual/CommandLineArguments.html).

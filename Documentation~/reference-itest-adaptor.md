@@ -13,7 +13,7 @@
 | `bool IsSuite`            | Whether the node is a test suite/fixture. |
 | `IEnumerable<ITestAdaptor> Children` | The child nodes. |
 | `ITestAdaptor Parent`     | The parent node, if any. |
-| `int TestCaseTimeout`     | The test case timeout in milliseconds. |
+| `int TestCaseTimeout`     | The test case timeout in milliseconds. Note that this value is only available on TestFinished. |
 | `ITypeInfo TypeInfo`      | The type of test class as an `NUnit` [ITypeInfo](https://github.com/nunit/nunit/blob/master/src/NUnitFramework/framework/Interfaces/ITypeInfo.cs). If the node is not a test class, then the value is `null`. |
 | `IMethodInfo Method`      | The [Nunit IMethodInfo](https://github.com/nunit/nunit/blob/master/src/NUnitFramework/framework/Interfaces/IMethodInfo.cs) of the test method. If the node is not a test method, then the value is `null`. |
 | `string[] Categories`     | An array of the categories applied to the test or fixture. |

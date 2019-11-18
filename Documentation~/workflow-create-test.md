@@ -27,7 +27,7 @@ If you have a lot of tests, and you only want to view/run a sub-set of them, you
 
 * Type in the search box in the top left
 
-* Click a test category (such as **NewTestScript** in the image above)
+* Click a test class or fixture (such as **NewTestScript** in the image above)
 
 * Click one of the test result icon buttons in the top right
 

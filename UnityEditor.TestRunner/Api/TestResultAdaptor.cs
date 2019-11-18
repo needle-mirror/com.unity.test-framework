@@ -10,9 +10,9 @@ namespace UnityEditor.TestTools.TestRunner.Api
     {
         private TNode m_Node;
 
-        internal TestResultAdaptor(ITestResult result)
+        internal TestResultAdaptor(ITestResult result, ITestAdaptor test, ITestResultAdaptor[] children = null)
         {
-            Test = new TestAdaptor(result.Test);
+            Test = test;
             Name = result.Name;
             FullName = result.FullName;
             ResultState = result.ResultState.ToString();
@@ -29,7 +29,7 @@ namespace UnityEditor.TestTools.TestRunner.Api
             InconclusiveCount = result.InconclusiveCount;
             HasChildren = result.HasChildren;
             Output = result.Output;
-            Children = result.Children.Select(child => new TestResultAdaptor(child)).ToArray();
+            Children = children;
             m_Node = result.ToXml(true);
         }
 

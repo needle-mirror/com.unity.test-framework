@@ -12,6 +12,8 @@ namespace UnityEditor.TestRunner.TestLaunchers
     [Serializable]
     internal class RemoteTestRunController : ScriptableSingleton<RemoteTestRunController>
     {
+        internal const int k_HeartbeatTimeout = 60 * 10;
+        
         [SerializeField]
         private RemoteTestResultReciever m_RemoteTestResultReciever;
 
@@ -21,6 +23,8 @@ namespace UnityEditor.TestRunner.TestLaunchers
         [SerializeField]
         private bool m_RegisteredConnectionCallbacks;
 
+        private IDelayedCallback m_TimeoutCallback;
+        
         public void Init(BuildTarget buildTarget)
         {
             m_PlatformSpecificSetup = new PlatformSpecificSetup(buildTarget);
@@ -32,6 +36,8 @@ namespace UnityEditor.TestRunner.TestLaunchers
                 EditorConnection.instance.Initialize();
                 DelegateEditorConnectionEvents();
             }
+            
+            m_TimeoutCallback = new DelayedCallback(TimeoutCallback, k_HeartbeatTimeout);
         }
 
         private void DelegateEditorConnectionEvents()
@@ -42,16 +48,19 @@ namespace UnityEditor.TestRunner.TestLaunchers
             EditorConnection.instance.Register(PlayerConnectionMessageIds.runFinishedMessageId, RunFinished);
             EditorConnection.instance.Register(PlayerConnectionMessageIds.testStartedMessageId, TestStarted);
             EditorConnection.instance.Register(PlayerConnectionMessageIds.testFinishedMessageId, TestFinished);
+            EditorConnection.instance.Register(PlayerConnectionMessageIds.playerAliveHeartbeat, PlayerAliveHearbeat);
         }
 
         private void RunStarted(MessageEventArgs messageEventArgs)
         {
+            m_TimeoutCallback.Reset();
             m_RemoteTestResultReciever.RunStarted(messageEventArgs);
             CallbacksDelegator.instance.RunStartedRemotely(messageEventArgs.data);
         }
 
         private void RunFinished(MessageEventArgs messageEventArgs)
         {
+            m_TimeoutCallback.Reset();
             m_RemoteTestResultReciever.RunFinished(messageEventArgs);
             m_PlatformSpecificSetup.CleanUp();
 
@@ -60,12 +69,24 @@ namespace UnityEditor.TestRunner.TestLaunchers
 
         private void TestStarted(MessageEventArgs messageEventArgs)
         {
+            m_TimeoutCallback.Reset();
             CallbacksDelegator.instance.TestStartedRemotely(messageEventArgs.data);
         }
 
         private void TestFinished(MessageEventArgs messageEventArgs)
         {
+            m_TimeoutCallback.Reset();
             CallbacksDelegator.instance.TestFinishedRemotely(messageEventArgs.data);
+        }
+        
+        private void PlayerAliveHearbeat(MessageEventArgs messageEventArgs)
+        {
+            m_TimeoutCallback.Reset();
+        }
+
+        private void TimeoutCallback()
+        {
+            CallbacksDelegator.instance.RunFailed($"Test execution timed out. No activity received from the player in {k_HeartbeatTimeout/60} minutes.");
         }
 
         public void PostBuildAction()

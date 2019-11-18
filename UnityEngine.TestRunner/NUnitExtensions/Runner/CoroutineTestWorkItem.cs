@@ -29,9 +29,7 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
         public CoroutineTestWorkItem(TestMethod test, ITestFilter filter)
             : base(test, null)
         {
-            m_Command = test.RunState == RunState.Runnable || test.RunState == RunState.Explicit && filter.IsExplicitMatch(test)
-                ? CommandBuilder.MakeTestCommand(test)
-                : CommandBuilder.MakeSkipCommand(test);
+            m_Command = m_Command = TestCommandBuilder.BuildTestCommand(test, filter);
         }
 
         protected override IEnumerable PerformWork()

@@ -4,15 +4,15 @@ Let’s clarify a bit what Play Mode and Edit Mode test means from the Unity Tes
 
 ## Edit Mode tests
 
-**Edit Mode** tests (also known as Editor tests) are only run in the Unity Editor and have access to the Editor code.
+**Edit Mode** tests (also known as Editor tests) are only run in the Unity Editor and have access to the Editor code in addition to the game code.
 
-With Edit Mode tests you may want to test any of your [Editor extensions](https://docs.unity3d.com/Manual/ExtendingTheEditor.html) using the [UnityTest](./reference-attribute-unitytest.md) attribute. In this case, your test code runs in the [EditorApplication.update](https://docs.unity3d.com/ScriptReference/EditorApplication-update.html) callback loop. 
+With Edit Mode tests it is possible to test any of your [Editor extensions](https://docs.unity3d.com/Manual/ExtendingTheEditor.html) using the [UnityTest](./reference-attribute-unitytest.md) attribute. For Edit Mode tests, your test code runs in the [EditorApplication.update](https://docs.unity3d.com/ScriptReference/EditorApplication-update.html) callback loop. 
 
-> **Note**: You can also control entering and exiting Play Mode from your Edit Mode test. 
+> **Note**: You can also control entering and exiting Play Mode from your Edit Mode test. This allow your test to make changes before entering Play Mode.
 
 Edit Mode tests should meet one of the following conditions:
 
-* They should have an [assembly definition file](./workflow-create-test-assembly.md), that references `NUnit` and has only the Editor as a target platform:
+* They should have an [assembly definition](./workflow-create-test-assembly.md) with reference to *nunit.framework.dll* and has only the Editor as a target platform:
 
 ```assembly
     "includePlatforms": [
@@ -50,4 +50,4 @@ Use the [NUnit](http://www.nunit.org/) `Test` attribute instead of the `UnityTes
 
 ### References
 
-Reference in your tests `UnityEngine.TestRunner` and `UnityEditor.TestRunner`, only Edit Mode tests requires the latter. The `TestAssemblies` option under `optionalUnityReference` is auto-updated into a reference to the `NUnit` and `TestRunner` assemblies.
+It is possible for your Test Assemblies to reference the test tools in `UnityEngine.TestRunner` and `UnityEditor.TestRunner`. The latter is only available in Edit Mode. You can specify these references in the `Assembly Definition References` on the Assembly Definition.

@@ -18,6 +18,8 @@ namespace UnityEngine.TestTools.TestRunner.Callbacks
             public byte[] data { get; set; }
         }
 
+        private const int k_aliveMessageFrequency = 120;
+        private float m_NextliveMessage = k_aliveMessageFrequency;
         private readonly Queue<QueueData> m_SendQueue = new Queue<QueueData>();
         private readonly object m_LockQueue = new object();
         private readonly IRemoteTestResultDataFactory m_TestResultDataFactory = new RemoteTestResultDataFactory();
@@ -113,6 +115,7 @@ namespace UnityEngine.TestTools.TestRunner.Callbacks
                 {
                     if (PlayerConnection.instance.isConnected && m_SendQueue.Count > 0)
                     {
+                        ResetNextPlayerAliveMessageTime();
                         var queueData = m_SendQueue.Dequeue();
                         PlayerConnection.instance.Send(queueData.id, queueData.data);
                         yield return null;
@@ -121,10 +124,28 @@ namespace UnityEngine.TestTools.TestRunner.Callbacks
                     //This is needed so we dont stall the player totally
                     if (!m_SendQueue.Any())
                     {
+                        SendAliveMessageIfNeeded();
                         yield return new WaitForSeconds(0.02f);
                     }
                 }
             }
+        }
+
+        private void SendAliveMessageIfNeeded()
+        {
+            if (Time.timeSinceLevelLoad < m_NextliveMessage)
+            {
+                return;
+            }
+
+            Debug.Log("Sending player alive message back to editor.");
+            ResetNextPlayerAliveMessageTime();
+            PlayerConnection.instance.Send(PlayerConnectionMessageIds.playerAliveHeartbeat, new byte[0]);
+        }
+
+        private void ResetNextPlayerAliveMessageTime()
+        {
+            m_NextliveMessage = Time.timeSinceLevelLoad + k_aliveMessageFrequency;
         }
     }
 }

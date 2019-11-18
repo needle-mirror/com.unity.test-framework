@@ -106,6 +106,8 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
         public bool IsSingleThreaded { get; set; }
         public BeforeAfterTestCommandState SetUpTearDownState { get; set; }
         public BeforeAfterTestCommandState OuterUnityTestActionState { get; set; }
+        public int EnumerableRepeatedTestState { get; set; }
+        public int EnumerableRetryTestState { get; set; }
 
         internal int AssertCount
         {

@@ -48,5 +48,7 @@ The following table indicates the root folders in the package where you can find
 
 | Date         | Reason                                                |
 | :----------- | :---------------------------------------------------- |
+| August 23, 2019 | Applied feedback to the documentation |
+| July 25, 2019 | Documentation updated to include features in version 1.1.0 |
 | July 11, 2019 | Documentation updated. Matches package version 1.0.18 |
 | May 27, 2019 | Documentation created. Matches package version 1.0.14 |

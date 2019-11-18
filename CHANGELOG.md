@@ -1,4 +1,14 @@
 # Changelog
+## [1.1.2] - 2019-11-19
+- Fixed an issue where Run Selected would run all tests in the category, if a category filter was selected, regardless of what tests were selected.
+- Unsupported attributes used in UnityTests now give an explicit error.
+- Added support for the Repeat and Retry attributes in UnityTests (case 1131940).
+- Tests with a explicit timeout higher than 10 minutes, no longer times out after running longer than 10 minutes when running from command line (case 1125991).
+- Fixed a performance regression in the test runner api result reporting, introduced in 2018.3 (case 1109865).
+- Fixed an issue where parameterized test fixtures would not run if selected in the test tree (case 1092244).
+- Pressing Clear Results now also correctly clears the counters on the test list (case 1181763).
+- Prebuild setup now handles errors logged with Debug.LogError and stops the run if any is logged (case 1115240). It now also supports LogAssert.Expect.
+
 ## [1.1.1] - 2019-08-07
 - Tests retrieved as a test list with the test runner api incorrectly showed both mode as their TestMode.
 - Fixed a compatibility issue with running tests from rider.

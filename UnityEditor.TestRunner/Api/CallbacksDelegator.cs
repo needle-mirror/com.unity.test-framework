@@ -34,6 +34,7 @@ namespace UnityEditor.TestTools.TestRunner.Api
 
         public void RunStarted(ITest testsToRun)
         {
+            m_AdaptorFactory.ClearResultsCache();
             var testRunnerTestsToRun = m_AdaptorFactory.Create(testsToRun);
             TryInvokeAllCallbacks(callbacks => callbacks.RunStarted(testRunnerTestsToRun));
         }

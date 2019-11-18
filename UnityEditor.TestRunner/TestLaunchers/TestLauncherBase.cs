@@ -1,7 +1,10 @@
 using System;
+using System.Linq;
 using NUnit.Framework.Interfaces;
 using UnityEngine;
 using UnityEngine.TestTools;
+using UnityEngine.TestTools.Logging;
+using UnityEngine.TestTools.TestRunner;
 
 namespace UnityEditor.TestTools.TestRunner
 {
@@ -50,7 +53,23 @@ namespace UnityEditor.TestTools.TestRunner
                     var targetClass = (T)Activator.CreateInstance(targetClassType);
 
                     Debug.LogFormat(logString, targetClassType.FullName);
-                    action(targetClass);
+
+                    using (var logScope = new LogScope())
+                    {
+                        action(targetClass);
+
+                        if (logScope.AnyFailingLogs())
+                        {
+                            var failingLog = logScope.FailingLogs.First();
+                            throw new UnhandledLogMessageException(failingLog);
+                        }
+                        
+                        if (logScope.ExpectedLogs.Any())
+                        {
+                            var expectedLogs = logScope.ExpectedLogs.First();
+                            throw new UnexpectedLogMessageException(expectedLogs);
+                        }
+                    }
                 }
                 catch (InvalidCastException) {}
                 catch (Exception e)

@@ -17,9 +17,7 @@ namespace UnityEditor.TestTools.TestRunner
         public EditorEnumeratorTestWorkItem(TestMethod test, ITestFilter filter)
             : base(test, null)
         {
-            m_Command = test.RunState == RunState.Runnable || test.RunState == RunState.Explicit && filter.IsExplicitMatch(test)
-                ? CommandBuilder.MakeTestCommand(test)
-                : CommandBuilder.MakeSkipCommand(test);
+            m_Command = TestCommandBuilder.BuildTestCommand(test, filter);
         }
 
         private static IEnumerableTestMethodCommand FindFirstIEnumerableTestMethodCommand(TestCommand command)
@@ -91,7 +89,7 @@ namespace UnityEditor.TestTools.TestRunner
                         m_Command = applyChangesToContextCommand.GetInnerCommand();
                     }
 
-                    var innerCommand = (IEnumerableTestMethodCommand)m_Command;
+                    var innerCommand = m_Command as IEnumerableTestMethodCommand;
                     if (innerCommand == null)
                     {
                         Debug.Log("failed getting innerCommand");

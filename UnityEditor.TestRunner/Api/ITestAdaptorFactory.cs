@@ -12,5 +12,6 @@ namespace UnityEditor.TestTools.TestRunner.Api
         ITestResultAdaptor Create(RemoteTestResultData testResult, RemoteTestResultDataWithTestData allData);
         ITestAdaptor BuildTree(RemoteTestResultDataWithTestData data);
         IEnumerator<ITestAdaptor> BuildTreeAsync(RemoteTestResultDataWithTestData data);
+        void ClearResultsCache();
     }
 }

@@ -13,11 +13,7 @@ namespace UnityEditor.TestTools.TestRunner.Api
 {
     internal class TestAdaptor : ITestAdaptor
     {
-        internal TestAdaptor(ITest test) : this(test,null)
-        {
-        }
-
-        protected TestAdaptor(ITest test, ITestAdaptor parent)
+        internal TestAdaptor(ITest test, ITestAdaptor[] children = null)
         {
             Id = test.Id;
             Name = test.Name;
@@ -30,7 +26,6 @@ namespace UnityEditor.TestTools.TestRunner.Api
             TestCaseCount = test.TestCaseCount;
             HasChildren = test.HasChildren;
             IsSuite = test.IsSuite;
-            Parent = parent;
             if (UnityTestExecutionContext.CurrentContext != null)
             {
                 TestCaseTimeout = UnityTestExecutionContext.CurrentContext.TestCaseTimeout;
@@ -59,13 +54,18 @@ namespace UnityEditor.TestTools.TestRunner.Api
                 {
                     TestMode = (TestMode)Enum.Parse(typeof(TestMode),test.Properties.Get("platform").ToString());        
                 }
-                else if (parent != null)
-                {
-                    TestMode = parent.TestMode;
-                }
             }
-            
-            Children = test.Tests.Select(t => new TestAdaptor(t, this)).ToArray();
+
+            Children = children;
+        }
+
+        public void SetParent(ITestAdaptor parent)
+        {
+            Parent = parent;
+            if (parent != null)
+            {
+                TestMode = parent.TestMode;
+            }
         }
 
         internal TestAdaptor(RemoteTestData test)
@@ -122,7 +122,7 @@ namespace UnityEditor.TestTools.TestRunner.Api
         public string UniqueName { get; }
         public string ParentUniqueName { get; }
         public int ChildIndex { get; }
-        public TestMode TestMode { get; }
+        public TestMode TestMode { get; private set; }
         
         private static string GetIndexedTestCaseName(string fullName, int index)
         {

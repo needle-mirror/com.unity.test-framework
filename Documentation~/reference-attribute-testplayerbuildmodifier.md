@@ -66,7 +66,7 @@ namespace Tests
             // Do not launch the player after the build completes.
             playerOptions.options &= ~BuildOptions.AutoRunPlayer;
 
-            // Modify the build location of the player to be inside of PlayModeTestPlayer in the project root.
+            // Set the headlessBuildLocation to the output directory you desire. It does not need to be inside the project.
             var headlessBuildLocation = Path.GetFullPath(Path.Combine(Application.dataPath, ".//..//PlayModeTestPlayer"));
             var fileName = Path.GetFileName(playerOptions.locationPathName);
             if (!string.IsNullOrEmpty(fileName))
