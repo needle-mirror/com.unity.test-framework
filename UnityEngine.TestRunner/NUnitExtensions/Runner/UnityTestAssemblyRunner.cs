@@ -20,7 +20,6 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
         UnityWorkItem TopLevelWorkItem { get; set; }
         UnityTestExecutionContext GetCurrentContext();
         ITest Load(Assembly[] assemblies, TestPlatform testPlatform, IDictionary<string, object> settings);
-        void LoadTestTree(ITest testTree);
         IEnumerable Run(ITestListener listener, ITestFilter filter);
         void StopRun();
     }
@@ -74,11 +73,6 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
                 Randomizer.InitialSeed = (int)settings[FrameworkPackageSettings.RandomSeed];
 
             return LoadedTest = unityBuilder.Build(assemblies, Enumerable.Repeat(testPlatform, assemblies.Length).ToArray(), settings);
-        }
-
-        public void LoadTestTree(ITest testTree)
-        {
-            LoadedTest = testTree;
         }
 
         public IEnumerable Run(ITestListener listener, ITestFilter filter)

@@ -2,9 +2,9 @@ using System;
 using System.Collections;
 using UnityEditor.SceneManagement;
 
-namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks.Scene
+namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
 {
-    internal class SaveModifiedSceneTask : TestTaskBase
+    internal class SaveModiedSceneTask : TestTaskBase
     {
         internal Func<bool> SaveCurrentModifiedScenesIfUserWantsTo =
             EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo;

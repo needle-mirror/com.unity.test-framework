@@ -1,6 +1,12 @@
 # Changelog
+## [1.1.9] - 2019-12-12
+- Rolled back refactoring to the test run system, as it caused issues in some corner cases.
+
 ## [1.1.8] - 2019-11-15
 - Ensured that a resumed test run is continued instantly. 
+
+## [1.1.7] - 2019-11-14
+- Fixed an issue with test runs after domain reload.
 
 ## [1.1.6] - 2019-11-12
 - Building a player for test will no longer look in unrelated assemblies for relevant attributes.

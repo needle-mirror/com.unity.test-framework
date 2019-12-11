@@ -17,7 +17,7 @@ The `TestRunnerApi` supports the following workflows:
 
 | Syntax                                     | Description                                                  |
 | ------------------------------------------ | ------------------------------------------------------------ |
-| `string Execute(ExecutionSettings executionSettings)` | Starts a test run with a given set of [ExecutionSettings](./reference-execution-settings.md). Returns the guid of the test job. |
+| `void Execute(ExecutionSettings executionSettings)` | Starts a test run with a given set of [ExecutionSettings](./reference-execution-settings.md). |
 | `void RegisterCallbacks(ICallbacks testCallbacks, int priority = 0)` | Sets up a given instance of [ICallbacks](./reference-icallbacks.md) to be invoked on test runs. |
 | `void UnregisterCallbacks(ICallbacks testCallbacks)` | Unregisters an instance of ICallbacks to no longer receive callbacks from test runs. |
 | `void RetrieveTestList(TestMode testMode, Action<ITestAdaptor> callback)` | Retrieve the full test tree as [ITestAdaptor](./reference-itest-adaptor.md) for a given test mode. |

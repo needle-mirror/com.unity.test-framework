@@ -10,13 +10,13 @@ namespace UnityEngine.TestRunner.Utils
 {
     internal class TestRunCallbackListener : ScriptableObject, ITestRunnerListener
     {
-        internal ITestRunCallback[] m_Callbacks;
+        private ITestRunCallback[] m_Callbacks;
         public void RunStarted(ITest testsToRun)
         {
             InvokeAllCallbacks(callback => callback.RunStarted(testsToRun));
         }
 
-        internal static ITestRunCallback[] GetAllCallbacks()
+        private static ITestRunCallback[] GetAllCallbacks()
         {
             var allAssemblies = AppDomain.CurrentDomain.GetAssemblies();
             allAssemblies = allAssemblies.Where(x => x.GetReferencedAssemblies().Any(z => z.Name == "UnityEngine.TestRunner")).ToArray();

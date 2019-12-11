@@ -13,6 +13,7 @@ namespace UnityEditor.TestTools.TestRunner
     internal class EditModeRunnerCallback : ScriptableObject, ITestRunnerListener
     {
         private EditModeLauncherContextSettings m_Settings;
+        public SceneSetup[] previousSceneSetup;
         public EditModeRunner runner;
 
         private bool m_Canceled;
@@ -52,6 +53,8 @@ namespace UnityEditor.TestTools.TestRunner
         private void Setup()
         {
             m_Settings = new EditModeLauncherContextSettings();
+            Application.logMessageReceivedThreaded += LogReceived;
+            EditorApplication.playModeStateChanged += WaitForExitPlaymode;
             EditorApplication.update += DisplayProgressBar;
             AssemblyReloadEvents.beforeAssemblyReload += BeforeAssemblyReload;
         }
@@ -78,8 +81,42 @@ namespace UnityEditor.TestTools.TestRunner
             }
         }
 
+        private static void LogReceived(string message, string stacktrace, LogType type)
+        {
+            if (TestContext.Out != null)
+                TestContext.Out.WriteLine(message);
+        }
+
+        private static void WaitForExitPlaymode(PlayModeStateChange state)
+        {
+            if (state == PlayModeStateChange.EnteredEditMode)
+            {
+                EditorApplication.playModeStateChanged -= WaitForExitPlaymode;
+                //because logMessage is reset on Enter EditMode
+                //we remove and add the callback
+                //because Unity
+                Application.logMessageReceivedThreaded -= LogReceived;
+                Application.logMessageReceivedThreaded += LogReceived;
+            }
+        }
+
         public void RunFinished(ITestResult result)
         {
+            if (previousSceneSetup != null && previousSceneSetup.Length > 0)
+            {
+                try
+                {
+                    EditorSceneManager.RestoreSceneManagerSetup(previousSceneSetup);
+                }
+                catch (ArgumentException e)
+                {
+                    Debug.LogWarning(e.Message);
+                }
+            }
+            else
+            {
+                EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
+            }
             CleanUp();
         }
 
@@ -91,7 +128,7 @@ namespace UnityEditor.TestTools.TestRunner
             {
                 m_Settings.Dispose();
             }
-            
+            Application.logMessageReceivedThreaded -= LogReceived;
             EditorApplication.update -= DisplayProgressBar;
         }
 

@@ -4,7 +4,6 @@ using System.Threading;
 using UnityEditor.TestTools.TestRunner.CommandLineTest;
 using UnityEditor.TestTools.TestRunner.TestRun;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.TestRunner.TestLaunchers;
 using UnityEngine.TestTools;
 using UnityEngine.TestTools.NUnitExtensions;
@@ -28,12 +27,10 @@ namespace UnityEditor.TestTools.TestRunner.Api
             }
         }
 
-        internal Func<ExecutionSettings, string> ScheduleJob = (executionSettings) =>
+        internal Func<ExecutionSettings,string> ScheduleJob = (executionSettings) =>
         {
             var runner = new TestJobRunner();
-            var jobData = new TestJobData(executionSettings);
-            runner.RunJob(jobData);
-            return jobData.guid;
+            return runner.RunJob(new TestJobData(executionSettings));
         };
         
         public string Execute(ExecutionSettings executionSettings)
@@ -119,8 +116,5 @@ namespace UnityEditor.TestTools.TestRunner.Api
         {
             return (((testMode & TestMode.EditMode) == TestMode.EditMode) ? TestPlatform.EditMode : 0) | (((testMode & TestMode.PlayMode) == TestMode.PlayMode) ? TestPlatform.PlayMode : 0);
         }
-
-        internal class RunProgressChangedEvent : UnityEvent<TestRunProgress> {}
-        internal static RunProgressChangedEvent runProgressChanged = new RunProgressChangedEvent();
     }
 }

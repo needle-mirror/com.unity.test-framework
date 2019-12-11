@@ -6,9 +6,9 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
 {
     internal class LegacyPlayModeRunTask : TestTaskBase
     {
-        public LegacyPlayModeRunTask()
+        public LegacyPlayModeRunTask() : base(true)
         {
-            SupportsResumingEnumerator = true;
+            
         }
         public override IEnumerator Execute(TestJobData testJobData)
         {
