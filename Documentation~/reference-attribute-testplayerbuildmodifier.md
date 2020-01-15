@@ -35,7 +35,7 @@ public class BuildModifier : ITestPlayerBuildModifier
 
 > **Note:** When building the Player, it includes all `TestPlayerBuildModifier` attributes across all loaded assemblies, independent of the currently used test filter. As the implementation references the `UnityEditor` namespace, the code is typically implemented in an Editor only assembly, as the `UnityEditor` namespace is not available otherwise.
 
-## Split build and run for Play Mode tests
+## Split build and run
 
 It is possible to use the Unity Editor for building the Player with tests, without [running the tests](./workflow-run-playmode-test-standalone.md). This allows for running the Player on e.g. another machine. In this case, it is necessary to modify the Player to build and implement a custom handling of the test result.
 

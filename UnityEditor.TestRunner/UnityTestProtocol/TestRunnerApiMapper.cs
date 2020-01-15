@@ -36,7 +36,8 @@ namespace UnityEditor.TestTools.TestRunner.UnityTestProtocol
                 duration = Convert.ToUInt64(result.Duration * 1000),
                 durationMicroseconds = Convert.ToUInt64(result.Duration * 1000000),
                 message = result.Message,
-                state = GetTestStateFromResult(result)
+                state = GetTestStateFromResult(result),
+                stackTrace = result.StackTrace
             };
         }
 

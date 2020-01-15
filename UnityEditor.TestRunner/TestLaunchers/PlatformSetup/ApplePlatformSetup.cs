@@ -31,6 +31,10 @@ namespace UnityEditor.TestTools.TestRunner
         {
         }
 
+        public void PostSuccessfulLaunchAction()
+        {
+        }
+
         public void CleanUp()
         {
         }

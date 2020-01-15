@@ -19,7 +19,8 @@ namespace UnityEditor.TestTools.TestRunner.GUI
         {
             EditorGUILayout.BeginHorizontal(GUILayout.ExpandHeight(false));
             base.PrintHeadPanel();
-            if (GUILayout.Button("Run all in player (" + EditorUserBuildSettings.activeBuildTarget + ")", EditorStyles.toolbarButton))
+            var runButtonText = EditorUserBuildSettings.installInBuildFolder ? "Export project" : "Run all in player";
+            if (GUILayout.Button($"{runButtonText} ({EditorUserBuildSettings.activeBuildTarget})", EditorStyles.toolbarButton))
             {
                 RunTestsInPlayer();
             }
@@ -36,7 +37,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                 var noTestText = "No tests to show";
                 if (!PlayerSettings.playModeTestRunnerEnabled)
                 {
-                    const string testsArePulledFromCustomAssemblues = "Test Assemblies are defined by Assembly Definitions where you add Unity References \"Test Assemblies\"";
+                    const string testsArePulledFromCustomAssemblues = "Test Assemblies are defined by Assembly Definitions that references the \"nunit.framework.dll\" Assembly Reference or the Assembly Definition Reference \"UnityEngine.TestRunner\".";
                     const string infoTextAboutTestsInAllAssemblies =
                         "To have tests in all assemblies enable it in the Test Runner window context menu";
                     noTestText += Environment.NewLine + testsArePulledFromCustomAssemblues + Environment.NewLine +

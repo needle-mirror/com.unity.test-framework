@@ -5,6 +5,7 @@ namespace UnityEditor.TestTools.TestRunner
         void Setup();
         void PostBuildAction();
         void PostSuccessfulBuildAction();
+        void PostSuccessfulLaunchAction();
         void CleanUp();
     }
 }

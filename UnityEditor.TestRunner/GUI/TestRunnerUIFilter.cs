@@ -105,6 +105,10 @@ namespace UnityEditor.TestTools.TestRunner.GUI
         public void Draw()
         {
             EditorGUI.BeginChangeCheck();
+            if (m_SearchString == null)
+            {
+                m_SearchString = "";
+            }
             m_SearchString = EditorGUILayout.ToolbarSearchField(m_SearchString);
             if (EditorGUI.EndChangeCheck() && SearchStringChanged != null)
             {

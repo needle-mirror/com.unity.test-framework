@@ -86,6 +86,8 @@ namespace UnityEditor.TestTools.TestRunner
                 }
 
                 editorConnectionTestCollector.PostSuccessfulBuildAction();
+                if((playerBuildOptions.BuildPlayerOptions.options & BuildOptions.AutoRunPlayer) != 0)
+                    editorConnectionTestCollector.PostSuccessfulLaunchAction();
             }
         }
 
@@ -140,11 +142,19 @@ namespace UnityEditor.TestTools.TestRunner
             scenes.AddRange(EditorBuildSettings.scenes.Select(x => x.path));
             buildOptions.scenes = scenes.ToArray();
 
-            buildOptions.options |= BuildOptions.AutoRunPlayer | BuildOptions.Development | BuildOptions.ConnectToHost | BuildOptions.IncludeTestAssemblies | BuildOptions.StrictMode;
+            buildOptions.options |= BuildOptions.Development | BuildOptions.ConnectToHost | BuildOptions.IncludeTestAssemblies | BuildOptions.StrictMode;
             buildOptions.target = m_TargetPlatform;
 
             if (EditorUserBuildSettings.waitForPlayerConnection)
                 buildOptions.options |= BuildOptions.WaitForPlayerConnection;
+
+            if (EditorUserBuildSettings.allowDebugging)
+                buildOptions.options |= BuildOptions.AllowDebugging;
+
+            if (EditorUserBuildSettings.installInBuildFolder)
+                buildOptions.options |= BuildOptions.InstallInBuildFolder;
+            else
+                buildOptions.options |= BuildOptions.AutoRunPlayer;
 
             var buildTargetGroup = EditorUserBuildSettings.activeBuildTargetGroup;
 

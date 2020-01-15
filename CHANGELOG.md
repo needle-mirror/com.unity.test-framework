@@ -1,4 +1,16 @@
 # Changelog
+## [1.1.11] - 2020-01-16
+- Fixed test runner dlls got included into player build (case 1211624)
+- Passing a non-full-path of XML file for -testResults in Unity Batchmode issue resolved, now passing "result.xml" creates the result file in the project file directory (case 959078)
+- Respect Script Debugging build setting when running tests
+
+## [1.1.10] - 2019-12-19
+- Introduced PostSuccessfulLaunchAction callback
+- Fixed an issue where canceling a UnityTest while it was running would incorrectly mark it as passed instead of canceled.
+- Added command line argument for running tests synchronously.
+- The test search bar now handles null values correctly.
+- The test output pane now retains its size on domain reloads.
+
 ## [1.1.9] - 2019-12-12
 - Rolled back refactoring to the test run system, as it caused issues in some corner cases.
 

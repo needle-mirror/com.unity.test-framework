@@ -7,6 +7,7 @@ namespace UnityEditor.TestTools.TestRunner.UnityTestProtocol
         public string message;
         public ulong duration; // milliseconds
         public ulong durationMicroseconds;
+        public string stackTrace;
 
         public TestFinishedMessage()
         {

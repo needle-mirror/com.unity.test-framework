@@ -19,6 +19,10 @@ namespace UnityEditor.TestTools.TestRunner
 
         public void PostSuccessfulBuildAction()
         {
+        }
+
+        public void PostSuccessfulLaunchAction()
+        {
             var connectionResult = -1;
             var maxTryCount = 100;
             var tryCount = maxTryCount;

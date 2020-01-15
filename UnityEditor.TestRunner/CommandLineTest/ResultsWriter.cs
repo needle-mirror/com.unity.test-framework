@@ -54,7 +54,11 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
 
         void CreateDirectory(string filePath)
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+            var driectoryPath = Path.GetDirectoryName(filePath);
+            if (!String.IsNullOrEmpty(driectoryPath))
+            {
+                Directory.CreateDirectory(driectoryPath);
+            }
         }
 
         public void WriteResultToStream(ITestResultAdaptor result, StreamWriter streamWriter, XmlWriterSettings settings = null)

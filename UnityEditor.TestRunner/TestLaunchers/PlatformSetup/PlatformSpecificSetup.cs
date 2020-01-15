@@ -75,6 +75,18 @@ namespace UnityEditor.TestTools.TestRunner
             dictionary[m_Target].PostSuccessfulBuildAction();
         }
 
+        public void PostSuccessfulLaunchAction()
+        {
+            var dictionary = GetSetup();
+
+            if (!dictionary.ContainsKey(m_Target))
+            {
+                return;
+            }
+
+            dictionary[m_Target].PostSuccessfulLaunchAction();
+        }
+
         public void CleanUp()
         {
             var dictionary = GetSetup();

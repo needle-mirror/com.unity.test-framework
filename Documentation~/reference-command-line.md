@@ -18,7 +18,7 @@ Runs Unity in batch mode and ensures no pop-up windows appear to eliminate the n
 
 Don't save your current **Project** into the Unity launcher/hub history.
 
-### runTest
+### runTests
 
 Runs tests in the Project.
 
@@ -54,6 +54,10 @@ The path where Unity should save the result file. By default, Unity saves it in 
 ### playerHeartbeatTimeout
 
 The time, in seconds, the editor should wait for heartbeats after starting a test run on a player. This defaults to 10 minutes.
+
+### runSynchronously
+
+If included, the test run will run tests synchronously, guaranteeing that all tests runs in one editor update call. Note that this is only supported for EditMode tests, and that tests which take multiple frames (i.e. `[UnityTest]` tests, or tests with `[UnitySetUp]` or `[UnityTearDown]` scaffolding) will be filtered out.
 
 ### testSettingsFile 
 
@@ -109,8 +113,4 @@ Set to one of the following values:
 
 - Mono2x = 0 
 - IL2CPP = 1 
-- WinRT DotNET = 2 
-
-#### useLatestScriptingRuntimeVersion
-
-Sets option to always use the latest [Scripting Runtime Version](https://docs.unity3d.com/Manual/ScriptingRuntimeUpgrade.html).
+- WinRT DotNET = 2

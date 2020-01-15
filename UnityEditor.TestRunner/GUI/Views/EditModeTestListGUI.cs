@@ -24,7 +24,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                 if (!PlayerSettings.playModeTestRunnerEnabled)
                 {
                     const string testsArePulledFromCustomAssemblies =
-                        "EditMode tests can be in Editor only Assemblies, either in the editor special folder or Editor only Assembly Definitions with added Unity References \"Test Assemblies\".";
+                        "EditMode tests can be in Editor only Assemblies, either in the editor special folder or Editor only Assembly Definitions that references the \"nunit.framework.dll\" Assembly Reference or any of the Assembly Definition References \"UnityEngine.TestRunner\" or \"UnityEditor.TestRunner\"..";
                     noTestText += Environment.NewLine + testsArePulledFromCustomAssemblies;
                 }
 

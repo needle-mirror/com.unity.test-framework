@@ -1,6 +1,6 @@
 # Actions outside of tests
 
-When writing tests, it is possible to avoid duplication of code by using the [SetUp and TearDown](https://github.com/nunit/docs/wiki/SetUp-and-TearDown) methods built into [NUnit](http://www.nunit.org/). The Unity Test Framework has extended these methods with extra functionality, which can yield commands and skip frames, in the same way as [UnityTest](./reference-unitytest.md).
+When writing tests, it is possible to avoid duplication of code by using the [SetUp and TearDown](https://github.com/nunit/docs/wiki/SetUp-and-TearDown) methods built into [NUnit](http://www.nunit.org/). The Unity Test Framework has extended these methods with extra functionality, which can yield commands and skip frames, in the same way as [UnityTest](./reference-attribute-unitytest.md).
 
 ## Action execution order
 

@@ -31,6 +31,7 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
             string testSettingsFilePath = null;
             int testRepetitions = 1;
             int? playerHeartbeatTimeout = null;
+            bool runSynchronously = false;
 
             var optionSet = new CommandLineOptionSet(
                 new CommandLineOption("quit", () => { quit = true; }),
@@ -41,7 +42,8 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
                 new CommandLineOption("testCategory", catagories => { testCategories = catagories; }),
                 new CommandLineOption("testSettingsFile", settingsFilePath => { testSettingsFilePath = settingsFilePath; }),
                 new CommandLineOption("testRepetitions", reps => { testRepetitions = int.Parse(reps); }),
-                new CommandLineOption("playerHeartbeatTimeout", timeout => { playerHeartbeatTimeout = int.Parse(timeout); })
+                new CommandLineOption("playerHeartbeatTimeout", timeout => { playerHeartbeatTimeout = int.Parse(timeout); }),
+                new CommandLineOption("runSynchronously", () => { runSynchronously = true; })
             );
             optionSet.Parse(commandLineArgs);
 
@@ -74,7 +76,8 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
             {
                 filters = new []{filter},
                 overloadTestRunSettings = new RunSettings(testSettings),
-                targetPlatform = buildTarget
+                targetPlatform = buildTarget,
+                runSynchronously = runSynchronously
             };
 
             if (playerHeartbeatTimeout != null)

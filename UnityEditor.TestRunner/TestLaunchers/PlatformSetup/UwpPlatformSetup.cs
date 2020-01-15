@@ -39,6 +39,10 @@ namespace UnityEditor.TestTools.TestRunner
         {
         }
 
+        public void PostSuccessfulLaunchAction()
+        {
+        }
+
         public void CleanUp()
         {
             PlayerSettings.WSA.SetCapability(PlayerSettings.WSACapability.InternetClientServer, m_InternetClientServer);

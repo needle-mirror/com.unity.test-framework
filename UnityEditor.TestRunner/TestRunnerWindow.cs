@@ -39,7 +39,8 @@ namespace UnityEditor.TestTools.TestRunner
         private bool m_Enabled;
         public TestFilterSettings filterSettings;
 
-        private readonly SplitterState m_Spl = new SplitterState(new float[] { 75, 25 }, new[] { 32, 32 }, null);
+        [SerializeField]
+        private SplitterState m_Spl = new SplitterState(new float[] { 75, 25 }, new[] { 32, 32 }, null);
 
         private TestRunnerWindowSettings m_Settings;
 
