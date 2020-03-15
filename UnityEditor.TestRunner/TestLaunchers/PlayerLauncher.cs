@@ -85,9 +85,11 @@ namespace UnityEditor.TestTools.TestRunner
                     throw new TestLaunchFailedException("Player build failed");
                 }
 
-                editorConnectionTestCollector.PostSuccessfulBuildAction();
-                if((playerBuildOptions.BuildPlayerOptions.options & BuildOptions.AutoRunPlayer) != 0)
+                if ((playerBuildOptions.BuildPlayerOptions.options & BuildOptions.AutoRunPlayer) != 0)
+                {
+                    editorConnectionTestCollector.PostSuccessfulBuildAction();
                     editorConnectionTestCollector.PostSuccessfulLaunchAction();
+                }
             }
         }
 
@@ -201,7 +203,8 @@ namespace UnityEditor.TestTools.TestRunner
 
         private BuildPlayerOptions ModifyBuildOptions(BuildPlayerOptions buildOptions)
         {
-            var allAssemblies = AppDomain.CurrentDomain.GetAssemblies().Where(x => x.GetReferencedAssemblies().Any(z => z.Name == "UnityEngine.TestRunner")).ToArray();
+            var allAssemblies = AppDomain.CurrentDomain.GetAssemblies()
+                .Where(x => x.GetReferencedAssemblies().Any(z => z.Name == "UnityEditor.TestRunner")).ToArray();
             var attributes = allAssemblies.SelectMany(assembly => assembly.GetCustomAttributes(typeof(TestPlayerBuildModifierAttribute), true).OfType<TestPlayerBuildModifierAttribute>()).ToArray();
             var modifiers = attributes.Select(attribute => attribute.ConstructModifier()).ToArray();
 

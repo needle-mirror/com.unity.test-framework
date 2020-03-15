@@ -30,7 +30,7 @@ namespace UnityEditor.TestTools.TestRunner
 
         public static bool UpdateEnumeratorPcIfNeeded(IEnumerator enumerator)
         {
-            if (m_PC > 0)
+            if (m_PC != 0)
             {
                 GetPCFieldInfo(enumerator).SetValue(enumerator, m_PC);
                 m_PC = 0;

@@ -26,7 +26,7 @@ namespace UnityEditor.TestRunner.TestLaunchers
         [SerializeField] 
         private int m_HearbeatTimeOut;
         
-        private IDelayedCallback m_TimeoutCallback;
+        private UnityEditor.TestTools.TestRunner.DelayedCallback m_TimeoutCallback;
         
         public void Init(BuildTarget buildTarget, int heartbeatTimeout)
         {
@@ -45,12 +45,12 @@ namespace UnityEditor.TestRunner.TestLaunchers
         private void DelegateEditorConnectionEvents()
         {
             m_RegisteredConnectionCallbacks = true;
-            //This is needed because RemoteTestResultReciever is not a ScriptableObject
+            //This is needed because RemoteTestResultReceiver is not a ScriptableObject
             EditorConnection.instance.Register(PlayerConnectionMessageIds.runStartedMessageId, RunStarted);
             EditorConnection.instance.Register(PlayerConnectionMessageIds.runFinishedMessageId, RunFinished);
             EditorConnection.instance.Register(PlayerConnectionMessageIds.testStartedMessageId, TestStarted);
             EditorConnection.instance.Register(PlayerConnectionMessageIds.testFinishedMessageId, TestFinished);
-            EditorConnection.instance.Register(PlayerConnectionMessageIds.playerAliveHeartbeat, PlayerAliveHearbeat);
+            EditorConnection.instance.Register(PlayerConnectionMessageIds.playerAliveHeartbeat, PlayerAliveHeartbeat);
         }
 
         private void RunStarted(MessageEventArgs messageEventArgs)
@@ -81,7 +81,7 @@ namespace UnityEditor.TestRunner.TestLaunchers
             CallbacksDelegator.instance.TestFinishedRemotely(messageEventArgs.data);
         }
         
-        private void PlayerAliveHearbeat(MessageEventArgs messageEventArgs)
+        private void PlayerAliveHeartbeat(MessageEventArgs messageEventArgs)
         {
             m_TimeoutCallback?.Reset();
         }
@@ -99,7 +99,7 @@ namespace UnityEditor.TestRunner.TestLaunchers
         public void PostSuccessfulBuildAction()
         {
             m_PlatformSpecificSetup.PostSuccessfulBuildAction();
-            m_TimeoutCallback = new DelayedCallback(TimeoutCallback, m_HearbeatTimeOut);
+            m_TimeoutCallback = new UnityEditor.TestTools.TestRunner.DelayedCallback(TimeoutCallback, m_HearbeatTimeOut);
         }
 
         public void PostSuccessfulLaunchAction()

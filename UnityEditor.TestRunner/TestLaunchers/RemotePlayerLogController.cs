@@ -18,6 +18,9 @@ namespace UnityEditor.TestRunner.TestLaunchers
         public void SetBuildTarget(BuildTarget buildTarget)
         {
             m_Loggers = GetDeploymentTargetLoggers(buildTarget);
+
+            if (m_Loggers == null)
+                Debug.Log("Deployment target logger could not be created");
         }
 
         public void SetLogsDirectory(string dir)
@@ -57,6 +60,9 @@ namespace UnityEditor.TestRunner.TestLaunchers
             try
             {
                 deploymentTargetManager = DeploymentTargetManager.CreateInstance(EditorUserBuildSettings.activeBuildTargetGroup, buildTarget);
+
+                if (deploymentTargetManager == null)
+                    return null;
             }
             catch (NotSupportedException ex)
             {

@@ -1,4 +1,17 @@
 # Changelog
+## [1.1.13] - 2020-03-16
+- Fixed an issue where a combination of Entering / Exiting playmode and recompiling scripts would result in the test run repeating (case 1213958).
+- Fixed a regression from 1.1.12 where prefabs left in the scene would be cleaned up to aggressively.
+- Fixed Test execution timed out. No activity received from the player in 600 seconds error when player is not supposed to start (case 1225147)
+
+## [1.1.12] - 2020-03-02
+- Now 'Open error line' for a failed UTF test does not throw exceptions for corrupted testable pdb in Editor release mode (case 1118259)
+- Fixed an issue where running a test fixture would also run other fixtures with the same full name (namespace plus classname) in other assemblies (case 1197385).
+- Running tests with the same full name, with a domain reload inbetween, will no longer fail to initialize the fixture of the second class (case 1205240).
+- Running a playmode tests with "Maximize on Play" will now correctly show the result of the tests in the test runner window (case 1014908).
+- Fixed an issue where leaving a game object in a scene with a DontSaveInEditor hideFlags would result in an error on cleanup (case 1136883).
+- Now ITestPlayerBuildModifier.ModifyOptions is called as expected when running tests on a device (case 1213845)
+
 ## [1.1.11] - 2020-01-16
 - Fixed test runner dlls got included into player build (case 1211624)
 - Passing a non-full-path of XML file for -testResults in Unity Batchmode issue resolved, now passing "result.xml" creates the result file in the project file directory (case 959078)

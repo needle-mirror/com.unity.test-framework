@@ -42,12 +42,15 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
 
         protected static bool ShouldRestore(ITest loadedTest)
         {
-            return UnityWorkItemDataHolder.alreadyExecutedTests != null && UnityWorkItemDataHolder.alreadyExecutedTests.Contains(loadedTest.FullName);
+            return UnityWorkItemDataHolder.alreadyExecutedTests != null &&
+                   UnityWorkItemDataHolder.alreadyExecutedTests.Contains(loadedTest.GetUniqueName());
         }
 
         protected bool ShouldExecuteStartEvent()
         {
-            return UnityWorkItemDataHolder.alreadyStartedTests != null && UnityWorkItemDataHolder.alreadyStartedTests.All(x => x != Test.FullName) && !ShouldRestore(Test);
+            return UnityWorkItemDataHolder.alreadyStartedTests != null &&
+                   UnityWorkItemDataHolder.alreadyStartedTests.All(x => x != Test.GetUniqueName()) &&
+                   !ShouldRestore(Test);
         }
 
         protected abstract IEnumerable PerformWork();

@@ -133,7 +133,7 @@ namespace UnityEditor.TestTools.TestRunner
 
                 EnumeratorStepHelper.SetEnumeratorPC(m_CurrentPC);
 
-                UnityWorkItemDataHolder.alreadyExecutedTests = m_ExecutedTests.Select(x => x.fullName).ToList();
+                UnityWorkItemDataHolder.alreadyExecutedTests = m_ExecutedTests.Select(x => x.uniqueName).ToList();
                 UnityWorkItemDataHolder.alreadyStartedTests = m_AlreadyStartedTests;
                 Run();
             }
@@ -141,12 +141,12 @@ namespace UnityEditor.TestTools.TestRunner
 
         public void TestStartedEvent(ITest test)
         {
-            m_AlreadyStartedTests.Add(test.FullName);
+            m_AlreadyStartedTests.Add(test.GetUniqueName());
         }
 
         public void TestFinishedEvent(ITestResult testResult)
         {
-            m_AlreadyStartedTests.Remove(testResult.FullName);
+            m_AlreadyStartedTests.Remove(testResult.Test.GetUniqueName());
             m_ExecutedTests.Add(TestResultSerializer.MakeFromTestResult(testResult));
         }
 

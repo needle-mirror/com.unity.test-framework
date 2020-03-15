@@ -99,10 +99,6 @@ namespace UnityEditor.TestTools.TestRunner
         public void OnDestroy()
         {
             EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
-            if (m_testRunnerApi != null)
-            {
-                m_testRunnerApi.UnregisterCallbacks(m_WindowResultUpdater);
-            }
         }
 
         private void OnEnable()

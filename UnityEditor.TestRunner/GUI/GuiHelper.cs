@@ -46,7 +46,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             if (string.IsNullOrEmpty(fileOpenInfo.FilePath))
             {
                 var dirPath = Paths.UnifyDirectorySeparator(Application.dataPath);
-                var allCsFiles = Directory.GetFiles(dirPath, string.Format("*{0}", fileExtension), SearchOption.AllDirectories)
+                var allCsFiles = Directory.GetFiles(dirPath, $"*{fileExtension}", SearchOption.AllDirectories)
                     .Select(Paths.UnifyDirectorySeparator);
 
                 var fileName = allCsFiles.FirstOrDefault(x =>
@@ -82,15 +82,22 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             if (!matchingLines.Any())
                 return false;
 
-            var fileOpenInfo = matchingLines
+            var fileOpenInfos = matchingLines
                 .Select(x => regex.Match(x))
                 .Select(x =>
                     new FileOpenInfo
                     {
                         FilePath = x.Groups["path"].Value,
                         LineNumber = int.Parse(x.Groups["line"].Value)
-                    })
-                .First(openInfo => !string.IsNullOrEmpty(openInfo.FilePath) && File.Exists(openInfo.FilePath));
+                    }).ToList();
+
+            var fileOpenInfo = fileOpenInfos
+                .FirstOrDefault(openInfo => !string.IsNullOrEmpty(openInfo.FilePath) && File.Exists(openInfo.FilePath));
+
+            if (fileOpenInfo == null)
+            {
+                return false;
+            }
 
             var filePath = FilePathToAssetsRelativeAndUnified(fileOpenInfo.FilePath);
             AssetsDatabaseHelper.OpenAssetInItsDefaultExternalEditor(filePath, fileOpenInfo.LineNumber);

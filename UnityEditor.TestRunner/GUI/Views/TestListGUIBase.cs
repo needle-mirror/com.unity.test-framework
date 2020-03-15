@@ -285,6 +285,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             }
             m_QueuedResults.Clear();
             TestSelectionCallback(m_TestListState.selectedIDs.ToArray());
+            m_TestRunnerUIFilter.UpdateCounters(newResultList);
             Repaint();
             m_Window.Repaint();
         }
@@ -406,6 +407,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
         private TestRunnerFilter[] GetSelectedTestsAsFilter(IEnumerable<int> selectedIDs)
         {
             var namesToRun = new List<string>();
+            var assembliesForNamesToRun = new List<string>();
             var exactNamesToRun = new List<string>();
             var assembliesToRun = new List<string>();
             foreach (var lineId in selectedIDs)
@@ -423,12 +425,23 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                         }
 
                         if (testLine.FullName.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
+                        {
                             assembliesToRun.Add(TestRunnerFilter.AssemblyNameFromPath(testLine.FullName));
+                        }
                         else
-                            namesToRun.Add(string.Format("^{0}$", Regex.Escape(testLine.FullName)));
+                        {
+                            namesToRun.Add($"^{Regex.Escape(testLine.FullName)}$");
+                            var assembly = TestRunnerFilter.AssemblyNameFromPath(testLine.GetAssemblyName());
+                            if (!string.IsNullOrEmpty(assembly) && !assembliesForNamesToRun.Contains(assembly))
+                            {
+                                assembliesForNamesToRun.Add(assembly);
+                            }
+                        }
                     }
                     else
+                    {
                         exactNamesToRun.Add(testLine.FullName);
+                    }
                 }
             }
 
@@ -446,7 +459,8 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             {
                 filters.Add(new TestRunnerFilter()
                 {
-                    groupNames = namesToRun.ToArray()
+                    groupNames = namesToRun.ToArray(),
+                    assemblyNames = assembliesForNamesToRun.ToArray()
                 });
             }
             

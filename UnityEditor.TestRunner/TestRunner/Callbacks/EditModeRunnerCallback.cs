@@ -115,6 +115,14 @@ namespace UnityEditor.TestTools.TestRunner
             }
             else
             {
+                foreach (var obj in FindObjectsOfType<GameObject>())
+                {
+                    if (obj != null && obj.transform.parent != null && (obj.transform.parent.hideFlags & HideFlags.DontSaveInEditor) == HideFlags.DontSaveInEditor && obj.transform.parent.gameObject != null)
+                    {
+                        DestroyImmediate(obj.transform.parent.gameObject); 
+                    }
+                }
+
                 EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
             }
             CleanUp();

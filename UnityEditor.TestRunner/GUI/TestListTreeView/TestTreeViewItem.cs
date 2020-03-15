@@ -20,6 +20,22 @@ namespace UnityEditor.TestTools.TestRunner.GUI
         public bool IsGroupNode { get { return m_Test.IsSuite; } }
 
         public string FullName { get { return m_Test.FullName; } }
+        
+        public string GetAssemblyName()
+        {
+            var test = m_Test;
+            while (test != null)
+            {
+                if (test.IsTestAssembly)
+                {
+                    return test.FullName;
+                }
+
+                test = test.Parent;
+            }
+
+            return null;
+        }
 
         public TestTreeViewItem(ITestAdaptor test, int depth, TreeViewItem parent)
             : base(GetId(test), depth, parent, test.Name)

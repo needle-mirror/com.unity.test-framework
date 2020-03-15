@@ -49,8 +49,8 @@ namespace UnityEngine.TestTools.TestRunner.GUI
             if (AreOptionalFiltersEmpty())
                 return true;
 
-            if (assemblyNames == null)
-                return false;
+            if (assemblyNames == null || assemblyNames.Length == 0)
+                return true;
 
             int openingBracket = id.IndexOf('[');
             int closingBracket = id.IndexOf(']');
@@ -76,8 +76,8 @@ namespace UnityEngine.TestTools.TestRunner.GUI
             if (AreOptionalFiltersEmpty())
                 return true;
 
-            if (groupNames == null)
-                return false;
+            if (groupNames == null || groupNames.Length == 0)
+                return true;
 
             foreach (var nameFromFilter in groupNames)
             {
@@ -108,8 +108,8 @@ namespace UnityEngine.TestTools.TestRunner.GUI
             if (AreOptionalFiltersEmpty())
                 return true;
 
-            if (testNames == null)
-                return false;
+            if (testNames == null || testNames.Length == 0)
+                return true;
 
             foreach (var exactName in testNames)
             {
@@ -140,7 +140,7 @@ namespace UnityEngine.TestTools.TestRunner.GUI
             {
                 if (!result.IsSuite && CategoryMatches(result.Categories))
                 {
-                    if (IDMatchesAssembly(result.Id) || NameMatches(result.FullName) || NameMatchesExactly(result.FullName))
+                    if (IDMatchesAssembly(result.Id) && NameMatches(result.FullName) && NameMatchesExactly(result.FullName))
                     {
                         result.Clear();
                         ClearAncestors(newResultList, result.ParentId);

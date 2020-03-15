@@ -4,6 +4,7 @@ using System.Text;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
 using UnityEngine;
+using UnityEngine.TestRunner.NUnitExtensions;
 
 namespace UnityEditor.TestTools.TestRunner
 {
@@ -33,6 +34,8 @@ namespace UnityEditor.TestTools.TestRunner
 
         [SerializeField] private string status;
 
+        [SerializeField] public string uniqueName;
+
         public static TestResultSerializer MakeFromTestResult(ITestResult result)
         {
             var wrapper = new TestResultSerializer();
@@ -46,6 +49,7 @@ namespace UnityEditor.TestTools.TestRunner
             wrapper.stacktrace = result.StackTrace;
             wrapper.message = result.Message;
             wrapper.startTimeAO = result.StartTime.ToOADate();
+            wrapper.uniqueName = result.Test.GetUniqueName();
             return wrapper;
         }
 
