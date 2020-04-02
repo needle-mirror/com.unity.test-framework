@@ -72,6 +72,7 @@ namespace UnityEditor.TestTools.TestRunner
                 var playerBuildOptions = GetBuildOptions(scenePath);
 
                 var success = BuildAndRunPlayer(playerBuildOptions);
+                
                 editorConnectionTestCollector.PostBuildAction();
                 ExecutePostBuildCleanupMethods(runner.LoadedTest, filter);
 
@@ -99,7 +100,12 @@ namespace UnityEditor.TestTools.TestRunner
             {
                 runner.AddEventHandlerMonoBehaviour<PlayModeRunnerCallback>();
                 runner.settings = m_Settings;
-                runner.AddEventHandlerMonoBehaviour<RemoteTestResultSender>();
+                var commandLineArgs = Environment.GetCommandLineArgs();
+                if (!commandLineArgs.Contains("-doNotReportTestResultsBackToEditor"))
+                {
+                    runner.AddEventHandlerMonoBehaviour<RemoteTestResultSender>();
+                }
+                runner.AddEventHandlerMonoBehaviour<PlayerQuitHandler>();
                 runner.AddEventHandlerScriptableObject<TestRunCallbackListener>();
             });
             return scene;

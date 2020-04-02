@@ -1,4 +1,10 @@
 # Changelog
+## [1.1.14] - 2020-04-03
+- Added the 'assemblyNames' command line argument for filtering on the assembly level.
+- The dll and project level of the tree view should now correctly show the results when running tests in a player (case 1197026).
+- Optimize usage of player connection when transfering test results (case 1229200).
+- Ignore internal test framework tests assertions (case 1206961).
+
 ## [1.1.13] - 2020-03-16
 - Fixed an issue where a combination of Entering / Exiting playmode and recompiling scripts would result in the test run repeating (case 1213958).
 - Fixed a regression from 1.1.12 where prefabs left in the scene would be cleaned up to aggressively.

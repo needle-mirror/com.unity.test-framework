@@ -103,11 +103,18 @@ namespace UnityEngine.TestRunner.NUnitExtensions
 
         public static string GetFullName(ITest test)
         {
-            if (test.TypeInfo == null && (test.Parent == null || test.Parent.TypeInfo == null))
+            var typeInfo = test.TypeInfo ?? test.Parent?.TypeInfo ?? test.Tests.FirstOrDefault()?.TypeInfo;
+            if (typeInfo == null)
             {
-                return "[" + test.FullName + "]";
+                return "[" + test.Name + "]";
             }
-            var assemblyId = test.TypeInfo == null ? test.Parent.TypeInfo.Assembly.GetName().Name : test.TypeInfo.Assembly.GetName().Name;
+            
+            var assemblyId = typeInfo.Assembly.GetName().Name;
+            if (assemblyId == test.Name)
+            {
+                return $"[{test.Name}]";
+            }
+            
             return string.Format("[{0}][{1}]", assemblyId, test.FullName);
         }
 

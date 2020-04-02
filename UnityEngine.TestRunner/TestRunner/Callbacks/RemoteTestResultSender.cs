@@ -26,26 +26,7 @@ namespace UnityEngine.TestTools.TestRunner.Callbacks
 
         public void Start()
         {
-            PlayerConnection.instance.Register(PlayerConnectionMessageIds.quitPlayerMessageId, EditorProccessedTheResult);
             StartCoroutine(SendDataRoutine());
-        }
-
-        private void EditorProccessedTheResult(MessageEventArgs arg0)
-        {
-            if (arg0.data != null)
-            {
-                return;
-            }
-
-            //Some platforms don't quit, so we need to disconnect to make sure they will not connect to another editor instance automatically.
-            PlayerConnection.instance.DisconnectAll();
-
-            //XBOX has an error when quitting
-            if (Application.platform == RuntimePlatform.XboxOne)
-            {
-                return;
-            }
-            Application.Quit();
         }
 
         private byte[] SerializeObject(object objectToSerialize)

@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using UnityEditor.TestTools.TestRunner.Api;
 using UnityEngine;
 
@@ -77,7 +78,7 @@ namespace UnityEditor.TestTools.TestRunner
             PlayerSettings.SplashScreen.show = false;
 
             m_OldproductName = PlayerSettings.productName;
-            PlayerSettings.productName = "UnityTestFramework";
+            PlayerSettings.productName = string.Join("_", Application.productName.Split(Path.GetInvalidFileNameChars()));
 
 #pragma warning disable 618
             m_OldLightmapping = Lightmapping.giWorkflowMode;

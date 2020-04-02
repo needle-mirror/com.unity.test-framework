@@ -47,6 +47,10 @@ Platform/Type convention is from the [BuildTarget](https://docs.unity3d.com/Scri
 * PS4
 * XboxOne
 
+### assemblyNames
+
+A semicolon-separated list of test assemblies to include in the run.
+
 ### testResults
 
 The path where Unity should save the result file. By default, Unity saves it in the Project’s root folder.
