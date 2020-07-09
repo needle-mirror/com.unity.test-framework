@@ -3,6 +3,9 @@ using System.IO;
 using UnityEditor.TestRunner.CommandLineParser;
 using UnityEditor.TestTools.TestRunner.Api;
 using UnityEngine;
+using UnityEditor.Compilation;
+using System.Linq;
+using UnityEngine.TestTools;
 
 namespace UnityEditor.TestTools.TestRunner.CommandLineTest
 {
@@ -20,11 +23,10 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
             {
                 return;
             }
-
-            executer.ExitOnCompileErrors();
-
+          
             if (RunData.instance.isRunning)
             {
+                executer.ExitOnCompileErrors();
                 executer.SetUpCallbacks(RunData.instance.executionSettings);
                 return;
             }

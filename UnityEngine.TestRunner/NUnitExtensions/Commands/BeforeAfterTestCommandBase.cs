@@ -50,7 +50,17 @@ namespace UnityEngine.TestTools
             while (state.NextBeforeStepIndex < BeforeActions.Length)
             {
                 var action = BeforeActions[state.NextBeforeStepIndex];
-                var enumerator = InvokeBefore(action, Test, unityContext);
+                IEnumerator enumerator;
+                try
+                {
+                    enumerator = InvokeBefore(action, Test, unityContext);
+                }
+                catch (Exception ex)
+                {
+                    state.TestHasRun = true;
+                    context.CurrentResult.RecordPrefixedException(m_BeforeErrorPrefix, ex);
+                    break;
+                }
                 ActivePcHelper.SetEnumeratorPC(enumerator, state.NextBeforeStepPc);
 
                 using (var logScope = new LogScope())
@@ -120,7 +130,17 @@ namespace UnityEngine.TestTools
             {
                 state.TestAfterStarted = true;
                 var action = AfterActions[state.NextAfterStepIndex];
-                var enumerator = InvokeAfter(action, Test, unityContext);
+                IEnumerator enumerator;
+                try
+                {
+                    enumerator = InvokeAfter(action, Test, unityContext);
+                }
+                catch (Exception ex)
+                {
+                    context.CurrentResult.RecordPrefixedException(m_AfterErrorPrefix, ex);
+                    state.StoreTestResult(context.CurrentResult);
+                    break;
+                }
                 ActivePcHelper.SetEnumeratorPC(enumerator, state.NextAfterStepPc);
 
                 using (var logScope = new LogScope())

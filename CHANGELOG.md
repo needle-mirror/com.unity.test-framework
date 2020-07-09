@@ -1,4 +1,13 @@
 # Changelog
+
+## [1.1.16] - 2020-07-09
+- Follow up on fix when UTF picks up on outdated compilation errors
+
+## [1.1.15] - 2020-07-02
+- Fixed an issue where an exception is thrown on getting the enumerator of a UnityTest would result in stopping the test run instead of failing it (case 1212000).
+- Including a trailing semi-colon in a testName filter no longer results in all tests being run (case 1171200).
+- Fixed and issue when Unity Test Framework exits editor on an outdated script compilation error (during api updates)
+
 ## [1.1.14] - 2020-04-03
 - Added the 'assemblyNames' command line argument for filtering on the assembly level.
 - The dll and project level of the tree view should now correctly show the results when running tests in a player (case 1197026).

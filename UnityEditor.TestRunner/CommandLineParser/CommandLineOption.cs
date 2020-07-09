@@ -39,7 +39,7 @@ namespace UnityEditor.TestRunner.CommandLineParser
                 return null;
             }
 
-            return value.Split(';').ToArray();
+            return value.Split(new[] {';'}, StringSplitOptions.RemoveEmptyEntries);
         }
     }
 }
