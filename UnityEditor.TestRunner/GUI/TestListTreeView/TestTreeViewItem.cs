@@ -3,7 +3,6 @@ using System.Reflection;
 using System.Text;
 using UnityEditor.IMGUI.Controls;
 using UnityEditor.TestTools.TestRunner.Api;
-using UnityEngine.TestTools.TestRunner.GUI;
 
 namespace UnityEditor.TestTools.TestRunner.GUI
 {
@@ -69,6 +68,10 @@ namespace UnityEditor.TestTools.TestRunner.GUI
 
         public string GetResultText()
         {
+            if (result.resultStatus == TestRunnerResult.ResultStatus.NotRun)
+            {
+                return string.Empty;
+            }
             var durationString = String.Format("{0:0.000}", result.duration);
             var sb = new StringBuilder(string.Format("{0} ({1}s)", displayName.Trim(), durationString));
             if (!string.IsNullOrEmpty(result.description))

@@ -1,23 +1,18 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.IO;
-using NUnit.Framework.Interfaces;
-using NUnit.Framework.Internal;
-using NUnit.Framework.Internal.Filters;
-using UnityEngine.TestRunner.NUnitExtensions.Filters;
 
-namespace UnityEngine.TestTools.TestRunner.GUI
+namespace UnityEditor.TestTools.TestRunner.GUI
 {
     [Serializable]
-    internal class TestRunnerFilter
+    internal class UITestRunnerFilter
     {
 #pragma warning disable 649
         public string[] assemblyNames;
         public string[] groupNames;
         public string[] categoryNames;
-        public static TestRunnerFilter empty = new TestRunnerFilter();
         public string[] testNames;
         public int testRepetitions = 1;
         public bool synchronousOnly = false;
@@ -54,20 +49,23 @@ namespace UnityEngine.TestTools.TestRunner.GUI
 
             int openingBracket = id.IndexOf('[');
             int closingBracket = id.IndexOf(']');
-            if (openingBracket >= 0 && openingBracket < id.Length && closingBracket > openingBracket && openingBracket < id.Length)
+            if (openingBracket >= 0 && openingBracket < id.Length && closingBracket > openingBracket &&
+                openingBracket < id.Length)
             {
                 //Some assemblies are absolute and explicitly part of the test ID e.g.
                 //"[/path/to/assembly-name.dll][rest of ID ...]"
                 //While some are minimal assembly names e.g.
                 //"[assembly-name][rest of ID ...]"
                 //Strip them down to just the assembly name
-                string assemblyNameFromID = AssemblyNameFromPath(id.Substring(openingBracket + 1, closingBracket - openingBracket - 1));
+                string assemblyNameFromID =
+                    AssemblyNameFromPath(id.Substring(openingBracket + 1, closingBracket - openingBracket - 1));
                 foreach (string assemblyName in assemblyNames)
                 {
                     if (assemblyName.Equals(assemblyNameFromID, StringComparison.OrdinalIgnoreCase))
                         return true;
                 }
             }
+
             return false;
         }
 
@@ -89,6 +87,7 @@ namespace UnityEngine.TestTools.TestRunner.GUI
                 if (Regex.IsMatch(name, regex))
                     return true;
             }
+
             return false;
         }
 
@@ -116,6 +115,7 @@ namespace UnityEngine.TestTools.TestRunner.GUI
                 if (name == exactName)
                     return true;
             }
+
             return false;
         }
 
@@ -140,54 +140,14 @@ namespace UnityEngine.TestTools.TestRunner.GUI
             {
                 if (!result.IsSuite && CategoryMatches(result.Categories))
                 {
-                    if (IDMatchesAssembly(result.Id) && NameMatches(result.FullName) && NameMatchesExactly(result.FullName))
+                    if (IDMatchesAssembly(result.Id) && NameMatches(result.FullName) &&
+                        NameMatchesExactly(result.FullName))
                     {
                         result.Clear();
                         ClearAncestors(newResultList, result.ParentId);
                     }
                 }
             }
-        }
-
-        public ITestFilter BuildNUnitFilter()
-        {
-            var filters = new List<ITestFilter>();
-
-            if (testNames != null && testNames.Length != 0)
-            {
-                var nameFilter = new OrFilter(testNames.Select(n => new FullNameFilter(n)).ToArray());
-                filters.Add(nameFilter);
-            }
-
-            if (groupNames != null && groupNames.Length != 0)
-            {
-                var exactNamesFilter = new OrFilter(groupNames.Select(n =>
-                {
-                    var f = new FullNameFilter(n);
-                    f.IsRegex = true;
-                    return f;
-                }).ToArray());
-                filters.Add(exactNamesFilter);
-            }
-
-            if (assemblyNames != null && assemblyNames.Length != 0)
-            {
-                var assemblyFilter = new OrFilter(assemblyNames.Select(c => new AssemblyNameFilter(c)).ToArray());
-                filters.Add(assemblyFilter);
-            }
-
-            if (categoryNames != null && categoryNames.Length != 0)
-            {
-                var categoryFilter = new OrFilter(categoryNames.Select(c => new CategoryFilterExtended(c) {IsRegex = true}).ToArray());
-                filters.Add(categoryFilter);
-            }
-
-            if (synchronousOnly)
-            {
-                filters.Add(new SynchronousFilter());
-            }
-
-            return filters.Count == 0 ? TestFilter.Empty : new AndFilter(filters.ToArray());
         }
 
         internal interface IClearableResult
@@ -199,5 +159,6 @@ namespace UnityEngine.TestTools.TestRunner.GUI
             List<string> Categories { get; }
             void Clear();
         }
+
     }
 }

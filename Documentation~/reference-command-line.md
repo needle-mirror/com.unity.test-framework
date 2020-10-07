@@ -24,11 +24,11 @@ Runs tests in the Project.
 
 ### testCategory
 
-A semicolon-separated list of test categories to include in the run. If using both `testFilter` and `testCategory`, then tests only run that matches both.
+A semicolon-separated list of test categories to include in the run. If using both `testFilter` and `testCategory`, then tests only run that matches both. This argument supports negation using '!'. If using '!MyCategory' then no tests with the 'MyCategory' category will be included in the run.
 
 ### testFilter
 
-A semicolon-separated list of test names to run, or a regular expression pattern to match tests by their full name.
+A semicolon-separated list of test names to run, or a regular expression pattern to match tests by their full name. This argument supports negation using '!'. If using the test filter '!MyNamespace.Something.MyTest', then all tests except that test will be run.
 
 ### testPlatform
 

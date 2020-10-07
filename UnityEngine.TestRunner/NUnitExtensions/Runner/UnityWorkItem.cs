@@ -15,6 +15,7 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
         protected readonly WorkItemFactory m_Factory;
         protected bool m_ExecuteTestStartEvent;
         protected bool m_DontRunRestoringResult;
+        protected const int k_DefaultTimeout = 1000 * 180;
         public event EventHandler Completed;
 
         public bool ResultedInDomainReload { get; internal set; }

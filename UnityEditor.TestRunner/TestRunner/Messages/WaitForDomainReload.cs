@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using UnityEditor;
+using UnityEditorInternal;
 
 namespace UnityEngine.TestTools
 {
@@ -18,27 +19,17 @@ namespace UnityEngine.TestTools
         {
             EditorApplication.UnlockReloadAssemblies();
 
-            // Detect if AssetDatabase.Refresh was called (true) or if it will be called on next tick
-            bool isAsync = EditorApplication.isCompiling;
-
-            yield return null;
-
-            if (!isAsync)
-            {
-                EditorApplication.LockReloadAssemblies();
-                throw new Exception("Expected domain reload, but it did not occur");
-            }
-
-            while (EditorApplication.isCompiling)
+            while (InternalEditorUtility.IsScriptReloadRequested() || EditorApplication.isCompiling)
             {
                 yield return null;
             }
 
-            if (EditorUtility.scriptCompilationFailed)
-            {
-                EditorApplication.LockReloadAssemblies();
-                throw new Exception("Script compilation failed");
-            }
+            // Add this point the domain reload should have occured and stopped any further progress on the instruction.
+            EditorApplication.LockReloadAssemblies();
+            throw new Exception(
+                EditorUtility.scriptCompilationFailed ? 
+                    "Script compilation failed" : 
+                    "Expected domain reload, but it did not occur");
         }
     }
 }

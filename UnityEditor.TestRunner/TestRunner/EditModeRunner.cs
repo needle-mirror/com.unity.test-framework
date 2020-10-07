@@ -432,7 +432,7 @@ namespace UnityEditor.TestTools.TestRunner
 
         public ITestFilter GetFilter()
         {
-            return new OrFilter(m_Filters.Select(filter => filter.BuildNUnitFilter(RunningSynchronously)).ToArray());
+            return new OrFilter(m_Filters.Select(filter => filter.ToRuntimeTestRunnerFilter(RunningSynchronously).BuildNUnitFilter()).ToArray());
         }
     }
 }

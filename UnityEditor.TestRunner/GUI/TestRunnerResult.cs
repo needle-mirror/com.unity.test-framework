@@ -2,12 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor.TestTools.TestRunner.Api;
-using UnityEngine.TestTools.TestRunner.GUI;
 
 namespace UnityEditor.TestTools.TestRunner.GUI
 {
     [Serializable]
-    internal class TestRunnerResult : TestRunnerFilter.IClearableResult
+    internal class TestRunnerResult : UITestRunnerFilter.IClearableResult
     {
         public string id;
         public string uniqueId;

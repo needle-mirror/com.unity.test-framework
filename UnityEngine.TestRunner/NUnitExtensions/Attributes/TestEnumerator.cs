@@ -13,6 +13,11 @@ namespace UnityEngine.TestTools
 
         public static IEnumerator Enumerator { get { return m_TestEnumerator; } }
 
+        public static void Reset()
+        {
+            m_TestEnumerator = null;
+        }
+
         public TestEnumerator(ITestExecutionContext context, IEnumerator testEnumerator)
         {
             m_Context = context;

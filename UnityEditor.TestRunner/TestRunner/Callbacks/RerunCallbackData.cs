@@ -1,13 +1,13 @@
 using UnityEditor.TestTools.TestRunner.Api;
+using UnityEditor.TestTools.TestRunner.GUI;
 using UnityEngine;
-using UnityEngine.TestTools.TestRunner.GUI;
 
 namespace UnityEditor.TestTools.TestRunner
 {
     internal class RerunCallbackData : ScriptableSingleton<RerunCallbackData>
     {
         [SerializeField]
-        internal TestRunnerFilter[] runFilters;
+        internal UITestRunnerFilter[] runFilters;
 
         [SerializeField]
         internal TestMode testMode;

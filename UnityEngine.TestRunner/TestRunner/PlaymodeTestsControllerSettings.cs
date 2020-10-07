@@ -11,12 +11,12 @@ namespace UnityEngine.TestTools.TestRunner
     internal class PlaymodeTestsControllerSettings
     {
         [SerializeField]
-        public TestRunnerFilter[] filters;
+        public RuntimeTestRunnerFilter[] filters;
         public bool sceneBased;
         public string originalScene;
         public string bootstrapScene;
 
-        public static PlaymodeTestsControllerSettings CreateRunnerSettings(TestRunnerFilter[] filters)
+        public static PlaymodeTestsControllerSettings CreateRunnerSettings(RuntimeTestRunnerFilter[] filters)
         {
             var settings = new PlaymodeTestsControllerSettings
             {

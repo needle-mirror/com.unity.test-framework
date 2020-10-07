@@ -51,7 +51,7 @@ namespace UnityEditor.TestTools.TestRunner.Api
         
         internal ITestFilter BuildNUnitFilter()
         {
-            return new OrFilter(filters.Select(f => f.BuildNUnitFilter(runSynchronously)).ToArray());
+            return new OrFilter(filters.Select(f => f.ToRuntimeTestRunnerFilter(runSynchronously).BuildNUnitFilter()).ToArray());
         }
     }
 }

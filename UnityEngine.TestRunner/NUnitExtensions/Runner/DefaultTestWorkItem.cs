@@ -19,7 +19,6 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
     internal class DefaultTestWorkItem : UnityWorkItem
     {
         private TestCommand _command;
-
         public DefaultTestWorkItem(TestMethod test, ITestFilter filter)
             : base(test, null)
         {
@@ -48,7 +47,10 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
                     Debug.LogError("Cannot perform work on " + _command.GetType().Name);
                     yield break;
                 }
-
+                if (Context.TestCaseTimeout == 0)
+                {
+                    Context.TestCaseTimeout = k_DefaultTimeout;
+                }
                 foreach (var workItemStep in ((IEnumerableTestMethodCommand)_command).ExecuteEnumerable(Context))
                 {
                     ResultedInDomainReload = false;

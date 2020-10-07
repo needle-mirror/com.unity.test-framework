@@ -12,7 +12,7 @@ namespace UnityEngine.TestTools.TestRunner
 
         private static string BuildMessage(int timeout)
         {
-            return string.Format("UnityTest exceeded Timeout value of {0}ms", timeout);
+            return string.Format("Timeout value of {0}ms was exceeded", timeout);
         }
 
         public override ResultState ResultState

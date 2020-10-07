@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Diagnostics;
 using System.Linq;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
@@ -24,6 +25,8 @@ namespace UnityEngine.TestTools
             m_SkipYieldAfterActions = skipYieldAfterActions;
         }
 
+        internal Func<long> GetUtcNow = () => DateTime.UtcNow.Millisecond;
+        
         protected T[] BeforeActions = new T[0];
 
         protected T[] AfterActions = new T[0];
@@ -49,6 +52,7 @@ namespace UnityEngine.TestTools
 
             while (state.NextBeforeStepIndex < BeforeActions.Length)
             {
+                state.Timestamp = GetUtcNow();
                 var action = BeforeActions[state.NextBeforeStepIndex];
                 IEnumerator enumerator;
                 try
@@ -92,6 +96,13 @@ namespace UnityEngine.TestTools
                         {
                             yield return enumerator.Current;
                         }
+
+                        if (GetUtcNow() - state.Timestamp > unityContext.TestCaseTimeout)
+                        {
+                            context.CurrentResult.RecordPrefixedError(m_BeforeErrorPrefix, new UnityTestTimeoutException(unityContext.TestCaseTimeout).Message);
+                            state.TestHasRun = true;
+                            break;
+                        }
                     }
 
                     if (logScope.AnyFailingLogs())
@@ -128,6 +139,7 @@ namespace UnityEngine.TestTools
 
             while (state.NextAfterStepIndex < AfterActions.Length)
             {
+                state.Timestamp = GetUtcNow();
                 state.TestAfterStarted = true;
                 var action = AfterActions[state.NextAfterStepIndex];
                 IEnumerator enumerator;
@@ -163,7 +175,13 @@ namespace UnityEngine.TestTools
 
                         state.NextAfterStepPc = ActivePcHelper.GetEnumeratorPC(enumerator);
                         state.StoreTestResult(context.CurrentResult);
-
+                        
+                        if (GetUtcNow() - state.Timestamp > unityContext.TestCaseTimeout)
+                        {
+                            context.CurrentResult.RecordPrefixedError(m_AfterErrorPrefix, new UnityTestTimeoutException(unityContext.TestCaseTimeout).Message);
+                            yield break;
+                        }
+                        
                         if (m_SkipYieldAfterActions)
                         {
                             break;

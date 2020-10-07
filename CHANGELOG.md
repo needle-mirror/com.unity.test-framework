@@ -1,4 +1,17 @@
 # Changelog
+## [1.1.18] - 2020-10-07
+- Fixed issue of timeout during UnitySetUp which wasn't detected and allowed the test to pass instead of failing (case DSTR-21)
+
+## [1.1.17] - 2020-10-05
+- Fixed an issue where the WaitForDomainReload yield instruction would sometimes let the test continue for one frame before the domain reload.
+- Added support for negation in filters using !. E.g. !CategoryToExclude.
+- Fixed an issue where if the first test enters PlayMode from UnitySetup then the test body will not run on consecutive runs (case 1260901). 
+- Clear Results button clears the test results in the GUI (DSTR-16)
+- Improved UI in Test Runner window, added new options:
+	- Run Selected Tests in player
+	- Build/Export project with all tests in player
+	- Build/Export project with selected tests in player
+- Fixed issue on loading EditMode or Playmode test tree in the wrong tab when switching between tabs when TestRunner is loading (DS-865)
 
 ## [1.1.16] - 2020-07-09
 - Follow up on fix when UTF picks up on outdated compilation errors

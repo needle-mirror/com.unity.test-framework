@@ -1,6 +1,6 @@
 using UnityEditor.TestTools.TestRunner.Api;
 using UnityEditor.TestTools.TestRunner.CommandLineTest;
-using UnityEngine.TestTools.TestRunner.GUI;
+using UnityEditor.TestTools.TestRunner.GUI;
 using UnityEngine;
 
 namespace UnityEditor.TestTools.TestRunner
@@ -8,12 +8,12 @@ namespace UnityEditor.TestTools.TestRunner
     internal class RerunCallback : ScriptableObject, ICallbacks
     {
         public static bool useMockRunFilter = false;
-        public static TestRunnerFilter mockRunFilter = null;
+        public static UITestRunnerFilter mockRunFilter = null;
 
         public void RunFinished(ITestResultAdaptor result)
         {
             if (RerunCallbackData.instance.runFilters == null || RerunCallbackData.instance.runFilters.Length == 0)
-                RerunCallbackData.instance.runFilters = new[] {new TestRunnerFilter()};
+                RerunCallbackData.instance.runFilters = new[] {new UITestRunnerFilter()};
 
             var runFilter = RerunCallbackData.instance.runFilters[0];
 

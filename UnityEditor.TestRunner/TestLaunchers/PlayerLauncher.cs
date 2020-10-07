@@ -91,6 +91,12 @@ namespace UnityEditor.TestTools.TestRunner
                     editorConnectionTestCollector.PostSuccessfulBuildAction();
                     editorConnectionTestCollector.PostSuccessfulLaunchAction();
                 }
+
+                var runSettings = m_OverloadTestRunSettings as PlayerLauncherTestRunSettings;
+                if (success && runSettings != null && runSettings.buildOnly)
+                {
+                    EditorUtility.RevealInFinder(playerBuildOptions.BuildPlayerOptions.locationPathName);
+                }
             }
         }
 
@@ -135,16 +141,16 @@ namespace UnityEditor.TestTools.TestRunner
             return result.summary.result == Build.Reporting.BuildResult.Succeeded;
         }
 
-        private PlayerLauncherBuildOptions GetBuildOptions(string scenePath)
+        internal PlayerLauncherBuildOptions GetBuildOptions(string scenePath)
         {
-            var buildOptions = new BuildPlayerOptions();
-            var reduceBuildLocationPathLength = false;
-
-            //Some platforms hit MAX_PATH limits during the build process, in these cases minimize the path length
-            if ((m_TargetPlatform == BuildTarget.WSAPlayer) || (m_TargetPlatform == BuildTarget.XboxOne))
+            var buildOnly = false;
+            var runSettings = m_OverloadTestRunSettings as PlayerLauncherTestRunSettings;
+            if (runSettings != null)
             {
-                reduceBuildLocationPathLength = true;
+                buildOnly = runSettings.buildOnly;
             }
+
+            var buildOptions = new BuildPlayerOptions();
 
             var scenes = new List<string>() { scenePath };
             scenes.AddRange(EditorBuildSettings.scenes.Select(x => x.path));
@@ -161,7 +167,7 @@ namespace UnityEditor.TestTools.TestRunner
 
             if (EditorUserBuildSettings.installInBuildFolder)
                 buildOptions.options |= BuildOptions.InstallInBuildFolder;
-            else
+            else if (!buildOnly)
                 buildOptions.options |= BuildOptions.AutoRunPlayer;
 
             var buildTargetGroup = EditorUserBuildSettings.activeBuildTargetGroup;
@@ -175,29 +181,48 @@ namespace UnityEditor.TestTools.TestRunner
                     buildOptions.options |= BuildOptions.CompressWithLz4HC;
             }
 
-            var uniqueTempPathInProject = FileUtil.GetUniqueTempPathInProject();
-            var playerDirectoryName = reduceBuildLocationPathLength ? "PwT" : "PlayerWithTests";
-
-            if (reduceBuildLocationPathLength)
+            string buildLocation;
+            if (buildOnly)
             {
-                uniqueTempPathInProject = Path.GetTempFileName();
-                File.Delete(uniqueTempPathInProject);
-                Directory.CreateDirectory(uniqueTempPathInProject);
-            }
-            var tempPath = Path.GetFullPath(uniqueTempPathInProject);
-            var buildLocation = Path.Combine(tempPath, playerDirectoryName);
-
-            // iOS builds create a folder with Xcode project instead of an executable, therefore no executable name is added
-            if (m_TargetPlatform == BuildTarget.iOS)
-            {
-                buildOptions.locationPathName = buildLocation;
+                buildLocation = buildOptions.locationPathName = runSettings.buildOnlyLocationPath;
             }
             else
             {
-                string extensionForBuildTarget = PostprocessBuildPlayer.GetExtensionForBuildTarget(buildTargetGroup, buildOptions.target, buildOptions.options);
-                var playerExecutableName = "PlayerWithTests";
-                playerExecutableName += string.Format(".{0}", extensionForBuildTarget);
-                buildOptions.locationPathName = Path.Combine(buildLocation, playerExecutableName);
+                var reduceBuildLocationPathLength = false;
+
+                //Some platforms hit MAX_PATH limits during the build process, in these cases minimize the path length
+                if ((m_TargetPlatform == BuildTarget.WSAPlayer) || (m_TargetPlatform == BuildTarget.XboxOne))
+                {
+                    reduceBuildLocationPathLength = true;
+                }
+
+                var uniqueTempPathInProject = FileUtil.GetUniqueTempPathInProject();
+                var playerDirectoryName = reduceBuildLocationPathLength ? "PwT" : "PlayerWithTests";
+
+                if (reduceBuildLocationPathLength)
+                {
+                    uniqueTempPathInProject = Path.GetTempFileName();
+                    File.Delete(uniqueTempPathInProject);
+                    Directory.CreateDirectory(uniqueTempPathInProject);
+                }
+
+                var tempPath = Path.GetFullPath(uniqueTempPathInProject);
+                buildLocation = Path.Combine(tempPath, playerDirectoryName);
+
+                // iOS builds create a folder with Xcode project instead of an executable, therefore no executable name is added
+                if (m_TargetPlatform == BuildTarget.iOS)
+                {
+                    buildOptions.locationPathName = buildLocation;
+                }
+                else
+                {
+                    string extensionForBuildTarget =
+                        PostprocessBuildPlayer.GetExtensionForBuildTarget(buildTargetGroup, buildOptions.target,
+                            buildOptions.options);
+                    var playerExecutableName = "PlayerWithTests";
+                    playerExecutableName += string.Format(".{0}", extensionForBuildTarget);
+                    buildOptions.locationPathName = Path.Combine(buildLocation, playerExecutableName);
+                }
             }
 
             return new PlayerLauncherBuildOptions

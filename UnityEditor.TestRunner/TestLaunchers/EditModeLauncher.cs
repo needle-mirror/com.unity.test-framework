@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using NUnit.Framework.Interfaces;
 using UnityEditor.SceneManagement;
 using UnityEditor.TestTools.TestRunner.Api;
+using UnityEditor.TestTools.TestRunner.GUI;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestRunner.Utils;
 using UnityEngine.TestTools;
 using UnityEngine.TestTools.TestRunner;
-using UnityEngine.TestTools.TestRunner.GUI;
 
 namespace UnityEditor.TestTools.TestRunner
 {
@@ -19,7 +19,7 @@ namespace UnityEditor.TestTools.TestRunner
         public bool launchedOutsideApi;
 
         // provided for backward compatibility with Rider UnitTesting prior to Rider package v.1.1.1
-        public EditModeLauncher(TestRunnerFilter filter, TestPlatform platform)
+        public EditModeLauncher(UITestRunnerFilter filter, TestPlatform platform)
         {
             launchedOutsideApi = true;
             var apiFilter = new[]
@@ -39,6 +39,7 @@ namespace UnityEditor.TestTools.TestRunner
 
         public EditModeLauncher(Filter[] filters, TestPlatform platform, bool runSynchronously)
         {
+            TestEnumerator.Reset();
             m_EditModeRunner = ScriptableObject.CreateInstance<EditModeRunner>();
             m_EditModeRunner.UnityTestAssemblyRunnerFactory = new UnityTestAssemblyRunnerFactory();
             m_EditModeRunner.Init(filters, platform, runSynchronously);

@@ -12,7 +12,7 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
         }
         public override IEnumerator Execute(TestJobData testJobData)
         {
-            var settings = PlaymodeTestsControllerSettings.CreateRunnerSettings(testJobData.executionSettings.filters.Select(filter => filter.ToTestRunnerFilter()).ToArray());
+            var settings = PlaymodeTestsControllerSettings.CreateRunnerSettings(testJobData.executionSettings.filters.Select(filter => filter.ToRuntimeTestRunnerFilter(testJobData.executionSettings.runSynchronously)).ToArray());
             var launcher = new PlaymodeLauncher(settings);
             
             launcher.Run();

@@ -1,3 +1,5 @@
+using System;
+using System.Data;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
 
@@ -16,6 +18,7 @@ namespace UnityEngine.TestTools
         public string CurrentTestMessage;
         public string CurrentTestStrackTrace;
         public bool TestAfterStarted;
+        public long Timestamp;
 
         public void Reset()
         {
