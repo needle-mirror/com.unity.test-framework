@@ -1,4 +1,11 @@
 # Changelog
+## [1.1.19] - 2020-11-17
+- Command line runs with an inconclusive test result now exit with exit code 2 (case DS-951).
+- Fixed timeout during UnitySetUp which caoused test to pass instead of failing due to wrong time format.
+- Timeout exeption thrown when timeout time is exeded in the UnitySetup when using `WaitForSeconds(n)`.
+- Method marked with UnityTest that are not returning IEnumerator is now giving a proper error (DS-1059).
+- Updating `com.unity.ext.nunit` version.
+
 ## [1.1.18] - 2020-10-07
 - Fixed issue of timeout during UnitySetUp which wasn't detected and allowed the test to pass instead of failing (case DSTR-21)
 

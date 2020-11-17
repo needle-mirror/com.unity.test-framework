@@ -25,7 +25,7 @@ namespace UnityEngine.TestTools
             m_SkipYieldAfterActions = skipYieldAfterActions;
         }
 
-        internal Func<long> GetUtcNow = () => DateTime.UtcNow.Millisecond;
+        internal Func<long> GetUtcNow = () => new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds();
         
         protected T[] BeforeActions = new T[0];
 

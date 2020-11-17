@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using NUnit.Framework;
 using NUnit.Framework.Internal.Commands;
 using NUnit.Framework.Interfaces;
@@ -27,6 +28,13 @@ namespace UnityEngine.TestTools
 
             if (t.parms != null)
                 t.parms.HasExpectedResult = false;
+
+            if (!method.ReturnType.IsType(typeof(IEnumerator)))
+            {
+                t.RunState = RunState.NotRunnable;
+                t.Properties.Set(PropertyNames.SkipReason, "Method marked with UnityTest must return IEnumerator.");
+            }
+ 
             return t;
         }
     }

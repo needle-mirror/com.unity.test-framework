@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using NUnit.Framework.Internal;
 using UnityEngine.TestRunner.NUnitExtensions.Runner;
+using UnityEngine.TestTools.TestRunner;
 
 namespace UnityEngine.TestTools.Utils
 {
@@ -40,6 +41,7 @@ namespace UnityEngine.TestTools.Utils
                 if (m_TestFailed)
                 {
                     StopAllRunningCoroutines();
+                    m_Context.CurrentResult.RecordException(new UnityTestTimeoutException(m_Context.TestCaseTimeout));
                     yield break;
                 }
 
