@@ -291,7 +291,24 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
 
         private void PerformOneTimeTearDown()
         {
-            _teardownCommand.Execute(Context);
+            var logScope = new LogScope();
+            try
+            {
+                _teardownCommand.Execute(Context);
+            }
+            catch (Exception ex)
+            {
+                if (ex is NUnitException || ex is TargetInvocationException)
+                    ex = ex.InnerException;
+
+                Result.RecordException(ex, FailureSite.SetUp);
+            }
+
+            if (logScope.AnyFailingLogs())
+            {
+                Result.RecordException(new UnhandledLogMessageException(logScope.FailingLogs.First()));
+            }
+            logScope.Dispose();
         }
 
         private string GetSkipReason()

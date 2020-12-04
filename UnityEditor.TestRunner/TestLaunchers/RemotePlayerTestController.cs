@@ -106,5 +106,10 @@ namespace UnityEditor.TestRunner.TestLaunchers
         {
             m_PlatformSpecificSetup.PostSuccessfulLaunchAction();
         }
+
+        public void CleanUp()
+        {
+            m_PlatformSpecificSetup.CleanUp();
+        }
     }
 }

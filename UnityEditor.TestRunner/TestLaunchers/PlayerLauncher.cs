@@ -81,6 +81,7 @@ namespace UnityEditor.TestTools.TestRunner
 
                 if (!success)
                 {
+                    editorConnectionTestCollector.CleanUp();
                     ScriptableObject.DestroyImmediate(editorConnectionTestCollector);
                     Debug.LogError("Player build failed");
                     throw new TestLaunchFailedException("Player build failed");

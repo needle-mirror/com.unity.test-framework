@@ -5,6 +5,32 @@ using UnityEngine.Profiling;
 
 namespace UnityEngine.TestTools.Constraints
 {
+    /// <summary>
+    /// An NUnit test constraint class to test whether a given block of code makes any GC allocations.
+    /// 
+    /// Use this class with NUnit's Assert.That() method to make assertions about the GC behaviour of your code. The constraint executes the delegate you provide, and checks if it has caused any GC memory to be allocated. If any GC memory was allocated, the constraint passes; otherwise, the constraint fails.
+    ///
+    /// Usually you negate this constraint to make sure that your delegate does not allocate any GC memory. This is easy to do using the Is class:
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// using NUnit.Framework;
+    /// using UnityEngine.TestTools.Constraints;
+    /// using Is = UnityEngine.TestTools.Constraints.Is;
+    /// 
+    /// public class MyTestClass
+    /// {
+    ///     [Test]
+    ///     public void SettingAVariableDoesNotAllocate()
+    ///     {
+    ///         Assert.That(() => {
+    ///             int a = 0;
+    ///             a = 1;
+    ///         }, Is.Not.AllocatingGCMemory());
+    ///     }
+    /// }
+    /// </code>
+    /// </example>
     public class AllocatingGCMemoryConstraint : Constraint
     {
         private class AllocatingGCMemoryResult : ConstraintResult
@@ -54,6 +80,13 @@ namespace UnityEngine.TestTools.Constraints
             return new AllocatingGCMemoryResult(this, original, recorder.sampleBlockCount);
         }
 
+        /// <summary>
+        /// Applies GC memory constraint to the test.
+        /// </summary>
+        /// <param name="del">An ActualValueDelegate</param>
+        /// <returns>A ConstraintResult</returns>
+        /// <exception cref="ArgumentNullException">Throws a <see cref="ArgumentNullException"/> if the provided object is null.</exception>
+        /// <exception cref="ArgumentException">Throws a <see cref="ArgumentException"/> if the provided object is not a <see cref="TestDelegate"/>.</exception>
         public override ConstraintResult ApplyTo(object obj)
         {
             if (obj == null)
@@ -67,6 +100,14 @@ namespace UnityEngine.TestTools.Constraints
             return ApplyTo(() => d.Invoke(), obj);
         }
 
+        /// <summary>
+        /// Test whether the constraint is satisfied by a given reference.
+        /// The default implementation simply dereferences the value but
+        /// derived classes may override it to provide for delayed processing.
+        /// </summary>
+        /// <param name="del">A reference to the value delegate to be tested</param>
+        /// <returns>A ConstraintResult</returns>
+        /// <exception cref="ArgumentNullException">Throws a <see cref="ArgumentNullException"/> if the provided delegate is null.</exception>
         public override ConstraintResult ApplyTo<TActual>(ActualValueDelegate<TActual> del)
         {
             if (del == null)
@@ -75,6 +116,9 @@ namespace UnityEngine.TestTools.Constraints
             return ApplyTo(() => del.Invoke(), del);
         }
 
+        /// <summary>
+        /// The Description of what this constraint tests, for to use in messages and in the ConstraintResult.
+        /// </summary>
         public override string Description
         {
             get { return "allocates GC memory"; }

@@ -7,8 +7,6 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
     [Serializable]
     internal class ExitCallbacks : ScriptableObject, IErrorCallbacks
     {
-        private bool m_AnyTestsExecuted;
-        private bool m_RunFailed;
         internal static bool preventExit;
 
         public void RunFinished(ITestResultAdaptor testResults)
@@ -18,18 +16,19 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
                 return;
             }
 
-            if (!m_AnyTestsExecuted)
+            if (!ExitCallbacksDataHolder.instance.AnyTestsExecuted)
             {
                 Debug.LogFormat(LogType.Warning, LogOption.NoStacktrace, null, "No tests were executed");
             }
-            EditorApplication.Exit(m_RunFailed ? (int)Executer.ReturnCodes.Failed : (int)Executer.ReturnCodes.Ok);
+
+            EditorApplication.Exit(ExitCallbacksDataHolder.instance.RunFailed ? (int)Executer.ReturnCodes.Failed : (int)Executer.ReturnCodes.Ok);
         }
 
         public void TestStarted(ITestAdaptor test)
         {
             if (!test.IsSuite)
             {
-                m_AnyTestsExecuted = true;
+                ExitCallbacksDataHolder.instance.AnyTestsExecuted = true;
             }
         }
 
@@ -37,7 +36,7 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
         {
             if (!result.Test.IsSuite && (result.TestStatus == TestStatus.Failed || result.TestStatus == TestStatus.Inconclusive))
             {
-                m_RunFailed = true;
+                ExitCallbacksDataHolder.instance.RunFailed = true;
             }
         }
 

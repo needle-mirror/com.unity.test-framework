@@ -86,6 +86,7 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
             UpstreamActions = new List<ITestAction>(other.UpstreamActions);
             SetUpTearDownState = other.SetUpTearDownState;
             OuterUnityTestActionState = other.OuterUnityTestActionState;
+            EnumerableTestState = other.EnumerableTestState;
 
             TestContext.CurrentTestExecutionContext = this;
 
@@ -106,8 +107,7 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
         public bool IsSingleThreaded { get; set; }
         public BeforeAfterTestCommandState SetUpTearDownState { get; set; }
         public BeforeAfterTestCommandState OuterUnityTestActionState { get; set; }
-        public int EnumerableRepeatedTestState { get; set; }
-        public int EnumerableRetryTestState { get; set; }
+        public EnumerableTestState EnumerableTestState { get; set; }
 
         internal int AssertCount
         {

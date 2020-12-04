@@ -6,10 +6,10 @@ using UnityEngine;
 
 namespace UnityEditor.TestTools.TestRunner
 {
-    [Serializable]
     /// <summary>
     /// The TestRunnerWindow class is repsonsible for drawing the Test Runner window.
     /// </summary>
+    [Serializable]
     public class TestRunnerWindow : EditorWindow, IHasCustomMenu
     {
         internal static class Styles
@@ -65,10 +65,10 @@ namespace UnityEditor.TestTools.TestRunner
 
         private WindowResultUpdater m_WindowResultUpdater;
 
-        [MenuItem("Window/General/Test Runner", false, 201, false)]
         /// <summary>
         /// Launches the Test Runner window.
         /// </summary>
+        [MenuItem("Window/General/Test Runner", false, 201, false)]
         public static void ShowWindow()
         {
             s_Instance = GetWindow<TestRunnerWindow>("Test Runner");

@@ -10,6 +10,18 @@ using UnityEngine.TestTools.NUnitExtensions;
 
 namespace UnityEditor.TestTools.TestRunner.Api
 {
+    /// <summary>
+    /// The TestRunnerApi retrieves and runs tests programmatically from code inside the project, or inside other packages. TestRunnerApi is a [ScriptableObject](https://docs.unity3d.com/ScriptReference/ScriptableObject.html).
+    ///You can initialize the API like this:
+    /// ```
+    /// var testRunnerApi = ScriptableObject.CreateInstance&lt;TestRunnerApi&gt;();
+    /// ```
+    /// Note: You can subscribe and receive test results in one instance of the API, even if the run starts from another instance.
+    /// The TestRunnerApi supports the following workflows:
+    /// - [How to run tests programmatically](https://docs.unity3d.com/Packages/com.unity.test-framework@1.1/manual/extension-run-tests.html)
+    /// - [How to get test results](https://docs.unity3d.com/Packages/com.unity.test-framework@1.1/manual/extension-get-test-results.html)
+    /// - [How to retrieve the list of tests](https://docs.unity3d.com/Packages/com.unity.test-framework@1.1/manual/extension-retrieve-test-list.html)
+    /// </summary>
     public class TestRunnerApi : ScriptableObject, ITestRunnerApi
     {
         internal ICallbacksHolder callbacksHolder;
@@ -32,7 +44,11 @@ namespace UnityEditor.TestTools.TestRunner.Api
             var runner = new TestJobRunner();
             return runner.RunJob(new TestJobData(executionSettings));
         };
-        
+        /// <summary>
+        /// Starts a test run with a given set of executionSettings.
+        /// </summary>
+        /// <param name="executionSettings">Set of <see cref="ExecutionSettings"/></param>
+        /// <returns>A GUID that identifies the TestJobData.</returns>
         public string Execute(ExecutionSettings executionSettings)
         {
             if (executionSettings == null)
@@ -55,6 +71,10 @@ namespace UnityEditor.TestTools.TestRunner.Api
             return ScheduleJob(executionSettings);
         }
 
+        /// <summary>
+        /// Sets up a given instance of <see cref="ICallbacks"/> to be invoked on test runs.
+        /// </summary>
+        /// <param name="testCallbacks">The test callbacks to be invoked</param>
         public void RegisterCallbacks<T>(T testCallbacks, int priority = 0) where T : ICallbacks
         {
             if (testCallbacks == null)
@@ -64,7 +84,10 @@ namespace UnityEditor.TestTools.TestRunner.Api
 
             m_CallbacksHolder.Add(testCallbacks, priority);
         }
-
+        /// <summary>
+        /// Unregister an instance of <see cref="ICallbacks"/> to no longer receive callbacks from test runs.
+        /// </summary>
+        /// <param name="testCallbacks">The test callbacks to unregister.</param>
         public void UnregisterCallbacks<T>(T testCallbacks) where T : ICallbacks
         {
             if (testCallbacks == null)
@@ -85,7 +108,11 @@ namespace UnityEditor.TestTools.TestRunner.Api
             var firstFilter = executionSettings.filters?.FirstOrDefault() ?? executionSettings.filter;
             RetrieveTestList(firstFilter.testMode, callback);
         }
-
+        /// <summary>
+        /// Retrieve the full test tree as ITestAdaptor for a given test mode. This is obsolete. Use TestRunnerApi.RetrieveTestTree instead.
+        /// </summary>
+        /// <param name="testMode"></param>
+        /// <param name="callback"></param>
         public void RetrieveTestList(TestMode testMode, Action<ITestAdaptor> callback)
         {
             if (callback == null)

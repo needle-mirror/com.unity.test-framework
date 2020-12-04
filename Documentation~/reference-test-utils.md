@@ -17,7 +17,7 @@ This contains test utility functions for float value comparison and creating pri
 class UtilsTests
 {
     [Test]
-    public void ChechThat_FloatsAreEqual()
+    public void CheckThat_FloatsAreEqual()
     {
         float expected = 10e-8f;
         float actual = 0f;
@@ -27,7 +27,7 @@ class UtilsTests
     }
 	
     [Test]
-    public void ChechThat_FloatsAreAbsoluteEqual()
+    public void CheckThat_FloatsAreAbsoluteEqual()
     {
         float expected = 0f;
         float actual = 10e-6f;

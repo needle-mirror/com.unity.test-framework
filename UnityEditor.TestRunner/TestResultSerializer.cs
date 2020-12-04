@@ -32,6 +32,8 @@ namespace UnityEditor.TestTools.TestRunner
 
         [SerializeField] private double startTimeAO;
 
+        [SerializeField] private double endTimeAO;
+
         [SerializeField] private string status;
 
         [SerializeField] public string uniqueName;
@@ -49,6 +51,7 @@ namespace UnityEditor.TestTools.TestRunner
             wrapper.stacktrace = result.StackTrace;
             wrapper.message = result.Message;
             wrapper.startTimeAO = result.StartTime.ToOADate();
+            wrapper.endTimeAO = result.EndTime.ToOADate();
             wrapper.uniqueName = result.Test.GetUniqueName();
             return wrapper;
         }
@@ -57,14 +60,16 @@ namespace UnityEditor.TestTools.TestRunner
         {
             var resultState = new ResultState((TestStatus)Enum.Parse(typeof(TestStatus), status), label,
                 (FailureSite)Enum.Parse(typeof(FailureSite), site));
-            result.GetType().BaseType.GetField("_resultState", flags).SetValue(result, resultState);
-            result.GetType().BaseType.GetField("_output", flags).SetValue(result, new StringBuilder(output));
-            result.GetType().BaseType.GetField("_duration", flags).SetValue(result, duration);
-            result.GetType().BaseType.GetField("_message", flags).SetValue(result, message);
-            result.GetType().BaseType.GetField("_stackTrace", flags).SetValue(result, stacktrace);
-            result.GetType()
-                .BaseType.GetProperty("StartTime", flags)
+            var baseType = result.GetType().BaseType;
+            baseType.GetField("_resultState", flags).SetValue(result, resultState);
+            baseType.GetField("_output", flags).SetValue(result, new StringBuilder(output));
+            baseType.GetField("_duration", flags).SetValue(result, duration);
+            baseType.GetField("_message", flags).SetValue(result, message);
+            baseType.GetField("_stackTrace", flags).SetValue(result, stacktrace);
+            baseType.GetProperty("StartTime", flags)
                 .SetValue(result, DateTime.FromOADate(startTimeAO), null);
+            baseType.GetProperty("EndTime", flags)
+                .SetValue(result, DateTime.FromOADate(endTimeAO), null);
         }
 
         public bool IsPassed()

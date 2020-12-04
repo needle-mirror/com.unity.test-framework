@@ -1,8 +1,11 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using Unity.CodeEditor;
 using UnityEditor.Utils;
 using UnityEngine;
 
@@ -14,10 +17,18 @@ namespace UnityEditor.TestTools.TestRunner.GUI
         {
             MonoCecilHelper = monoCecilHelper;
             AssetsDatabaseHelper = assetsDatabaseHelper;
+            Editor = new DefaultExternalCodeEditor();
+            GetCSFiles = (dirPath, fileExtension) =>
+            {
+                return Directory.GetFiles(dirPath, $"*{fileExtension}", SearchOption.AllDirectories)
+                    .Select(Paths.UnifyDirectorySeparator);
+            };
         }
-
+        internal Func<string, string, IEnumerable<string>> GetCSFiles;
         protected IMonoCecilHelper MonoCecilHelper { get; private set; }
         public IAssetsDatabaseHelper AssetsDatabaseHelper { get; private set; }
+        public IExternalCodeEditor Editor { get; internal set; }
+        private const string FileExtension = ".cs";
 
         public void OpenScriptInExternalEditor(Type type, MethodInfo method)
         {
@@ -35,31 +46,50 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                 Debug.LogWarning("Failed to get a line number for unity test method. So please find it in opened file in external editor.");
             }
 
-            AssetsDatabaseHelper.OpenAssetInItsDefaultExternalEditor(fileOpenInfo.FilePath, fileOpenInfo.LineNumber);
+            if (!fileOpenInfo.FilePath.Contains("Assets"))
+            {
+                Editor.OpenProject(fileOpenInfo.FilePath, fileOpenInfo.LineNumber, 1);
+            }
+            else
+            { 
+                AssetsDatabaseHelper.OpenAssetInItsDefaultExternalEditor(fileOpenInfo.FilePath, fileOpenInfo.LineNumber);
+            }
+            
         }
 
         public IFileOpenInfo GetFileOpenInfo(Type type, MethodInfo method)
         {
-            const string fileExtension = ".cs";
-
             var fileOpenInfo = MonoCecilHelper.TryGetCecilFileOpenInfo(type, method);
             if (string.IsNullOrEmpty(fileOpenInfo.FilePath))
             {
                 var dirPath = Paths.UnifyDirectorySeparator(Application.dataPath);
-                var allCsFiles = Directory.GetFiles(dirPath, $"*{fileExtension}", SearchOption.AllDirectories)
-                    .Select(Paths.UnifyDirectorySeparator);
+                var allCsFiles = GetCSFiles(dirPath, FileExtension);
 
                 var fileName = allCsFiles.FirstOrDefault(x =>
-                    x.Split(Path.DirectorySeparatorChar).Last().Equals(string.Concat(type.Name, fileExtension)));
+                    x.Split(Path.DirectorySeparatorChar).Last().Equals(string.Concat(GetTestFileName(type), FileExtension)));
 
                 fileOpenInfo.FilePath = fileName ?? string.Empty;
             }
 
+            if (!fileOpenInfo.FilePath.Contains("Assets"))
+            {
+                return fileOpenInfo;
+            }
             fileOpenInfo.FilePath = FilePathToAssetsRelativeAndUnified(fileOpenInfo.FilePath);
 
             return fileOpenInfo;
         }
 
+        internal static string GetTestFileName(Type type)
+        {
+            //This handles the case of a test in a nested class, getting the name of the base class
+            if (type.FullName != null && type.Namespace!=null && type.FullName.Contains("+"))
+            {
+                var removedNamespace = type.FullName.Substring(type.Namespace.Length+1);
+                return removedNamespace.Substring(0,removedNamespace.IndexOf("+", StringComparison.Ordinal));
+            }
+            return type.Name;
+        }
         public string FilePathToAssetsRelativeAndUnified(string filePath)
         {
             if (string.IsNullOrEmpty(filePath))

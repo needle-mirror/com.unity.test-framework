@@ -82,6 +82,9 @@ namespace UnityEditor.TestTools.TestRunner
         private BeforeAfterTestCommandState m_OuterUnityTestActionState;
 
         [SerializeField] 
+        private EnumerableTestState m_EnumerableTestState;
+
+        [SerializeField] 
         public bool RunFinished = false;
 
         public bool RunningSynchronously { get; private set; }
@@ -165,6 +168,12 @@ namespace UnityEditor.TestTools.TestRunner
                 m_OuterUnityTestActionState = CreateInstance<BeforeAfterTestCommandState>();
             }
             context.OuterUnityTestActionState = m_OuterUnityTestActionState;
+
+            if (m_EnumerableTestState == null)
+            {
+                m_EnumerableTestState = CreateInstance<EnumerableTestState>();
+            }
+            context.EnumerableTestState = m_EnumerableTestState;
 
             if (!m_RunningTests)
             {
