@@ -36,7 +36,7 @@ namespace UnityEngine.TestTools
     /// 
     /// In Play Mode, a test runs as a coroutine attached to a [MonoBehaviour](https://docs.unity3d.com/ScriptReference/MonoBehaviour.html). So all the yield instructions available in coroutines, are also available in your test. 
     /// 
-    /// From a Play Mode test you can use one of Unity's [Yield Instructions](https://docs.unity3d.com/ScriptReference/YieldInstruction.html):
+    /// From a Play Mode test you can use one of Unity’s [Yield Instructions](https://docs.unity3d.com/ScriptReference/YieldInstruction.html):
     /// 
     /// - [WaitForFixedUpdate](https://docs.unity3d.com/ScriptReference/WaitForFixedUpdate.html): to ensure changes expected within the next cycle of physics calculations.
     /// - [WaitForSeconds](https://docs.unity3d.com/ScriptReference/WaitForSeconds.html): if you want to pause your test coroutine for a fixed amount of time. Be careful about creating long-running tests.
@@ -67,6 +67,12 @@ namespace UnityEngine.TestTools
 
         private readonly NUnitTestCaseBuilder _builder = new NUnitTestCaseBuilder();
 
+        /// <summary>
+        /// This method builds the TestMethod from the Test and the method info. It also checks if the test with the `UnityTestAttribute` has an IEnumerator as return type.
+        /// </summary>
+        /// <param name="method">The method info.</param>
+        /// <param name="suite">The test.</param>
+        /// <returns>A TestMethod object</returns>
         TestMethod ISimpleTestBuilder.BuildFrom(IMethodInfo method, Test suite)
         {
             TestCaseParameters parms = new TestCaseParameters

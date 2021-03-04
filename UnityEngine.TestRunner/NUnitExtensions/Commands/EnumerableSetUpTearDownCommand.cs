@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using NUnit.Framework.Internal;
 using NUnit.Framework.Internal.Commands;
+using Unity.Profiling;
 using UnityEngine.TestRunner.NUnitExtensions.Runner;
 
 namespace UnityEngine.TestTools
@@ -24,6 +25,18 @@ namespace UnityEngine.TestTools
         {
             MethodInfo[] methodsWithAttribute = Reflect.GetMethodsWithAttribute(fixtureType, setUpType, true);
             return methodsWithAttribute.Where(x => x.ReturnType == typeof(IEnumerator)).ToArray();
+        }
+
+        protected override bool MoveAfterEnumerator(IEnumerator enumerator, Test test)
+        {
+            using (new ProfilerMarker(test.Name + ".TearDown").Auto())
+                return base.MoveAfterEnumerator(enumerator, test);
+        }
+
+        protected override bool MoveBeforeEnumerator(IEnumerator enumerator, Test test)
+        {
+            using (new ProfilerMarker(test.Name + ".Setup").Auto())
+                return base.MoveBeforeEnumerator(enumerator, test);
         }
 
         protected override IEnumerator InvokeBefore(MethodInfo action, Test test, UnityTestExecutionContext context)

@@ -6,6 +6,7 @@ using NUnit.Framework;
 using NUnit.Framework.Internal;
 using NUnit.Framework.Internal.Commands;
 using NUnit.Framework.Internal.Execution;
+using Unity.Profiling;
 using UnityEngine.TestRunner.NUnitExtensions.Runner;
 
 namespace UnityEngine.TestTools
@@ -30,13 +31,15 @@ namespace UnityEngine.TestTools
 
         protected override IEnumerator InvokeBefore(MethodInfo action, Test test, UnityTestExecutionContext context)
         {
-            Reflect.InvokeMethod(action, context.TestObject);
+            using (new ProfilerMarker(test.Name + ".Setup").Auto())
+                Reflect.InvokeMethod(action, context.TestObject);
             yield return null;
         }
 
         protected override IEnumerator InvokeAfter(MethodInfo action, Test test, UnityTestExecutionContext context)
         {
-            Reflect.InvokeMethod(action, context.TestObject);
+            using (new ProfilerMarker(test.Name + ".TearDown").Auto())
+                Reflect.InvokeMethod(action, context.TestObject);
             yield return null;
         }
 

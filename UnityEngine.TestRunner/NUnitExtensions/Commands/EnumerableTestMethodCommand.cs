@@ -6,6 +6,8 @@ using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
 using NUnit.Framework.Internal.Commands;
 using NUnit.Framework.Internal.Execution;
+using UnityEngine.TestRunner.NUnitExtensions;
+using Unity.Profiling;
 using UnityEngine.TestRunner.NUnitExtensions.Runner;
 using UnityEngine.TestTools.TestRunner;
 
@@ -45,7 +47,7 @@ namespace UnityEngine.TestTools
                 var enumerator = testEnumeraterYieldInstruction.Execute();
 
                 var executingEnumerator = ExecuteEnumerableAndRecordExceptions(enumerator, context);
-                while (executingEnumerator.MoveNext())
+                while (AdvanceEnumerator(executingEnumerator))
                 {
                     yield return executingEnumerator.Current;
                 }
@@ -57,6 +59,12 @@ namespace UnityEngine.TestTools
                     context.CurrentResult.SetResult(ResultState.Success);
                 }
             }
+        }
+
+        private bool AdvanceEnumerator(IEnumerator enumerator)
+        {
+            using (new ProfilerMarker(testMethod.MethodName).Auto())
+                return enumerator.MoveNext();
         }
 
         private static IEnumerator ExecuteEnumerableAndRecordExceptions(IEnumerator enumerator, ITestExecutionContext context)
@@ -78,7 +86,7 @@ namespace UnityEngine.TestTools
 
                 if (enumerator.Current is IEnumerator)
                 {
-                    var current = (IEnumerator)enumerator.Current; 
+                    var current = (IEnumerator)enumerator.Current;
                     yield return ExecuteEnumerableAndRecordExceptions(current, context);
                 }
                 else

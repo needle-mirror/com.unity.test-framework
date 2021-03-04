@@ -24,7 +24,7 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
             TestCommand command;
             if (!testReturnsIEnumerator)
             {
-                command = new TestMethodCommand(test);    
+                command = new UnityTestMethodCommand(test);
             }
             else
             {

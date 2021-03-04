@@ -1,4 +1,31 @@
 # Changelog
+## [1.1.24] - 2021-03-04
+- Improving UTF documentation(DSTR-120)
+  - Updated "Actions outside of tests" section of user manual. Added flow charts to clarify execution order for SetUp/TearDown, TestActions, and complete flow (DSTR-121).
+  - Fixed accepted values for scriptingBackend argument to be string literals instead of int values (DSTR-122).
+  - Fixed possible values of ResultState to be Passed, Failed, Skipped, Inconclusive, plus labels instead of Success and Failure (DSTR-125).
+  - Added NUNit version information (DSTR-130).
+  - Added namespace information for LogAsset in user manual (DSTR-124).
+  - Added instructions for creating additional sets of tests (DSTR-129).
+  - Added information on testResults XML output format and exit codes (DSTR-131).
+  - Updated description of testPlatform command line argument to clarify accepted values and their meaning (DSTR-123).
+- Reduce time taken by filtering operations when only a subset of tests is run.
+- Reduced the time taken to rebuild the test tree and to scan for assets a test created but did not delete.
+- Reduce the per-test overhead of running tests in the editor.
+- Added profiler markers around test setup, teardown, and execution.
+- Fixed unstable timeout bug (DSTR-21).
+
+## [1.1.23] - 2021-01-21
+- Improving UTF documentation(DSTR-120)
+  - Updated "Actions outside of tests" section of user manual. Added flow charts to clarify execution order for SetUp/TearDown, TestActions, and complete flow (DSTR-121).
+  - Fixed accepted values for scriptingBackend argument to be string literals instead of int values (DSTR-122).
+  - Fixed possible values of ResultState to be Passed, Failed, Skipped, Inconclusive, plus labels instead of Success and Failure (DSTR-125).
+  - Added NUNit version information (DSTR-130).
+  - Added namespace information for LogAsset in user manual (DSTR-124).
+  - Added instructions for creating additional sets of tests (DSTR-129).
+  - Added information on testResults XML output format and exit codes (DSTR-131).
+  - Updated description of testPlatform command line argument to clarify accepted values and their meaning (DSTR-123).
+  
 ## [1.1.22] - 2021-01-21
 - Fixed issue where test result of an explicit test was set to skipped in case it was passing and running from command line with testfilter set to the explicit test (DS-1236).
 - Fixed an issue where tests located in assemblies that did not directly reference any test assemblies were not included (DSTR-30).
@@ -8,11 +35,11 @@
 - Removed ability to `Enable playmode tests for all assemblies` from the TestRunner UI, since it is a deprecated behavior. It enforces to use of assembly definition files (DSTR-45).
 - Fixed typo in `LogAssert.cs` documentation.
 
-## [1.1.21] - 2021-01-14
+## [1.1.21] - 2020-12-04
 - Fixed issue where test result of an explicit test was set to skipped in case it was passing and running from command line with testfilter set to the explicit test (DS-1236).
 - Fixed an issue where tests located in assemblies that did not directly reference any test assemblies were not included (DSTR-30).
 - Fixed an issue where UnitySetup methods were incorrectly being rerun when entering playmode, rather than being skipped (DSTR-68).
-- Internal: Remove ##utp message AssemblyCompilationErrors (DS-1277)
+- Internal: Remove ##utp message AssemblyCompilationErrors (ds-1277)
 - Fixed issue where if the timeout was exceeded in SetUp the timeout exception was not thrown(DSTR-21).
 - Removed ability to `Enable playmode tests for all assemblies` from the TestRunner UI, since it is a deprecated behavior. It enforces to use of assembly definition files (DSTR-45).
 

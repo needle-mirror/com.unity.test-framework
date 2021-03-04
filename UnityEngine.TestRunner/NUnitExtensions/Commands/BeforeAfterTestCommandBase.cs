@@ -35,6 +35,16 @@ namespace UnityEngine.TestTools
 
         protected abstract IEnumerator InvokeAfter(T action, Test test, UnityTestExecutionContext context);
 
+        protected virtual bool MoveBeforeEnumerator(IEnumerator enumerator, Test test)
+        {
+            return enumerator.MoveNext();
+        }
+
+        protected virtual bool MoveAfterEnumerator(IEnumerator enumerator, Test test)
+        {
+            return enumerator.MoveNext();
+        }
+
         protected abstract BeforeAfterTestCommandState GetState(UnityTestExecutionContext context);
 
         public IEnumerable ExecuteEnumerable(ITestExecutionContext context)
@@ -98,7 +108,7 @@ namespace UnityEngine.TestTools
                             yield return enumerator.Current;
                         }
 
-                        if (GetUtcNow() - state.Timestamp > unityContext.TestCaseTimeout)
+                        if (GetUtcNow() - state.Timestamp > unityContext.TestCaseTimeout || CoroutineTimedOut(unityContext))
                         {
                             context.CurrentResult.RecordPrefixedError(m_BeforeErrorPrefix, new UnityTestTimeoutException(unityContext.TestCaseTimeout).Message);
                             state.TestHasRun = true;
@@ -177,7 +187,8 @@ namespace UnityEngine.TestTools
                         state.NextAfterStepPc = ActivePcHelper.GetEnumeratorPC(enumerator);
                         state.StoreTestResult(context.CurrentResult);
                         
-                        if (GetUtcNow() - state.Timestamp > unityContext.TestCaseTimeout)
+
+                        if (GetUtcNow() - state.Timestamp > unityContext.TestCaseTimeout || CoroutineTimedOut(unityContext))
                         {
                             context.CurrentResult.RecordPrefixedError(m_AfterErrorPrefix, new UnityTestTimeoutException(unityContext.TestCaseTimeout).Message);
                             yield break;
@@ -214,6 +225,16 @@ namespace UnityEngine.TestTools
         }
 
         private static TestCommandPcHelper pcHelper;
+        private static bool CoroutineTimedOut(ITestExecutionContext unityContext)
+        {
+            if (string.IsNullOrEmpty(unityContext.CurrentResult.Message))
+            {
+                return false;
+            }
+            return unityContext.CurrentResult.ResultState.Equals(ResultState.Failure) &&
+                       unityContext.CurrentResult.Message.Contains(new UnityTestTimeoutException(unityContext.TestCaseTimeout).Message);
+        }
+
 
         internal static TestCommandPcHelper ActivePcHelper
         {

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using NUnit.Framework.Internal.Filters;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEditor.TestRunner.TestLaunchers;
 using UnityEditor.TestTools.TestRunner.Api;
 using UnityEngine;
@@ -68,6 +69,9 @@ namespace UnityEditor.TestTools.TestRunner
                     CallbacksDelegator.instance.RunFailed("Run Failed: One or more errors in a prebuild setup. See the editor log for details.");
                     return;
                 }
+
+                EditorSceneManager.MarkSceneDirty(scene);
+                EditorSceneManager.SaveScene(scene);
 
                 var playerBuildOptions = GetBuildOptions(scenePath);
 
