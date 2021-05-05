@@ -1,4 +1,13 @@
 # Changelog
+## [1.1.26] - 2021-05-05
+- Fix html bug in TestRunnerApi API code snippet (DS-1973).
+- Fix typo bug in PreBuildSetup code example (DS-1974).
+- Fix incorrect syntax in command line reference (DS-1971).
+  
+## [1.1.25] - 2021-05-05
+- Fixed a bug where test filter would match project or player path (DSTP-412).
+- Added playerGraphicsAPI TestSettings parameter
+
 ## [1.1.24] - 2021-03-04
 - Improving UTF documentation(DSTR-120)
   - Updated "Actions outside of tests" section of user manual. Added flow charts to clarify execution order for SetUp/TearDown, TestActions, and complete flow (DSTR-121).

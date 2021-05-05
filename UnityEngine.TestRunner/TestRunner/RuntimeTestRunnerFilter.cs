@@ -6,6 +6,7 @@ using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
 using NUnit.Framework.Internal.Filters;
 using UnityEngine.TestRunner.NUnitExtensions.Filters;
+using FullNameFilter = UnityEngine.TestRunner.NUnitExtensions.Filters.FullNameFilter;
 
 namespace UnityEngine.TestTools.TestRunner.GUI
 {
