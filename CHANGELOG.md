@@ -1,8 +1,17 @@
 # Changelog
-## [1.1.26] - 2021-05-05
+## [1.1.27] - 2021-06-15
+- Fix empty reason on passed tests results xml (DSTR-63)
+- Fix Repeat and Retry attribute for UnityTest in PlayMode (DSTR-237).
+- Remove XDK Xbox One platform after Unity 2020.3 
+- Fixed issue when `.` suffix was applied to BuildTargets without extension.
+- Added support for `GameCoreXboxOne` and `GameCoreXboxSeries` reduced location path length.
+
+## [1.1.26] - 2021-05-25
 - Fix html bug in TestRunnerApi API code snippet (DS-1973).
 - Fix typo bug in PreBuildSetup code example (DS-1974).
 - Fix incorrect syntax in command line reference (DS-1971).
+- Fixed a bug where test filter would match project or player path (DSTP-412).
+- Added playerGraphicsAPI TestSettings parameter
   
 ## [1.1.25] - 2021-05-05
 - Fixed a bug where test filter would match project or player path (DSTP-412).

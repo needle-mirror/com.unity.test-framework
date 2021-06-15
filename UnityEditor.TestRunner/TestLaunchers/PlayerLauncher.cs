@@ -196,16 +196,22 @@ namespace UnityEditor.TestTools.TestRunner
                 var reduceBuildLocationPathLength = false;
 
                 //Some platforms hit MAX_PATH limits during the build process, in these cases minimize the path length
-                if ((m_TargetPlatform == BuildTarget.WSAPlayer) || (m_TargetPlatform == BuildTarget.XboxOne))
+                if ((m_TargetPlatform == BuildTarget.WSAPlayer) 
+#if !UNITY_2021_1_OR_NEWER
+                || (m_TargetPlatform == BuildTarget.XboxOne)
+#endif
+                )
                 {
                     reduceBuildLocationPathLength = true;
                 }
 
                 var uniqueTempPathInProject = FileUtil.GetUniqueTempPathInProject();
-                var playerDirectoryName = reduceBuildLocationPathLength ? "PwT" : "PlayerWithTests";
+                var playerDirectoryName = "PlayerWithTests";
 
+                //Some platforms hit MAX_PATH limits during the build process, in these cases minimize the path length
                 if (reduceBuildLocationPathLength)
                 {
+                    playerDirectoryName = "PwT";
                     uniqueTempPathInProject = Path.GetTempFileName();
                     File.Delete(uniqueTempPathInProject);
                     Directory.CreateDirectory(uniqueTempPathInProject);
@@ -225,7 +231,9 @@ namespace UnityEditor.TestTools.TestRunner
                         PostprocessBuildPlayer.GetExtensionForBuildTarget(buildTargetGroup, buildOptions.target,
                             buildOptions.options);
                     var playerExecutableName = "PlayerWithTests";
-                    playerExecutableName += string.Format(".{0}", extensionForBuildTarget);
+                    if (!string.IsNullOrEmpty(extensionForBuildTarget))
+                        playerExecutableName += $".{extensionForBuildTarget}";
+
                     buildOptions.locationPathName = Path.Combine(buildLocation, playerExecutableName);
                 }
             }
@@ -250,6 +258,23 @@ namespace UnityEditor.TestTools.TestRunner
             }
 
             return buildOptions;
+        }
+        
+        private static bool ShouldReduceBuildLocationPathLength(BuildTarget target)
+        {
+            switch (target)
+            {
+#if UNITY_2020_2_OR_NEWER
+                case BuildTarget.GameCoreXboxOne:
+                case BuildTarget.GameCoreXboxSeries:
+#else
+                case BuildTarget.XboxOne:
+#endif
+                case BuildTarget.WSAPlayer:
+                    return true;
+                default:
+                    return false;
+            }
         }
     }
 }
