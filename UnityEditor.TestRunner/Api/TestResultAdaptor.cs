@@ -54,7 +54,10 @@ namespace UnityEditor.TestTools.TestRunner.Api
             HasChildren = result.hasChildren;
             Output = result.output;
             Children = result.childrenIds.Select(childId => new TestResultAdaptor(allData.results.First(r => r.testId == childId), allData)).ToArray();
-            m_Node = TNode.FromXml(result.xml);
+            if (!string.IsNullOrEmpty(result.xml))
+            {
+                m_Node = TNode.FromXml(result.xml);
+            }
         }
 
         public ITestAdaptor Test { get; private set; }

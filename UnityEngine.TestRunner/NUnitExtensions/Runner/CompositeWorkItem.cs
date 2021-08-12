@@ -10,6 +10,7 @@ using NUnit.Framework.Internal.Commands;
 using NUnit.Framework.Internal.Execution;
 using UnityEngine.TestTools.Logging;
 using UnityEngine.TestTools.TestRunner;
+using CountdownEvent = System.Threading.CountdownEvent;
 
 namespace UnityEngine.TestRunner.NUnitExtensions.Runner
 {

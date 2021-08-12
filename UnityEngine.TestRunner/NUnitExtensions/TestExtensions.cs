@@ -126,12 +126,17 @@ namespace UnityEngine.TestRunner.NUnitExtensions
                 return string.Empty;
             }
             var typeInfo = test.TypeInfo ?? test.Parent?.TypeInfo;
-            if (typeInfo == null)
+            if (typeInfo == null && IsAssembly(test))
             {
                 return test.Name;
             }
 
             return test.FullName;
+        }
+
+        private static bool IsAssembly(this ITest test)
+        {
+            return test.Parent.Parent == null;
         }
 
         public static string GetSkipReason(this ITest test)

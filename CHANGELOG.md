@@ -1,4 +1,13 @@
 # Changelog
+
+## [1.1.29] - 2021-08-12
+- Nested enumerator execution order fix (DSTR-227).
+- Fix UI not running any tests if run select on a nested namespaces (DSTR-256).
+
+## [1.1.28] - 2021-06-25
+- Fix CountDownEvent reference due to `com.unity.ext.nunit` update.
+- Various performance optimization to fix "Test execution timed out. No activity received from the player in 600 seconds."(DSTR-100).
+
 ## [1.1.27] - 2021-06-15
 - Fix empty reason on passed tests results xml (DSTR-63)
 - Fix Repeat and Retry attribute for UnityTest in PlayMode (DSTR-237).

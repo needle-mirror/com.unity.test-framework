@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using NUnit.Framework.Internal;
@@ -11,20 +12,20 @@ namespace UnityEngine.TestTools
 {
     internal class EnumerableSetUpTearDownCommand : BeforeAfterTestCommandBase<MethodInfo>
     {
+        static readonly Dictionary<Type, List<MethodInfo>> m_BeforeActionsCache = new Dictionary<Type, List<MethodInfo>>();
+        static readonly Dictionary<Type, List<MethodInfo>> m_AfterActionsCache = new Dictionary<Type, List<MethodInfo>>();
+
         public EnumerableSetUpTearDownCommand(TestCommand innerCommand)
             : base(innerCommand, "SetUp", "TearDown")
         {
-            if (Test.TypeInfo.Type != null)
+            using (new ProfilerMarker(nameof(EnumerableSetUpTearDownCommand)).Auto())
             {
-                BeforeActions = GetMethodsWithAttributeFromFixture(Test.TypeInfo.Type, typeof(UnitySetUpAttribute));
-                AfterActions = GetMethodsWithAttributeFromFixture(Test.TypeInfo.Type, typeof(UnityTearDownAttribute)).Reverse().ToArray();
+                if (Test.TypeInfo.Type != null)
+                {
+                    BeforeActions = GetActions(m_BeforeActionsCache, Test.TypeInfo.Type, typeof(UnitySetUpAttribute), typeof(IEnumerator));
+                    AfterActions = GetActions(m_AfterActionsCache, Test.TypeInfo.Type, typeof(UnityTearDownAttribute), typeof(IEnumerator)).Reverse().ToArray();
+                }
             }
-        }
-
-        private static MethodInfo[] GetMethodsWithAttributeFromFixture(Type fixtureType, Type setUpType)
-        {
-            MethodInfo[] methodsWithAttribute = Reflect.GetMethodsWithAttribute(fixtureType, setUpType, true);
-            return methodsWithAttribute.Where(x => x.ReturnType == typeof(IEnumerator)).ToArray();
         }
 
         protected override bool MoveAfterEnumerator(IEnumerator enumerator, Test test)
