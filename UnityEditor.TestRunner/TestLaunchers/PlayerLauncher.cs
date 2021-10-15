@@ -163,6 +163,9 @@ namespace UnityEditor.TestTools.TestRunner
 
             buildOptions.options |= BuildOptions.Development | BuildOptions.ConnectToHost | BuildOptions.IncludeTestAssemblies | BuildOptions.StrictMode;
             buildOptions.target = m_TargetPlatform;
+#if UNITY_2021_2_OR_NEWER
+            buildOptions.subtarget = EditorUserBuildSettings.GetActiveSubtargetFor(m_TargetPlatform);
+#endif
 
             if (EditorUserBuildSettings.waitForPlayerConnection)
                 buildOptions.options |= BuildOptions.WaitForPlayerConnection;

@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.1.30] - 2021-10-15
+- Added validation of IEnumerator return type for parameterized tests with UnityTest attribute (DSTP-743).
+- Fixed runInBackground reset to original value after finishing to run playmode tests (DSTR-248).
+- Fixed issue with circular assembly references when constructing the test tree (DSTR-300).
+
 ## [1.1.29] - 2021-08-12
 - Nested enumerator execution order fix (DSTR-227).
 - Fix UI not running any tests if run select on a nested namespaces (DSTR-256).
