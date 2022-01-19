@@ -4,7 +4,7 @@ using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
 using NUnit.Framework.Internal.Commands;
 using NUnit.Framework.Internal.Execution;
-using UnityEngine.TestTools.TestRunner;
+using UnityEngine.TestRunner.Utils;
 using UnityEngine.TestTools.Utils;
 
 namespace UnityEngine.TestRunner.NUnitExtensions.Runner
@@ -55,12 +55,12 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
             {
                 var executeEnumerable = enumerableTestMethodCommand.ExecuteEnumerable(Context).GetEnumerator();
 
-                var coroutineRunner = new CoroutineRunner(monoBehaviourCoroutineRunner, Context);
+                var coroutineRunner = new CoroutineRunner(new MonoBehaviourCoroutineHost(monoBehaviourCoroutineRunner), Context);
                 yield return coroutineRunner.HandleEnumerableTest(executeEnumerable);
 
                 if (coroutineRunner.HasFailedWithTimeout())
                 {
-                    Context.CurrentResult.SetResult(ResultState.Failure, new UnityTestTimeoutException(Context.TestCaseTimeout).Message);
+                    Context.CurrentResult.SetResult(ResultState.Failure, string.Format("Test exceeded Timeout value of {0}ms", Context.TestCaseTimeout));
                 }
 
                 while (executeEnumerable.MoveNext()) {}

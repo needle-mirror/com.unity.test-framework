@@ -8,7 +8,7 @@ namespace UnityEngine.TestTools.Logging
     sealed class LogScope : ILogScope
     {
         static List<LogScope> s_ActiveScopes = new List<LogScope>();
-        
+
         readonly object m_Lock = new object();
         bool m_Disposed;
         bool m_NeedToProcessLogs;
@@ -22,7 +22,7 @@ namespace UnityEngine.TestTools.Logging
         public bool IsNUnitInconclusiveException { get; private set; }
         public bool IsNUnitIgnoreException { get; private set; }
         public string NUnitExceptionMessage { get; private set; }
-        
+
         public static LogScope Current
         {
             get

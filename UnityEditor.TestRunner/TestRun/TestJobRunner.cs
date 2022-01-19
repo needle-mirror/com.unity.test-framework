@@ -2,62 +2,40 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Profiling;
 using UnityEditor.TestTools.TestRunner.Api;
 using UnityEditor.TestTools.TestRunner.TestRun.Tasks;
 using UnityEngine;
+using UnityEngine.Profiling;
 using UnityEngine.TestTools;
 
 namespace UnityEditor.TestTools.TestRunner.TestRun
 {
-    internal class TestJobRunner
+    internal class TestJobRunner : ITestJobRunner
     {
-        private static IEnumerable<TestTaskBase> GetTaskList(ExecutionSettings settings)
-        {
-            if (settings == null)
-            {
-                yield break;
-            }
+        internal ITestJobDataHolder testJobDataHolder = TestJobDataHolder.instance;
 
-            if (settings.EditModeIncluded() || (PlayerSettings.runPlayModeTestAsEditModeTest && settings.PlayModeInEditorIncluded()))
-            {
-                yield return new SaveModiedSceneTask();
-                yield return new RegisterFilesForCleanupVerificationTask();
-                yield return new SaveUndoIndexTask();
-                yield return new BuildTestTreeTask(TestPlatform.EditMode);
-                yield return new PrebuildSetupTask();
-                yield return new LegacyEditModeRunTask();
-                yield return new PerformUndoTask();
-                yield return new CleanupVerificationTask();
-                yield break;
-            }
+        internal Action<EditorApplication.CallbackFunction> SubscribeCallback =
+            (callback) => EditorApplication.update += callback;
 
-            if (settings.PlayModeInEditorIncluded() && !PlayerSettings.runPlayModeTestAsEditModeTest)
-            {
-                yield return new SaveModiedSceneTask();
-                yield return new LegacyPlayModeRunTask();
-                yield break;
-            }
-
-            if (settings.PlayerIncluded())
-            {
-                yield return new LegacyPlayerRunTask();
-                yield break;
-            }
-        }
-
-        internal List<TestJobData> SavedTestJobData = TestJobDataHolder.instance.TestRuns;
-        internal Action<EditorApplication.CallbackFunction> SubscribeCallback = (callback) => EditorApplication.update += callback;
         // ReSharper disable once DelegateSubtraction
-        internal Action<EditorApplication.CallbackFunction> UnsubscribeCallback = (callback) => EditorApplication.update -= callback;
+        internal Action<EditorApplication.CallbackFunction> UnsubscribeCallback =
+            (callback) => EditorApplication.update -= callback;
+
         internal TestCommandPcHelper PcHelper = new EditModePcHelper();
-        internal Func<ExecutionSettings, IEnumerable<TestTaskBase>> GetTasks = GetTaskList;
+        internal Func<ExecutionSettings, IEnumerable<TestTaskBase>> GetTasks = TaskList.GetTaskList;
         internal Action<Exception> LogException = Debug.LogException;
         internal Action<string> LogError = Debug.LogError;
         internal Action<string> ReportRunFailed = CallbacksDelegator.instance.RunFailed;
+        internal Action<Action<PlayModeStateChange>> SubscribePlayModeStateChanged =
+            (callback) => EditorApplication.playModeStateChanged += callback;
+        internal Action<Action<PlayModeStateChange>> UnsubscribePlayModeStateChanged =
+            (callback) => EditorApplication.playModeStateChanged -= callback;
+        internal Func<TestRunnerApi.RunProgressChangedEvent> RunProgressChanged = () => TestRunnerApi.runProgressChanged;
 
         private TestJobData m_JobData;
-        private TestTaskBase[] Tasks;
         private IEnumerator m_Enumerator = null;
+        private string m_CurrentTaskName;
 
         public string RunJob(TestJobData data)
         {
@@ -65,8 +43,13 @@ namespace UnityEditor.TestTools.TestRunner.TestRun
             {
                 throw new ArgumentException(null, nameof(data));
             }
-            
-            if (m_JobData != null && m_JobData.isRunning)
+
+            if (data.taskInfoStack == null)
+            {
+                throw new ArgumentException($"{nameof(data.taskInfoStack)} on {nameof(TestJobData)} is null.", nameof(data));
+            }
+
+            if (IsRunningJob())
             {
                 throw new Exception("TestJobRunner is already running a job.");
             }
@@ -75,20 +58,40 @@ namespace UnityEditor.TestTools.TestRunner.TestRun
             {
                 throw new Exception("Test job is already being handled.");
             }
-            
+
             m_JobData = data;
             m_JobData.isHandledByRunner = true;
 
-            if (!m_JobData.isRunning)
+            if (!IsRunningJob())
             {
                 m_JobData.isRunning = true;
-                SavedTestJobData.Add(m_JobData);
+                m_JobData.taskInfoStack.Push(new TaskInfo());
+                testJobDataHolder.RegisterRun(this, m_JobData);
             }
-            
-            Tasks = GetTasks(data.executionSettings).ToArray();
+            else // Is resuming run
+            {
+                var taskInfoBeforeResuming = m_JobData.taskInfoStack.Peek();
+                if (taskInfoBeforeResuming.taskMode != TaskMode.Resume)
+                {
+                    m_JobData.taskInfoStack.Push(new TaskInfo
+                    {
+                        taskMode = TaskMode.Resume,
+                        index = 0,
+                        stopBeforeIndex = taskInfoBeforeResuming.index + (taskInfoBeforeResuming.pc > 0 ? 1 : 0)
+                    });
+                }
+                else
+                {
+                    taskInfoBeforeResuming.index = 0;
+                }
+            }
+
+            m_JobData.Tasks = GetTasks(data.executionSettings).ToArray();
+
             if (!data.executionSettings.runSynchronously)
-            {	            
-                SubscribeCallback(ExecuteStep);
+            {
+                SubscribePlayModeStateChanged(PlaymodeStateChanged);
+                SubscribeCallback(ExecuteCallback);
             }
             else
             {
@@ -101,66 +104,224 @@ namespace UnityEditor.TestTools.TestRunner.TestRun
             return data.guid;
         }
 
-        private void ExecuteStep()
+        private void ExecuteCallback()
         {
-            try
+            ExecuteStep();
+            var c = 0;
+            while (ShouldExecuteInstantly())
             {
-                if (m_JobData.taskIndex >= Tasks.Length)
+                ExecuteStep();
+                c++;
+
+                if (c > 500)
                 {
+                    var taskInfo = m_JobData.taskInfoStack.Peek();
+                    var taskName = taskInfo != null ? m_JobData.Tasks[taskInfo.index].GetType().Name : "null";
+                    Debug.LogError($"Too many instant steps in test execution mode: {taskInfo?.taskMode}. Current task {taskName}.");
                     StopRun();
                     return;
                 }
+            }
+        }
 
-                if (m_Enumerator == null)
+        private void ExecuteStep()
+        {
+            using (new ProfilerMarker(nameof(TestJobRunner) + "." + nameof(ExecuteStep)).Auto())
+            {
+                try
                 {
-                    var task = Tasks[m_JobData.taskIndex];
-                    m_Enumerator = task.Execute(m_JobData);
-                    if (task.SupportsResumingEnumerator)
+                    if (m_JobData.taskInfoStack.Count == 0)
                     {
-                        PcHelper.SetEnumeratorPC(m_Enumerator, m_JobData.taskPC);    
+                        StopRun();
+                        return;
+                    }
+
+                    var taskInfo = m_JobData.taskInfoStack.Peek();
+
+                    if (m_Enumerator == null)
+                    {
+                        if (taskInfo.index >= m_JobData.Tasks.Length || (taskInfo.stopBeforeIndex > 0 && taskInfo.index >= taskInfo.stopBeforeIndex))
+                        {
+                            m_JobData.taskInfoStack.Pop();
+                            return;
+                        }
+
+                        var task = m_JobData.Tasks[taskInfo.index];
+                        if (!task.ShouldExecute(taskInfo))
+                        {
+                            taskInfo.index++;
+                            return;
+                        }
+
+                        m_JobData.runProgress.stepName = task.GetTitle();
+                        m_CurrentTaskName = task.GetName();
+                        using (new ProfilerMarker(m_CurrentTaskName + ".Setup").Auto())
+                        {
+                            m_Enumerator = task.Execute(m_JobData);
+                        }
+
+                        if (task.SupportsResumingEnumerator)
+                        {
+                            PcHelper.SetEnumeratorPC(m_Enumerator, taskInfo.pc);
+                        }
+                    }
+
+                    using (new ProfilerMarker(m_CurrentTaskName + ".Progress").Auto())
+                    {
+                        var taskIsDone = !m_Enumerator.MoveNext();
+                        if (!m_JobData.executionSettings.runSynchronously && taskInfo.taskMode == TaskMode.Normal)
+                        {
+                            if (taskIsDone)
+                            {
+                                m_JobData.runProgress.progress += RunProgress.progressPrTask;
+                            }
+                            ReportRunProgress(false);
+                        }
+
+                        if (taskIsDone)
+                        {
+                            taskInfo.index++;
+                            taskInfo.pc = 0;
+                            m_Enumerator = null;
+
+                            return;
+                        }
+                    }
+
+                    if (m_JobData.Tasks[taskInfo.index].SupportsResumingEnumerator)
+                    {
+                        taskInfo.pc = PcHelper.GetEnumeratorPC(m_Enumerator);
                     }
                 }
+                catch (TestRunCanceledException)
+                {
+                    StopRun();
+                }
+                catch (AggregateException ex)
+                {
+                    MarkJobAsError();
+                    LogError(ex.Message);
+                    foreach (var innerException in ex.InnerExceptions)
+                    {
+                        LogException(innerException);
+                    }
 
-                if (!m_Enumerator.MoveNext())
-                {
-                    m_JobData.taskIndex++;
-                    m_JobData.taskPC = 0;
-                    m_Enumerator = null;
-                    return;
+                    ReportRunFailed("Multiple unexpected errors happened while running tests.");
                 }
-                
-                if (Tasks[m_JobData.taskIndex].SupportsResumingEnumerator)
+                catch (Exception ex)
                 {
-                    m_JobData.taskPC = PcHelper.GetEnumeratorPC(m_Enumerator);
+                    MarkJobAsError();
+                    LogException(ex);
+                    ReportRunFailed("An unexpected error happened while running tests.");
                 }
             }
-            catch (TestRunCanceledException)
+        }
+
+        public bool CancelRun()
+        {
+            if (m_JobData == null || m_JobData.taskInfoStack.Count == 0 || m_JobData.taskInfoStack.Peek().taskMode == TaskMode.Canceled)
             {
-                StopRun();
+                return false;
             }
-            catch (AggregateException ex)
+
+            var lastIndex = m_JobData.taskInfoStack.Last().index;
+            m_JobData.taskInfoStack.Clear();
+            m_JobData.taskInfoStack.Push(new TaskInfo()
             {
-                StopRun();
-                LogError(ex.Message);
-                foreach (var innerException in ex.InnerExceptions)
-                {
-                    LogException(innerException);
-                }
-                ReportRunFailed("Multiple unexpected errors happened while running tests.");
-            }
-            catch (Exception ex)
+                index = lastIndex,
+                taskMode = TaskMode.Canceled
+            });
+            m_Enumerator = null;
+            return true;
+        }
+
+        private bool ShouldExecuteInstantly()
+        {
+            if (m_JobData.taskInfoStack.Count == 0)
             {
-                StopRun();
-                LogException(ex);
-                ReportRunFailed("An unexpected error happened while running tests.");
+                return false;
             }
+
+            var taskInfo = m_JobData.taskInfoStack.Peek();
+            var canRunInstantly = m_JobData.Tasks.Length <= taskInfo.index || m_JobData.Tasks[taskInfo.index].CanRunInstantly;
+            return taskInfo.taskMode != TaskMode.Normal && taskInfo.taskMode != TaskMode.Canceled && canRunInstantly;
+        }
+
+        private void PlaymodeStateChanged(PlayModeStateChange stateChange)
+        {
+            if (stateChange != PlayModeStateChange.EnteredEditMode)
+            {
+                return;
+            }
+
+            var taskInfoBeforeStateChange = m_JobData.taskInfoStack.Peek();
+            m_JobData.taskInfoStack.Push(new TaskInfo
+            {
+                taskMode = TaskMode.EnteredEditMode,
+                index = 0,
+                stopBeforeIndex = taskInfoBeforeStateChange.index
+            });
+            m_Enumerator = null;
+        }
+
+        public bool IsRunningJob()
+        {
+            return m_JobData != null && m_JobData.taskInfoStack != null && m_JobData.taskInfoStack.Count > 0;
+        }
+
+        public TestJobData GetData()
+        {
+            return m_JobData;
         }
 
         private void StopRun()
         {
             m_JobData.isRunning = false;
-            UnsubscribeCallback(ExecuteStep);
-            SavedTestJobData.Remove(m_JobData);
+            UnsubscribeCallback(ExecuteCallback);
+            UnsubscribePlayModeStateChanged(PlaymodeStateChanged);
+            testJobDataHolder.UnregisterRun(this, m_JobData);
+
+            foreach (var task in m_JobData.Tasks)
+            {
+                if (task is IDisposable disposableTask)
+                {
+                    try
+                    {
+                        disposableTask.Dispose();
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogException(e);
+                    }
+                }
+            }
+
+            if (!m_JobData.executionSettings.runSynchronously)
+            {
+                ReportRunProgress(true);
+            }
+        }
+
+        private void ReportRunProgress(bool runHasFinished)
+        {
+            RunProgressChanged().Invoke(new TestRunProgress()
+            {
+                CurrentStageName = m_JobData.runProgress.stageName ?? "",
+                CurrentStepName = m_JobData.runProgress.stepName ?? "",
+                Progress = m_JobData.runProgress.progress,
+                ExecutionSettings = m_JobData.executionSettings,
+                RunGuid = m_JobData.guid ?? "",
+                HasFinished = runHasFinished,
+            });
+        }
+
+        private void MarkJobAsError()
+        {
+            var currentTaskInfo = m_JobData.taskInfoStack.Peek();
+            currentTaskInfo.taskMode = TaskMode.Error;
+            currentTaskInfo.index++;
+            currentTaskInfo.pc = 0;
+            m_Enumerator = null;
         }
     }
 }

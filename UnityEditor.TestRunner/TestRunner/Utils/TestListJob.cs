@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using NUnit.Framework.Interfaces;
 using UnityEditor.TestTools.TestRunner.Api;
 using UnityEngine.TestTools;
 
@@ -8,19 +9,19 @@ namespace UnityEditor.TestTools.TestRunner
     internal class TestListJob
     {
         private CachingTestListProvider m_TestListProvider;
-        private TestPlatform m_Platform;
+        private ITestFilter m_Filter;
         private Action<ITestAdaptor> m_Callback;
         private IEnumerator<ITestAdaptor> m_ResultEnumerator;
-        public TestListJob(CachingTestListProvider testListProvider, TestPlatform platform, Action<ITestAdaptor> callback)
+        public TestListJob(CachingTestListProvider testListProvider, ITestFilter filter, Action<ITestAdaptor> callback)
         {
             m_TestListProvider = testListProvider;
-            m_Platform = platform;
+            m_Filter = filter;
             m_Callback = callback;
         }
 
         public void Start()
         {
-            m_ResultEnumerator = m_TestListProvider.GetTestListAsync(m_Platform);
+            m_ResultEnumerator = m_TestListProvider.GetTestListAsync(m_Filter);
             EditorApplication.update += EditorUpdate;
         }
 

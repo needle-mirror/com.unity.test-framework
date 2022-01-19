@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
 using NUnit.Framework.Internal.Commands;
@@ -28,24 +27,24 @@ namespace UnityEngine.TestTools
         }
 
         internal Func<long> GetUtcNow = () => new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds();
-        
+
         protected T[] BeforeActions = new T[0];
 
         protected T[] AfterActions = new T[0];
-        
-        protected static MethodInfo[] GetActions(IDictionary<Type, List<MethodInfo>> cacheStorage, Type fixtureType, Type attributeType, Type returnType)
+
+        protected static MethodInfo[] GetActions(IDictionary<Type, List<MethodInfo>> cacheStorage, Type fixtureType, Type attributeType, Type[] returnTypes)
         {
             if (cacheStorage.TryGetValue(fixtureType, out var result))
             {
                 return result.ToArray();
             }
-            
-            cacheStorage[fixtureType] = GetMethodsWithAttributeFromFixture(fixtureType,  attributeType, returnType);
-            
+
+            cacheStorage[fixtureType] = GetMethodsWithAttributeFromFixture(fixtureType,  attributeType, returnTypes);
+
             return cacheStorage[fixtureType].ToArray();
         }
-        
-        protected static T[] GetTestActions(IDictionary<MethodInfo,  List<T>> cacheStorage, MethodInfo methodInfo) 
+
+        protected static T[] GetTestActions(IDictionary<MethodInfo,  List<T>> cacheStorage, MethodInfo methodInfo)
         {
             if (cacheStorage.TryGetValue(methodInfo, out var result))
             {
@@ -61,16 +60,18 @@ namespace UnityEngine.TestTools
                     attributesForMethodInfo.Add(attribute1);
                 }
             }
-            
+
             cacheStorage[methodInfo] = attributesForMethodInfo;
-            
+
             return cacheStorage[methodInfo].ToArray();
         }
-    
-        private static List<MethodInfo> GetMethodsWithAttributeFromFixture(Type fixtureType, Type setUpType, Type returnType)
+
+        private static List<MethodInfo> GetMethodsWithAttributeFromFixture(Type fixtureType, Type setUpType, Type[] returnTypes)
         {
             MethodInfo[] methodsWithAttribute = Reflect.GetMethodsWithAttribute(fixtureType, setUpType, true);
-            return methodsWithAttribute.Where(x => x.ReturnType == returnType).ToList();
+            var methodsInfo = new List<MethodInfo>();
+            methodsInfo.AddRange(methodsWithAttribute.Where(method => returnTypes.Any(type => type == method.ReturnType)));
+            return methodsInfo;
         }
 
         protected abstract IEnumerator InvokeBefore(T action, Test test, UnityTestExecutionContext context);
@@ -98,7 +99,7 @@ namespace UnityEngine.TestTools
             if (state?.GetHashCode() == null)
             {
                 // We do not expect a state to exist in playmode
-                state = ScriptableObject.CreateInstance<BeforeAfterTestCommandState>();
+                state = new BeforeAfterTestCommandState();
             }
 
             state.ApplyTestResult(context.CurrentResult);
@@ -115,7 +116,7 @@ namespace UnityEngine.TestTools
                 catch (Exception ex)
                 {
                     state.TestHasRun = true;
-                    context.CurrentResult.RecordPrefixedException(m_BeforeErrorPrefix, ex);
+                    context.CurrentResult.RecordPrefixedExceptionWithHint(m_BeforeErrorPrefix, ex);
                     break;
                 }
                 ActivePcHelper.SetEnumeratorPC(enumerator, state.NextBeforeStepPc);
@@ -134,7 +135,7 @@ namespace UnityEngine.TestTools
                         catch (Exception ex)
                         {
                             state.TestHasRun = true;
-                            context.CurrentResult.RecordPrefixedException(m_BeforeErrorPrefix, ex);
+                            context.CurrentResult.RecordPrefixedExceptionWithHint(m_BeforeErrorPrefix, ex);
                             state.StoreTestResult(context.CurrentResult);
                             break;
                         }
@@ -150,9 +151,15 @@ namespace UnityEngine.TestTools
                             yield return enumerator.Current;
                         }
 
-                        if (GetUtcNow() - state.Timestamp > unityContext.TestCaseTimeout || CoroutineTimedOut(unityContext))
+                        if (GetUtcNow() - state.Timestamp > unityContext.TestCaseTimeout)
                         {
-                            context.CurrentResult.RecordPrefixedError(m_BeforeErrorPrefix, new UnityTestTimeoutException(unityContext.TestCaseTimeout).Message);
+                            context.CurrentResult.RecordPrefixedExceptionWithHint(m_BeforeErrorPrefix, new UnityTestTimeoutException(unityContext.TestCaseTimeout));
+                            state.TestHasRun = true;
+                            break;
+                        }
+                        if (context.CurrentResult.ResultState.Status == TestStatus.Failed)
+                        {
+                            // In case the coroutine runner or any top level item has failed
                             state.TestHasRun = true;
                             break;
                         }
@@ -161,7 +168,7 @@ namespace UnityEngine.TestTools
                     if (logScope.AnyFailingLogs())
                     {
                         state.TestHasRun = true;
-                        context.CurrentResult.RecordPrefixedError(m_BeforeErrorPrefix, new UnhandledLogMessageException(logScope.FailingLogs.First()).Message);
+                        context.CurrentResult.RecordPrefixedExceptionWithHint(m_BeforeErrorPrefix, new UnhandledLogMessageException(logScope.FailingLogs.First()));
                         state.StoreTestResult(context.CurrentResult);
                     }
                 }
@@ -202,7 +209,7 @@ namespace UnityEngine.TestTools
                 }
                 catch (Exception ex)
                 {
-                    context.CurrentResult.RecordPrefixedException(m_AfterErrorPrefix, ex);
+                    context.CurrentResult.RecordPrefixedExceptionWithHint(m_AfterErrorPrefix, ex);
                     state.StoreTestResult(context.CurrentResult);
                     break;
                 }
@@ -221,21 +228,19 @@ namespace UnityEngine.TestTools
                         }
                         catch (Exception ex)
                         {
-                            context.CurrentResult.RecordPrefixedException(m_AfterErrorPrefix, ex);
+                            context.CurrentResult.RecordPrefixedExceptionWithHint(m_AfterErrorPrefix, ex);
                             state.StoreTestResult(context.CurrentResult);
                             break;
                         }
 
                         state.NextAfterStepPc = ActivePcHelper.GetEnumeratorPC(enumerator);
                         state.StoreTestResult(context.CurrentResult);
-                        
-
-                        if (GetUtcNow() - state.Timestamp > unityContext.TestCaseTimeout || CoroutineTimedOut(unityContext))
+                        if (GetUtcNow() - state.Timestamp > unityContext.TestCaseTimeout)
                         {
-                            context.CurrentResult.RecordPrefixedError(m_AfterErrorPrefix, new UnityTestTimeoutException(unityContext.TestCaseTimeout).Message);
+                            context.CurrentResult.RecordPrefixedExceptionWithHint(m_AfterErrorPrefix, new UnityTestTimeoutException(unityContext.TestCaseTimeout));
                             yield break;
                         }
-                        
+
                         if (m_SkipYieldAfterActions)
                         {
                             break;
@@ -249,7 +254,7 @@ namespace UnityEngine.TestTools
                     if (logScope.AnyFailingLogs())
                     {
                         state.TestHasRun = true;
-                        context.CurrentResult.RecordPrefixedError(m_AfterErrorPrefix, new UnhandledLogMessageException(logScope.FailingLogs.First()).Message);
+                        context.CurrentResult.RecordPrefixedExceptionWithHint(m_AfterErrorPrefix, new UnhandledLogMessageException(logScope.FailingLogs.First()));
                         state.StoreTestResult(context.CurrentResult);
                     }
                 }
@@ -267,16 +272,6 @@ namespace UnityEngine.TestTools
         }
 
         private static TestCommandPcHelper pcHelper;
-        private static bool CoroutineTimedOut(ITestExecutionContext unityContext)
-        {
-            if (string.IsNullOrEmpty(unityContext.CurrentResult.Message))
-            {
-                return false;
-            }
-            return unityContext.CurrentResult.ResultState.Equals(ResultState.Failure) &&
-                       unityContext.CurrentResult.Message.Contains(new UnityTestTimeoutException(unityContext.TestCaseTimeout).Message);
-        }
-
 
         internal static TestCommandPcHelper ActivePcHelper
         {

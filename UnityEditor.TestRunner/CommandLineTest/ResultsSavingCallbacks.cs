@@ -28,8 +28,7 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
                 m_ResultFilePath = GetDefaultResultFilePath();
             }
 
-            var resultWriter = new ResultsWriter();
-            resultWriter.WriteResultToFile(testResults, m_ResultFilePath);
+            TestRunnerApi.SaveResultToFile(testResults, m_ResultFilePath);
         }
 
         public void TestStarted(ITestAdaptor test)

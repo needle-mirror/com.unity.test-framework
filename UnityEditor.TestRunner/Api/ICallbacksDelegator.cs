@@ -5,14 +5,16 @@ namespace UnityEditor.TestTools.TestRunner.Api
     internal interface ICallbacksDelegator
     {
         void RunStarted(ITest testsToRun);
-        void RunStartedRemotely(byte[] testsToRunData);
+        void RunStarted(ITestAdaptor testsToRun);
         void RunFinished(ITestResult testResults);
-        void RunFinishedRemotely(byte[] testResultsData);
+        void RunFinished(ITestResultAdaptor testResults);
         void RunFailed(string failureMessage);
         void TestStarted(ITest test);
-        void TestStartedRemotely(byte[] testStartedData);
+        void TestStarted(ITestAdaptor test);
         void TestFinished(ITestResult result);
-        void TestFinishedRemotely(byte[] testResultsData);
+        void TestFinished(ITestResultAdaptor result);
         void TestTreeRebuild(ITest test);
+        void SetTestRunFilter(ITestFilter filter);
+        void ClearTestResultCache();
     }
 }

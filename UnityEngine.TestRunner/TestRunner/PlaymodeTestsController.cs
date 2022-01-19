@@ -14,7 +14,10 @@ namespace UnityEngine.TestTools.TestRunner
     [AddComponentMenu("")]
     internal class PlaymodeTestsController : MonoBehaviour
     {
+        public static bool RunFinished;
         private IEnumerator m_TestSteps;
+
+        public static PlaymodeTestsController ActiveController { get; set; }
 
         [SerializeField]
         private List<string> m_AssembliesWithTests;
@@ -38,6 +41,8 @@ namespace UnityEngine.TestTools.TestRunner
         internal RunStartedEvent runStartedEvent = new RunStartedEvent();
         [SerializeField]
         internal RunFinishedEvent runFinishedEvent = new RunFinishedEvent();
+        [SerializeField]
+        internal ScriptableObject[] includedObjects;
 
         internal const string kPlaymodeTestControllerName = "Code-based tests runner";
 
@@ -48,6 +53,7 @@ namespace UnityEngine.TestTools.TestRunner
 
         public IEnumerator Start()
         {
+            ActiveController = this;
             //Skip 2 frame because Unity.
             yield return null;
             yield return null;
@@ -74,8 +80,8 @@ namespace UnityEngine.TestTools.TestRunner
             if (m_Runner.IsTestComplete)
             {
                 runFinishedEvent.Invoke(m_Runner.Result);
-                Cleanup();
 
+                RunFinished = true;
                 yield return null;
             }
         }
@@ -85,16 +91,14 @@ namespace UnityEngine.TestTools.TestRunner
             CoroutineTestWorkItem.monoBehaviourCoroutineRunner = this;
             gameObject.hideFlags |= HideFlags.DontSave;
 
-            if (settings.sceneBased)
-            {
-                SceneManager.LoadScene(1, LoadSceneMode.Additive);
-                yield return null;
-            }
-
             var testListUtil = new PlayerTestAssemblyProvider(new AssemblyLoadProxy(), m_AssembliesWithTests);
-            m_Runner = new UnityTestAssemblyRunner(new UnityTestAssemblyBuilder(), new PlaymodeWorkItemFactory());
+            m_Runner = new UnityTestAssemblyRunner(new UnityTestAssemblyBuilder(), new PlaymodeWorkItemFactory(), new UnityTestExecutionContext());
 
-            var loadedTests = m_Runner.Load(testListUtil.GetUserAssemblies().Select(a => a.Assembly).ToArray(), TestPlatform.PlayMode, UnityTestAssemblyBuilder.GetNUnitTestBuilderSettings(TestPlatform.PlayMode));
+            var assemblies = testListUtil.GetUserAssemblies()
+                .Select(a => new AssemblyWithPlatform(a, TestPlatform.PlayMode))
+                .ToArray();
+
+            var loadedTests = m_Runner.Load(assemblies);
             loadedTests.ParseForNameDuplicates();
             runStartedEvent.Invoke(m_Runner.LoadedTest);
 
@@ -113,16 +117,23 @@ namespace UnityEngine.TestTools.TestRunner
             }
             if (Application.isEditor)
             {
-                Destroy(gameObject);
+                if (Application.isPlaying)
+                {
+                    Destroy(gameObject);
+                }
+                else
+                {
+                    DestroyImmediate(gameObject);
+                }
             }
         }
 
         public static void TryCleanup()
         {
-            var controller = GetController();
+            var controller = GameObject.Find(kPlaymodeTestControllerName);
             if (controller != null)
             {
-                controller.Cleanup();
+                controller.GetComponent<PlaymodeTestsController>().Cleanup();
             }
         }
     }

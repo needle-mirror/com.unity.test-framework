@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using NUnit.Framework.Internal;
 using UnityEngine.TestRunner.NUnitExtensions.Runner;
+using UnityEngine.TestRunner.Utils;
 using UnityEngine.TestTools.TestRunner;
 
 namespace UnityEngine.TestTools.Utils
@@ -9,15 +10,16 @@ namespace UnityEngine.TestTools.Utils
     internal class CoroutineRunner
     {
         private bool m_Running;
+        private bool m_TestFailed;
         private bool m_Timeout;
-        private readonly MonoBehaviour m_Controller;
+        private readonly ICoroutineHost m_Controller;
         private readonly UnityTestExecutionContext m_Context;
         private Coroutine m_TimeOutCoroutine;
         private IEnumerator m_TestCoroutine;
 
         internal const int k_DefaultTimeout = 1000 * 180;
 
-        public CoroutineRunner(MonoBehaviour playmodeTestsController, UnityTestExecutionContext context)
+        public CoroutineRunner(ICoroutineHost playmodeTestsController, UnityTestExecutionContext context)
         {
             m_Controller = playmodeTestsController;
             m_Context = context;
@@ -37,6 +39,13 @@ namespace UnityEngine.TestTools.Utils
                     m_TestCoroutine = ExMethod(testEnumerator, m_Context.TestCaseTimeout);
                     m_Controller.StartCoroutine(m_TestCoroutine);
                 }
+                if (m_TestFailed)
+                {
+                    StopAllRunningCoroutines();
+                    m_Context.CurrentResult.RecordException(new UnityTestTimeoutException(m_Context.TestCaseTimeout));
+                    yield break;
+                }
+
                 if (m_Context.ExecutionStatus == TestExecutionStatus.StopRequested || m_Context.ExecutionStatus == TestExecutionStatus.AbortRequested)
                 {
                     StopAllRunningCoroutines();
@@ -65,8 +74,8 @@ namespace UnityEngine.TestTools.Utils
             m_TimeOutCoroutine = m_Controller.StartCoroutine(StartTimer(e, timeout,
                 () =>
                 {
+                    m_TestFailed = true;
                     m_Timeout = true;
-                    m_Running = false;
                 }));
 
             yield return m_Controller.StartCoroutine(e);
@@ -80,21 +89,12 @@ namespace UnityEngine.TestTools.Utils
             if (coroutineToBeKilled != null)
                 m_Controller.StopCoroutine(coroutineToBeKilled);
             if (onTimeout != null)
-            {
                 onTimeout();
-                StopAllRunningCoroutines();
-                m_Context.CurrentResult.RecordException(new UnityTestTimeoutException(m_Context.TestCaseTimeout));
-            }
         }
 
         public bool HasFailedWithTimeout()
         {
             return m_Timeout;
-        }
-
-        public int GetDefaultTimeout()
-        {
-            return k_DefaultTimeout;
         }
     }
 }

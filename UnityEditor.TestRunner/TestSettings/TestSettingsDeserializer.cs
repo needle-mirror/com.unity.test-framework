@@ -48,7 +48,7 @@ namespace UnityEditor.TestTools.TestRunner
 
             foreach (var settingsMap in s_SettingsMapping)
             {
-                if (!settingsDictionary.ContainsKey(settingsMap.Key))
+                if (!settingsDictionary.ContainsKey(settingsMap.Key) || settingsDictionary[settingsMap.Key] == null)
                 {
                     continue;
                 }

@@ -41,13 +41,6 @@ namespace UnityEditor.TestTools.TestRunner.UnityTestProtocol
             };
         }
 
-        public string GetRunStateFromResultNunitXml(ITestResultAdaptor result)
-        {
-            var doc = new XmlDocument();
-            doc.LoadXml(result.ToXml().OuterXml);
-            return doc.FirstChild.Attributes["runstate"].Value;
-        }
-
         public TestState GetTestStateFromResult(ITestResultAdaptor result)
         {
             var state = TestState.Failure;
@@ -61,16 +54,22 @@ namespace UnityEditor.TestTools.TestRunner.UnityTestProtocol
                 state = TestState.Skipped;
 
                 if (result.ResultState.ToLowerInvariant().EndsWith("ignored"))
+                {
                     state = TestState.Ignored;
+                }
             }
             else
             {
                 if (result.ResultState.ToLowerInvariant().Equals("inconclusive"))
+                {
                     state = TestState.Inconclusive;
+                }
 
                 if (result.ResultState.ToLowerInvariant().EndsWith("cancelled") ||
                     result.ResultState.ToLowerInvariant().EndsWith("error"))
+                {
                     state = TestState.Error;
+                }
             }
 
             return state;

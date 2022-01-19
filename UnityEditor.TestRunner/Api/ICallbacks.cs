@@ -1,7 +1,7 @@
 namespace UnityEditor.TestTools.TestRunner.Api
 {
     /// <summary>
-    /// Callbacks in the <see cref="TestRunnerApi"/> for the test stages when running tests. 
+    /// Callbacks in the <see cref="TestRunnerApi"/> for the test stages when running tests.
     /// </summary>
     public interface ICallbacks
     {

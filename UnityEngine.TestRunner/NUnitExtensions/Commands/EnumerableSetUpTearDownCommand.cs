@@ -22,8 +22,8 @@ namespace UnityEngine.TestTools
             {
                 if (Test.TypeInfo.Type != null)
                 {
-                    BeforeActions = GetActions(m_BeforeActionsCache, Test.TypeInfo.Type, typeof(UnitySetUpAttribute), typeof(IEnumerator));
-                    AfterActions = GetActions(m_AfterActionsCache, Test.TypeInfo.Type, typeof(UnityTearDownAttribute), typeof(IEnumerator)).Reverse().ToArray();
+                    BeforeActions = GetActions(m_BeforeActionsCache, Test.TypeInfo.Type, typeof(UnitySetUpAttribute), new[] {typeof(IEnumerator)});
+                    AfterActions = GetActions(m_AfterActionsCache, Test.TypeInfo.Type, typeof(UnityTearDownAttribute), new[] {typeof(IEnumerator)}).Reverse().ToArray();
                 }
             }
         }

@@ -39,28 +39,15 @@ namespace UnityEditor.TestTools.TestRunner
         private bool m_IsBuilding;
         [NonSerialized]
         private bool m_Enabled;
-        internal TestFilterSettings filterSettings;
+        [NonSerialized]
+        private bool m_IsRetrievingTestTree;
 
         [SerializeField]
         private SplitterState m_Spl = new SplitterState(new float[] { 75, 25 }, new[] { 32, 32 }, null);
 
         private TestRunnerWindowSettings m_Settings;
 
-        private enum TestRunnerMenuLabels
-        {
-            PlayMode = 0,
-            EditMode = 1
-        }
-        [SerializeField]
-        private int m_TestTypeToolbarIndex = (int)TestRunnerMenuLabels.EditMode;
-        [SerializeField]
-        private PlayModeTestListGUI m_PlayModeTestListGUI;
-        [SerializeField]
-        private EditModeTestListGUI m_EditModeTestListGUI;
-
-        internal TestListGUI m_SelectedTestTypes;
-
-        private ITestRunnerApi m_testRunnerApi;
+        internal TestListGUI m_TestListGUI;
 
         private WindowResultUpdater m_WindowResultUpdater;
 
@@ -77,6 +64,8 @@ namespace UnityEditor.TestTools.TestRunner
         static TestRunnerWindow()
         {
             InitBackgroundRunners();
+            TestRunnerApi.runProgressChanged.AddListener(UpdateProgressStatus);
+            EditorApplication.update += UpdateProgressBar;
         }
 
         private static void InitBackgroundRunners()
@@ -93,10 +82,10 @@ namespace UnityEditor.TestTools.TestRunner
 
         private static void OnPlayModeStateChanged(PlayModeStateChange state)
         {
-            if (s_Instance && state == PlayModeStateChange.EnteredEditMode && s_Instance.m_SelectedTestTypes.HasTreeData())
+            if (s_Instance && state == PlayModeStateChange.EnteredEditMode && s_Instance.m_TestListGUI.HasTreeData())
             {
                 //repaint message details after exit playmode
-                s_Instance.m_SelectedTestTypes.TestSelectionCallback(s_Instance.m_SelectedTestTypes.m_TestListState.selectedIDs.ToArray());
+                s_Instance.m_TestListGUI.TestSelectionCallback(s_Instance.m_TestListGUI.m_TestListState.selectedIDs.ToArray());
                 s_Instance.Repaint();
             }
         }
@@ -109,57 +98,34 @@ namespace UnityEditor.TestTools.TestRunner
         private void OnEnable()
         {
             s_Instance = this;
-            SelectTestListGUI(m_TestTypeToolbarIndex);
+            if (m_TestListGUI == null)
+                m_TestListGUI = new TestListGUI();
 
-            m_testRunnerApi = ScriptableObject.CreateInstance<TestRunnerApi>();
             m_WindowResultUpdater = new WindowResultUpdater();
-            m_testRunnerApi.RegisterCallbacks(m_WindowResultUpdater);
+            TestRunnerApi.RegisterTestCallback(m_WindowResultUpdater);
         }
 
         private void Enable()
         {
             m_Settings = new TestRunnerWindowSettings("UnityEditor.PlaymodeTestsRunnerWindow");
-            filterSettings = new TestFilterSettings("UnityTest.IntegrationTestsRunnerWindow");
 
-            if (m_SelectedTestTypes == null)
-            {
-                SelectTestListGUI(m_TestTypeToolbarIndex);
-            }
+            if (m_TestListGUI == null)
+                m_TestListGUI = new TestListGUI();
 
             StartRetrieveTestList();
-            m_SelectedTestTypes.Reload();
+            m_TestListGUI.Reload();
             m_Enabled = true;
-        }
-
-        private void SelectTestListGUI(int testTypeToolbarIndex)
-        {
-            if (testTypeToolbarIndex == (int)TestRunnerMenuLabels.PlayMode)
-            {
-                if (m_PlayModeTestListGUI == null)
-                {
-                    m_PlayModeTestListGUI = new PlayModeTestListGUI();
-                }
-                m_SelectedTestTypes = m_PlayModeTestListGUI;
-            }
-            else if (testTypeToolbarIndex == (int)TestRunnerMenuLabels.EditMode)
-            {
-                if (m_EditModeTestListGUI == null)
-                {
-                    m_EditModeTestListGUI = new EditModeTestListGUI();
-                }
-                m_SelectedTestTypes = m_EditModeTestListGUI;
-            }
         }
 
         private void StartRetrieveTestList()
         {
-            if (!m_SelectedTestTypes.HasTreeData())
+            if (!m_IsRetrievingTestTree && !m_TestListGUI.HasTreeData())
             {
-                var listToInit = m_SelectedTestTypes;
-                m_testRunnerApi.RetrieveTestList(m_SelectedTestTypes.TestMode, (rootTest) =>
+                m_IsRetrievingTestTree = true;
+                TestRunnerApi.RetrieveTestTree(m_TestListGUI.GetExecutionSettings(), (rootTest) =>
                 {
-                    listToInit.Init(this, rootTest);
-                    listToInit.Reload();
+                    m_TestListGUI.Init(this, rootTest);
+                    m_TestListGUI.Reload();
                 });
             }
         }
@@ -181,23 +147,12 @@ namespace UnityEditor.TestTools.TestRunner
                 Repaint();
             }
 
-            EditorGUILayout.BeginHorizontal();
-            GUILayout.FlexibleSpace();
-            var selectedIndex = m_TestTypeToolbarIndex;
-            m_TestTypeToolbarIndex = GUILayout.Toolbar(m_TestTypeToolbarIndex, Enum.GetNames(typeof(TestRunnerMenuLabels)), "LargeButton", UnityEngine.GUI.ToolbarButtonSize.FitToContents);
-            GUILayout.FlexibleSpace();
-            EditorGUILayout.EndHorizontal();
-
-            if (selectedIndex != m_TestTypeToolbarIndex)
-            {
-                SelectTestListGUI(m_TestTypeToolbarIndex);
-                StartRetrieveTestList();
-            }
+            StartRetrieveTestList();
 
             EditorGUILayout.BeginVertical();
             using (new EditorGUI.DisabledScope(EditorApplication.isPlayingOrWillChangePlaymode))
             {
-                m_SelectedTestTypes.PrintHeadPanel();
+                m_TestListGUI.PrintHeadPanel();
             }
             EditorGUILayout.EndVertical();
 
@@ -208,16 +163,23 @@ namespace UnityEditor.TestTools.TestRunner
 
             EditorGUILayout.BeginVertical();
             EditorGUILayout.BeginVertical(Styles.testList);
-            m_SelectedTestTypes.RenderTestList();
+            m_TestListGUI.RenderTestList();
             EditorGUILayout.EndVertical();
             EditorGUILayout.EndVertical();
 
-            m_SelectedTestTypes.RenderDetails();
+            m_TestListGUI.RenderDetails();
 
             if (m_Settings.verticalSplit)
                 SplitterGUILayout.EndVerticalSplit();
             else
                 SplitterGUILayout.EndHorizontalSplit();
+
+            EditorGUILayout.BeginVertical();
+            using (new EditorGUI.DisabledScope(EditorApplication.isPlayingOrWillChangePlaymode))
+            {
+                m_TestListGUI.PrintBottomPanel();
+            }
+            EditorGUILayout.EndVertical();
         }
 
         /// <summary>
@@ -230,7 +192,7 @@ namespace UnityEditor.TestTools.TestRunner
             menu.AddItem(m_GUIHorizontalSplit, !m_Settings.verticalSplit, m_Settings.ToggleVerticalSplit);
 
             menu.AddSeparator(null);
-            
+
             if (EditorPrefs.GetBool("InternalMode", false))
             {
                 menu.AddItem(m_GUIRunPlayModeTestAsEditModeTests, PlayerSettings.runPlayModeTestAsEditModeTest, () =>
@@ -246,19 +208,40 @@ namespace UnityEditor.TestTools.TestRunner
             }
         }
 
+        private static TestRunProgress runProgress;
+        private static void UpdateProgressStatus(TestRunProgress progress)
+        {
+            runProgress = progress;
+        }
+
+        private static void UpdateProgressBar()
+        {
+            if (runProgress == null || runProgress.HasFinished)
+            {
+                EditorUtility.ClearProgressBar();
+                return;
+            }
+
+            var cancel = EditorUtility.DisplayCancelableProgressBar($"Test Runner - {runProgress.CurrentStageName}", runProgress.CurrentStepName, (float)runProgress.Progress);
+            if (cancel)
+            {
+                TestRunnerApi.CancelTestRun(runProgress.RunGuid);
+            }
+        }
+
         internal void RebuildUIFilter()
         {
-            if (m_SelectedTestTypes != null && m_SelectedTestTypes.HasTreeData())
+            if (m_TestListGUI != null && m_TestListGUI.HasTreeData())
             {
-                m_SelectedTestTypes.RebuildUIFilter();
+                m_TestListGUI.RebuildUIFilter();
             }
         }
 
         internal static void UpdateWindow()
         {
-            if (s_Instance != null && s_Instance.m_SelectedTestTypes != null)
+            if (s_Instance != null && s_Instance.m_TestListGUI != null)
             {
-                s_Instance.m_SelectedTestTypes.Repaint();
+                s_Instance.m_TestListGUI.Repaint();
                 s_Instance.Repaint();
             }
         }

@@ -14,7 +14,6 @@ namespace UnityEditor.TestTools.TestRunner.GUI
         public string[] groupNames;
         public string[] categoryNames;
         public string[] testNames;
-        public int testRepetitions = 1;
         public bool synchronousOnly = false;
 
         public static string AssemblyNameFromPath(string path)
@@ -82,7 +81,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                 //Strict regex match for test group name on its own
                 if (Regex.IsMatch(name, nameFromFilter))
                     return true;
-                //Match test names that end with parametrized test values and full nunit generated test names that have . separators
+                //Match test names that end with Parameterized test values and full nunit generated test names that have . separators
                 var regex = nameFromFilter.TrimEnd('$') + @"[\.|\(.*\)]";
                 if (Regex.IsMatch(name, regex))
                     return true;
@@ -159,6 +158,5 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             List<string> Categories { get; }
             void Clear();
         }
-
     }
 }

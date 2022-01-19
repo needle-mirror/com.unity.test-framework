@@ -6,24 +6,29 @@ using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
 using NUnit.Framework.Internal.Filters;
 using UnityEngine.TestRunner.NUnitExtensions.Filters;
-using FullNameFilter = UnityEngine.TestRunner.NUnitExtensions.Filters.FullNameFilter;
 
 namespace UnityEngine.TestTools.TestRunner.GUI
 {
     [Serializable]
     internal class RuntimeTestRunnerFilter
     {
+        public TestPlatform testMode;
+        public bool filterEditorOnly;
+        public bool filterEditorAndPlatformsOnly;
+        public bool hasRequiresPlayModeFlag;
+        public bool requiresPlayMode;
+
         public string[] assemblyNames;
         public string[] groupNames;
         public string[] categoryNames;
         public string[] testNames;
         public bool synchronousOnly = false;
-        
+
         public ITestFilter BuildNUnitFilter()
         {
             var filters = new List<ITestFilter>();
 
-            AddFilters(filters, testNames, (s) => new FullNameFilter(s));
+            AddFilters(filters, testNames, (s) => new FullTestNameFilter(s));
             AddFilters(filters, groupNames, OptimizedGroupFilter);
             AddFilters(filters, assemblyNames, (s) => new AssemblyNameFilter(s));
             AddFilters(filters, categoryNames, (s) => new CategoryFilterExtended(s) {IsRegex = true});
@@ -33,10 +38,30 @@ namespace UnityEngine.TestTools.TestRunner.GUI
                 filters.Add(new SynchronousFilter());
             }
 
-            return filters.Count == 0 ? TestFilter.Empty : new AndFilter(filters.ToArray());
+            // Add Editor only filter if the assembly type is set to only one of the values.
+            if (filterEditorOnly && !filterEditorAndPlatformsOnly)
+            {
+                filters.Add(new EditorOnlyFilter(true));
+            }
+            else if (filterEditorAndPlatformsOnly && !filterEditorOnly)
+            {
+                filters.Add(new EditorOnlyFilter(false));
+            }
+
+            if (testMode != 0 && testMode != TestPlatform.All)
+            {
+                filters.Add(new EditorOnlyFilter(testMode == TestPlatform.EditMode));
+            }
+
+            if (hasRequiresPlayModeFlag)
+            {
+                filters.Add(new RequiresPlayModeFilter(requiresPlayMode));
+            }
+
+            return filters.Count == 0 ? TestFilter.Empty : new AndFilterExtended(filters.ToArray());
         }
 
-        static FullNameFilter OptimizedGroupFilter(string s)
+        static FullTestNameFilter OptimizedGroupFilter(string s)
         {
             if (s.Length >= 2)
             {
@@ -51,13 +76,13 @@ namespace UnityEngine.TestTools.TestRunner.GUI
                     // if a regex is the same when we escape it, it means that it doesn't contain any characters
                     // with any meaning in the regex. Hence the regex is just a plain name.
                     if (raw.Equals(escaped, StringComparison.Ordinal))
-                        return new FullNameFilter(raw);
+                        return new FullTestNameFilter(raw);
                 }
             }
 
-            return new FullNameFilter(s) { IsRegex = true };
+            return new FullTestNameFilter(s) { IsRegex = true };
         }
-        
+
         private static void AddFilters(List<ITestFilter> filters, string[] values, Func<string, TestFilter> builder)
         {
             if (values == null || values.Length == 0)

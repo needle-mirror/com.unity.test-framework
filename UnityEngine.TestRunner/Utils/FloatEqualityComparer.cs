@@ -7,8 +7,8 @@ namespace UnityEngine.TestTools.Utils
     /// </summary>
     public class FloatEqualityComparer : IEqualityComparer<float>
     {
-        private const float k_DefaultError = 0.0001f;
-        private readonly float AllowedError;
+        internal const float k_DefaultError = 0.0001f;
+        internal readonly float AllowedError;
 
         private static readonly  FloatEqualityComparer m_Instance = new FloatEqualityComparer();
         /// <summary>

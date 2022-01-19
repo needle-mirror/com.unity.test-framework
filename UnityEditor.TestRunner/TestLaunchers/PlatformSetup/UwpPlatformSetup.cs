@@ -23,7 +23,9 @@ namespace UnityEditor.TestTools.TestRunner
             // Otherwise we can use the existing configuration specified by the user in Build Settings.
             if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("UNITY_THISISABUILDMACHINE")) || wsaSettingNotInitialized)
             {
+#if !UNITY_2021_1_OR_NEWER
                 EditorUserBuildSettings.wsaSubtarget = WSASubtarget.PC;
+#endif
                 EditorUserBuildSettings.wsaArchitecture = "x64";
                 EditorUserBuildSettings.SetPlatformSettings(BuildPipeline.GetBuildTargetName(BuildTarget.WSAPlayer), k_SettingsBuildConfiguration, WSABuildType.Debug.ToString());
                 EditorUserBuildSettings.wsaUWPBuildType = WSAUWPBuildType.ExecutableOnly;

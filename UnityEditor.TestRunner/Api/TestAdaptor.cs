@@ -13,7 +13,7 @@ namespace UnityEditor.TestTools.TestRunner.Api
 {
     internal class TestAdaptor : ITestAdaptor
     {
-        internal TestAdaptor(ITest test, ITestAdaptor[] children = null)
+        internal TestAdaptor(ITest test, string uniqueName = null, ITestAdaptor[] children = null)
         {
             Id = test.Id;
             Name = test.Name;
@@ -37,6 +37,7 @@ namespace UnityEditor.TestTools.TestRunner.Api
 
             TypeInfo = test.TypeInfo;
             Method = test.Method;
+            Arguments = test is TestMethod testMethod ? testMethod.parms?.Arguments : (test as TestSuite)?.Arguments;
             Categories = test.GetAllCategoriesFromTest().Distinct().ToArray();
             IsTestAssembly = test is TestAssembly;
             RunState = (RunState)Enum.Parse(typeof(RunState), test.RunState.ToString());
@@ -44,15 +45,19 @@ namespace UnityEditor.TestTools.TestRunner.Api
             SkipReason = test.GetSkipReason();
             ParentId = test.GetParentId();
             ParentFullName = test.GetParentFullName();
-            UniqueName = test.GetUniqueName();
             ParentUniqueName = test.GetParentUniqueName();
+            UniqueName = uniqueName ?? test.GetUniqueName();
             ChildIndex = childIndex;
-            
+
             if (test.Parent != null)
             {
                 if (test.Parent.Parent == null) // Assembly level
                 {
-                    TestMode = (TestMode)Enum.Parse(typeof(TestMode),test.Properties.Get("platform").ToString());        
+                    if (test.Properties.Get("platform").ToString() == "PlayMode")
+                    {
+                        RequiresPlayMode = true;
+                    }
+                    TestMode = (TestMode)Enum.Parse(typeof(TestMode), test.Properties.Get("platform").ToString());
                 }
             }
 
@@ -64,39 +69,8 @@ namespace UnityEditor.TestTools.TestRunner.Api
             Parent = parent;
             if (parent != null)
             {
+                RequiresPlayMode = parent.RequiresPlayMode;
                 TestMode = parent.TestMode;
-            }
-        }
-
-        internal TestAdaptor(RemoteTestData test)
-        {
-            Id = test.id;
-            Name = test.name;
-            FullName = test.ChildIndex != -1 ? GetIndexedTestCaseName(test.fullName, test.ChildIndex) : test.fullName;
-            TestCaseCount = test.testCaseCount;
-            HasChildren = test.hasChildren;
-            IsSuite = test.isSuite;
-            m_ChildrenIds = test.childrenIds;
-            TestCaseTimeout = test.testCaseTimeout;
-            Categories = test.Categories;
-            IsTestAssembly = test.IsTestAssembly;
-            RunState = (RunState)Enum.Parse(typeof(RunState), test.RunState.ToString());
-            Description = test.Description;
-            SkipReason = test.SkipReason;
-            ParentId = test.ParentId;
-            UniqueName = test.UniqueName;
-            ParentUniqueName = test.ParentUniqueName;
-            ParentFullName = test.ParentFullName;
-            ChildIndex = test.ChildIndex;
-            TestMode = TestMode.PlayMode;
-        }
-
-        internal void ApplyChildren(IEnumerable<TestAdaptor> allTests)
-        {
-            Children = m_ChildrenIds.Select(id => allTests.First(t => t.Id == id)).ToArray();
-            if (!string.IsNullOrEmpty(ParentId))
-            {
-                Parent = allTests.FirstOrDefault(t => t.Id == ParentId);
             }
         }
 
@@ -111,7 +85,7 @@ namespace UnityEditor.TestTools.TestRunner.Api
         public int TestCaseTimeout { get; private set; }
         public ITypeInfo TypeInfo { get; private set; }
         public IMethodInfo Method { get; private set; }
-        private string[] m_ChildrenIds;
+        public object[] Arguments { get; }
         public string[] Categories { get; private set; }
         public bool IsTestAssembly { get; private set; }
         public RunState RunState { get; }
@@ -122,8 +96,10 @@ namespace UnityEditor.TestTools.TestRunner.Api
         public string UniqueName { get; }
         public string ParentUniqueName { get; }
         public int ChildIndex { get; }
-        public TestMode TestMode { get; private set; }
-        
+        public TestMode TestMode { get; set; }
+        public AssemblyType AssemblyType { get; private set; }
+        public bool? RequiresPlayMode { get; private set; }
+
         private static string GetIndexedTestCaseName(string fullName, int index)
         {
             var generatedTestSuffix = " GeneratedTestCase" + index;

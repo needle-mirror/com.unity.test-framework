@@ -7,8 +7,8 @@ namespace UnityEngine.TestTools.Utils
     /// </summary>
     public class Vector4EqualityComparer : IEqualityComparer<Vector4>
     {
-        private const float k_DefaultError = 0.0001f;
-        private readonly float AllowedError;
+        internal const float k_DefaultError = 0.0001f;
+        internal readonly float AllowedError;
 
         private static readonly Vector4EqualityComparer m_Instance = new Vector4EqualityComparer();
         /// <summary>

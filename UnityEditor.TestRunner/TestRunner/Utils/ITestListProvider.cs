@@ -6,6 +6,6 @@ namespace UnityEditor.TestTools.TestRunner
 {
     interface ITestListProvider
     {
-        IEnumerator<ITest> GetTestListAsync(TestPlatform platform);
+        IEnumerator<ITest> GetTestListAsync();
     }
 }

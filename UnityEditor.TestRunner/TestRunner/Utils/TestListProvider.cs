@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework.Interfaces;
@@ -18,19 +17,15 @@ namespace UnityEditor.TestTools.TestRunner
             m_AssemblyBuilder = assemblyBuilder;
         }
 
-        public IEnumerator<ITest> GetTestListAsync(TestPlatform platform)
+        public IEnumerator<ITest> GetTestListAsync()
         {
-            var assembliesTask = m_AssemblyProvider.GetAssembliesGroupedByTypeAsync(platform);
+            var assembliesTask = m_AssemblyProvider.GetAssembliesAsync();
             while (assembliesTask.MoveNext())
             {
                 yield return null;
             }
 
-            var assemblies = assembliesTask.Current.Where(pair => platform.IsFlagIncluded(pair.Key))
-                .SelectMany(pair => pair.Value.Select(assemblyInfo => Tuple.Create(assemblyInfo.Assembly, pair.Key))).ToArray();
-
-            var settings = UnityTestAssemblyBuilder.GetNUnitTestBuilderSettings(platform);
-            var test =  m_AssemblyBuilder.BuildAsync(assemblies.Select(a => a.Item1).ToArray(), assemblies.Select(a => a.Item2).ToArray(), settings);
+            var test =  m_AssemblyBuilder.BuildAsync(assembliesTask.Current.ToArray());
             while (test.MoveNext())
             {
                 yield return null;

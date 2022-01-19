@@ -39,7 +39,7 @@ namespace UnityEngine.TestTools
             }
         }
 
-        static Dictionary<string, bool> m_ConditionMap = new Dictionary<string, bool>();
+        private static Dictionary<string, bool> m_ConditionMap = new Dictionary<string, bool>();
 
         /// <summary>
         /// Adds a flag indicating whether tests with the same key should be ignored.
@@ -52,7 +52,7 @@ namespace UnityEngine.TestTools
         /// using UnityEditor;
         /// using NUnit.Framework;
         /// using UnityEngine.TestTools;
-        /// 
+        ///
         /// [InitializeOnLoad]
         /// public class OnLoad
         /// {
@@ -62,11 +62,11 @@ namespace UnityEngine.TestTools
         ///         #if UNITY_EDITOR_OSX
         ///         editorIsOSX = true;
         ///         #endif
-        /// 
+        ///
         ///         ConditionalIgnoreAttribute.AddConditionalIgnoreMapping("IgnoreInMacEditor", editorIsOSX);
         ///     }
         /// }
-        /// 
+        ///
         /// public class MyTestClass
         /// {
         ///     [Test, ConditionalIgnore("IgnoreInMacEditor", "Ignored on Mac editor.")]

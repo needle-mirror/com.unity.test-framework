@@ -33,9 +33,8 @@ namespace UnityEngine.TestTools.Utils
 
         protected static ITest BuildTests(TestPlatform testPlatform, IAssemblyWrapper[] assemblies)
         {
-            var settings = UnityTestAssemblyBuilder.GetNUnitTestBuilderSettings(testPlatform);
             var builder = new UnityTestAssemblyBuilder();
-            return builder.Build(assemblies.Select(a => a.Assembly).ToArray(), Enumerable.Repeat(testPlatform, assemblies.Length).ToArray(), settings);
+            return builder.Build(assemblies.Select(assembly => new AssemblyWithPlatform(assembly, testPlatform)).ToArray());
         }
 
         private void LoadAssemblies()

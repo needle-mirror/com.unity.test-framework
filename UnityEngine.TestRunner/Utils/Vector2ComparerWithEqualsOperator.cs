@@ -30,7 +30,7 @@ namespace UnityEngine.TestTools.Utils
         ///     {
         ///         var actual = new Vector2(10e-7f, 10e-7f);
         ///         var expected = new Vector2(0f, 0f);
-        /// 
+        ///
         ///         Assert.That(actual, Is.EqualTo(expected).Using(Vector2ComparerWithEqualsOperator.Instance));
         ///     }
         /// }
@@ -40,6 +40,7 @@ namespace UnityEngine.TestTools.Utils
         {
             return expected == actual;
         }
+
         /// <summary>
         /// Serves as the default hash function.
         /// </summary>

@@ -1,17 +1,32 @@
-# Workflow: **How to create a new test assembly** 
+# Workflow: Creating test assemblies 
 
-Unity Test Framework looks for a test inside any assembly that references [NUnit](http://www.nunit.org/). We refer to such assemblies as `TestAssemblies`. The [Test Runner](./getting-started.md) UI can help you set up `TestAssemblies`. **Play Mode** and **Edit Mode** tests need to be in separate assemblies.
+Unity Test Framework looks for tests in a **Test Assembly**, which is any assembly that references Nunit.
 
-In the **Test Runner** window, you will see an **EditMode** tab enabled by default, as well as a **Create EditMode Test Assembly Folder** button. 
+The Test Runner UI helps you set up test assemblies:
 
-![Test Runner window EditMode tab](./images/editmode-tab.png)
+1. Select the Assets folder in your Project window.
+2. Open the Test Runner window (menu: **Window** > **General** > **Test Runner**).
+3. In the **Test Runner** window, select **Create a new Test Assembly Folder in the active path**.
 
-Click the button to create a *Tests* folder with a respective .asmdef file by default. Change the name of the new [Assembly Definition](https://docs.unity3d.com/Manual/ScriptCompilationAssemblyDefinitionFiles.html), if necessary, and press Enter to accept it.
+![Test Runner window EditMode tab](./images/create-test-assembly-folder.png)
 
-![New Test folder and assembly file](./images/tests-folder-assembly.png)
+Alternatively, you can go via the **Assets** menu:
 
-In the Inspector window, it should have references to **nunit.framework.dll***,* **UnityEngine.TestRunner,** and **UnityEditor.TestRunner** assemblies, as well as **Editor** preselected as a target platform. 
+1. Select the Assets folder in your Project window.
+2. Create a new Test Assembly Folder (menu: **Assets** > **Create** > **Testing** > **Test Assembly Folder**).
+
+This creates a *Tests* folder in your project Assets with a corresponding `.asmdef` file with the required references. You can change the name of the new [Assembly Definition](https://docs.unity3d.com/Manual/ScriptCompilationAssemblyDefinitionFiles.html) and press Enter to accept it.
+
+![New Test folder and assembly file](./images/test-assembly-folder.png)
+
+Click on the assembly definition file to inspect it in the **Inspector** window. You'll see that it has references to **nunit.framework.dll***,* **UnityEngine.TestRunner,** and **UnityEditor.TestRunner** assemblies. This tells Unity Test Framework that this is a test assembly. 
+
+The checkbox selections under **Platforms** determine which platforms the test assembly can run on. Assemblies created through the **Test Runner** target the **Editor** only by default. **Any Platform** or a specific platform other than **Editor** makes the tests you add run in Play Mode by default. 
+
+![Assembly definition import settings](./images/import-settings.png)
 
 > **Note**: The **UnityEditor.TestRunner** reference is only available for [Edit Mode tests](./edit-mode-vs-play-mode-tests.md#edit-mode-tests).
 
-![Assembly definition import settings](./images/import-settings.png)
+You can repeat the steps above as many times as you like to create additional Test Assemblies. The first Test Assembly folder you create is named *Tests* by default and subsequent ones are named *Tests 1*, *Tests 2*, and so on. Remember that you can always rename the assemblies but each assembly name must be unique.
+
+> **Note**: Changing the file name of an assembly definition file does not affect the value of the **Name** property in the file. Use the **Inspector** window or edit the .asmdef direclty in a text editor to change the name property.

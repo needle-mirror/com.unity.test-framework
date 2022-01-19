@@ -17,7 +17,7 @@ namespace UnityEditor.TestTools.TestRunner
         ProvisioningProfileType? tvOSManualProvisioningProfileType { get; set; }
         string tvOSManualProvisioningProfileID { get; set; }
         string[] playerGraphicsAPIs { get; set; }
-        bool autoGraphicsAPIs { get; set; }
+        bool? autoGraphicsAPIs { get; set; }
 
         void SetupProjectParameters();
     }

@@ -7,7 +7,6 @@ namespace UnityEditor.TestTools.TestRunner
 {
     interface ITestListCache
     {
-        void CacheTest(TestPlatform platform, ITest test);
-        IEnumerator<ITestAdaptor> GetTestFromCacheAsync(TestPlatform platform);
+        ITest CachedTree { get; set; }
     }
 }

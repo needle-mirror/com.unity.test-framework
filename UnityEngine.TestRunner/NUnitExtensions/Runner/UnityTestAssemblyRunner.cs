@@ -1,11 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using NUnit;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
-using UnityEngine.TestTools;
 using UnityEngine.TestTools.NUnitExtensions;
 
 namespace UnityEngine.TestRunner.NUnitExtensions.Runner
@@ -19,7 +16,8 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
         bool IsTestComplete { get; }
         UnityWorkItem TopLevelWorkItem { get; set; }
         UnityTestExecutionContext GetCurrentContext();
-        ITest Load(Assembly[] assemblies, TestPlatform testPlatform, IDictionary<string, object> settings);
+        ITest Load(AssemblyWithPlatform[] assemblies);
+        void LoadTestTree(ITest testTree);
         IEnumerable Run(ITestListener listener, ITestFilter filter);
         void StopRun();
     }
@@ -58,21 +56,21 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
             get { return TopLevelWorkItem != null && TopLevelWorkItem.State == NUnit.Framework.Internal.Execution.WorkItemState.Complete; }
         }
 
-        public UnityTestAssemblyRunner(UnityTestAssemblyBuilder builder, WorkItemFactory factory)
+        public UnityTestAssemblyRunner(UnityTestAssemblyBuilder builder, WorkItemFactory factory, UnityTestExecutionContext context)
         {
             unityBuilder = builder;
             m_Factory = factory;
-            Context = new UnityTestExecutionContext();
+            Context = context;
         }
 
-        public ITest Load(Assembly[] assemblies, TestPlatform testPlatform, IDictionary<string, object> settings)
+        public ITest Load(AssemblyWithPlatform[] assemblies)
         {
-            Settings = settings;
+            return LoadedTest = unityBuilder.Build(assemblies);
+        }
 
-            if (settings.ContainsKey(FrameworkPackageSettings.RandomSeed))
-                Randomizer.InitialSeed = (int)settings[FrameworkPackageSettings.RandomSeed];
-
-            return LoadedTest = unityBuilder.Build(assemblies, Enumerable.Repeat(testPlatform, assemblies.Length).ToArray(), settings);
+        public void LoadTestTree(ITest testTree)
+        {
+            LoadedTest = testTree;
         }
 
         public IEnumerable Run(ITestListener listener, ITestFilter filter)

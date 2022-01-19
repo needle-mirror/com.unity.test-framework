@@ -1,4 +1,3 @@
-
 using System.Collections;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
@@ -30,5 +29,4 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
             yield return null;
         }
     }
-
 }

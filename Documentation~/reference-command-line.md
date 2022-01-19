@@ -1,14 +1,6 @@
-# Running tests from the command line
+# Test Framework command line arguments
 
-It’s pretty simple to run a test project from the command line. Here is an example in Windows:
-
-```bash
-Unity.exe -runTests -batchmode -projectPath PATH_TO_YOUR_PROJECT -testResults C:\temp\results.xml -testPlatform PS4
-```
-
-> **Note**: Use the `-batchmode` option when running tests on the command line to remove the need for manual user inputs. For more information, see Unity [Command line arguments](https://docs.unity3d.com/Manual/CommandLineArguments.html).
-
-## Test Framework command line arguments
+This section lists the Unity Test Framework command line arguments for Unity. For an example command to run tests on the command line, see [Running tests from the command line](./workflow-run-test.md#running-tests-from-the-command-line).
 
 ### forgetProjectPath
 
@@ -16,11 +8,11 @@ Don't save your current **Project** into the Unity launcher/hub history.
 
 ### runTests
 
-Runs tests in the Project.
+Runs tests in the Project. This argument is required to run any tests.
 
 ### testCategory
 
-A semicolon-separated list of test categories to include in the run. A semi-colon separated list should be formatted as a string enclosed in quotation marks, e.g. `testCategory "firstCategory;secondCategory"`. If using both `testFilter` and `testCategory`, then only tests that match both are run. This argument supports negation using '!'. If using '!MyCategory' then no tests with the 'MyCategory' category will be included in the run.
+A semicolon-separated list of test categories to include in the run. A semi-colon separated list should be formatted as a string enclosed in quotation marks, e.g. `testCategory "firstCategory;secondCategory"`. If using both `testFilter` and `testCategory`, then only test that matches both are run. This argument supports negation using '!'. If using '!MyCategory' then no tests with the 'MyCategory' category will be included in the run.
 
 ### testFilter
 
@@ -28,20 +20,35 @@ A semicolon-separated list of test names to run, or a regular expression pattern
 
 ### testPlatform
 
-The platform to run tests on. Accepted values: 
+The platform to run tests on. Accepted values:
 
 * **EditMode**
-    * Edit Mode tests. Equivalent to running tests from the EditMode tab of the Test Runner window.
+    * Edit Mode tests. Equivalent to running tests with the **Run Location > In Editor ** option and only the **EditMode* checkbox selected in the Test Runner window.
 * **PlayMode**
-    * Play Mode tests that run in the Editor. Equivalent to running tests from the PlayMode tab of the Test Runner window.
+    * Play Mode tests that run in the Editor. Equivalent to running tests with the **Run Location > In Editor** options and only the **PlayMode** checkbox selected in the Test Runner window.
 * Any value from the [BuildTarget](https://docs.unity3d.com/ScriptReference/BuildTarget.html) enum.
-    * Play Mode tests that run on a player built for the specified platform. Equivalent to using the **Run all tests (`<target_platform>`)** dropdown in the PlayMode tab of the Test Runner window.
+    * Play Mode tests that run on a player built for the specified platform. Equivalent to using the **Run Location > On Player (`<target_platform>`)** option in the Test Runner window.
 
 > **Note**: If no value is specified for this argument, tests run in Edit Mode.
+
+### requiresPlayMode
+
+Filers whether to run tests that require Play Mode.
+* requiresPlayMode=true runs all tests that require Play Mode.
+* requiresPlayMode=false runs all tests that do not require Play Mode.
+* not specifying the parameters runs tests regardless of whether they require Play Mode or not.
+
+### assemblyType
+
+Filters the tests on an assembly type. Either **EditorOnly** or **EditorAndPlatforms**.
 
 ### assemblyNames
 
 A semicolon-separated list of test assemblies to include in the run. A semi-colon separated list should be formatted as a string enclosed in quotation marks, e.g. `assemblyNames "firstAssembly;secondAssembly"`.
+
+### testNames
+
+A semicolon-separeted list of full name of the tests to match the filter. This is usually in the format FixtureName.TestName. If the test has test arguments, then include them in parenthesis. e.g. `MyTestClass2.MyTestWithMultipleValues(1)`.
 
 ### testResults
 

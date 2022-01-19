@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo("Unity.PerformanceTesting.Editor")]
 [assembly: InternalsVisibleTo("Unity.IntegrationTests")]
 [assembly: InternalsVisibleTo("UnityEditor.TestRunner.Tests")]
+[assembly: InternalsVisibleTo("Unity.Build.Playmode.TestRunner")]
 [assembly: InternalsVisibleTo("Unity.PackageManagerUI.Develop.Editor")]
 [assembly: InternalsVisibleTo("Unity.PackageManagerUI.Develop.EditorTests")]
 [assembly: InternalsVisibleTo("Unity.PackageValidationSuite.Editor")]

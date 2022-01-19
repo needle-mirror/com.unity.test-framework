@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor.TestTools.TestRunner.Api;
+using UnityEngine;
 
 namespace UnityEditor.TestTools.TestRunner.GUI
 {
@@ -78,6 +79,36 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             }
         }
 
+        public void CalculateParentResult(string parentId, IDictionary<string, List<TestRunnerResult>> results)
+        {
+            if (results == null) return;
+            results.TryGetValue(parentId , out var childrenResult);
+            if (childrenResult == null) return;
+            if (childrenResult.TrueForAll(x => x.resultStatus == ResultStatus.Passed)) resultStatus = ResultStatus.Passed;
+            if (childrenResult.TrueForAll(x => x.resultStatus == ResultStatus.Skipped)) resultStatus = ResultStatus.Skipped;
+            else if (childrenResult.Any(x => x.resultStatus == ResultStatus.Skipped))
+            {
+                resultStatus = ResultStatus.Passed;
+            }
+            if (childrenResult.Any(x => x.resultStatus == ResultStatus.Inconclusive)) resultStatus = ResultStatus.Inconclusive;
+            if (childrenResult.Any(x => x.resultStatus == ResultStatus.Failed)) resultStatus = ResultStatus.Failed;
+            UpdateParentResult(results);
+        }
+
+        private void UpdateParentResult(IDictionary<string, List<TestRunnerResult>> results)
+        {
+            if (string.IsNullOrEmpty(parentUniqueId)) return;
+            results.TryGetValue(parentUniqueId, out var parentResultList);
+            if (parentResultList != null && parentResultList.Count > 0)
+            {
+                parentResultList.Add(this);
+            }
+            else
+            {
+                results.Add(parentUniqueId, new List<TestRunnerResult>() {this});
+            }
+        }
+
         public void Update(TestRunnerResult result)
         {
             if (ReferenceEquals(result, null))
@@ -141,6 +172,8 @@ namespace UnityEditor.TestTools.TestRunner.GUI
         public void Clear()
         {
             resultStatus = ResultStatus.NotRun;
+            stacktrace = string.Empty;
+            duration = 0.0f;
             if (m_OnResultUpdate != null)
                 m_OnResultUpdate(this);
         }

@@ -12,8 +12,8 @@ namespace UnityEngine.TestTools.Utils
     /// </summary>
     public class Vector2EqualityComparer : IEqualityComparer<Vector2>
     {
-        private const float k_DefaultError = 0.0001f;
-        private readonly float AllowedError;
+        internal const float k_DefaultError = 0.0001f;
+        internal readonly float AllowedError;
 
         private static readonly Vector2EqualityComparer m_Instance = new Vector2EqualityComparer();
 
@@ -33,6 +33,7 @@ namespace UnityEngine.TestTools.Utils
         {
             this.AllowedError = error;
         }
+
         /// <summary>
         /// Compares the actual and expected Vector2 objects for equality using the <see cref="Utils.AreFloatsEqual"/> method.
         /// </summary>
@@ -52,13 +53,13 @@ namespace UnityEngine.TestTools.Utils
         ///         var actual = new Vector2(10e-7f, 10e-7f);
         ///         var expected = new Vector2(0f, 0f);
         ///         var comparer = new Vector2EqualityComparer(10e-6f);
-        /// 
+        ///
         ///         Assert.That(actual, Is.EqualTo(expected).Using(comparer));
-        /// 
+        ///
         ///         //Default error 0.0001f
         ///         actual = new Vector2(0.01f, 0.01f);
         ///         expected = new Vector2(0.01f, 0.01f);
-        /// 
+        ///
         ///         Assert.That(actual, Is.EqualTo(expected).Using(Vector2EqualityComparer.Instance));
         ///      }
         ///  }
@@ -69,6 +70,7 @@ namespace UnityEngine.TestTools.Utils
             return Utils.AreFloatsEqual(expected.x, actual.x, AllowedError) &&
                 Utils.AreFloatsEqual(expected.y, actual.y, AllowedError);
         }
+
         /// <summary>
         /// Serves as the default hash function.
         /// </summary>
