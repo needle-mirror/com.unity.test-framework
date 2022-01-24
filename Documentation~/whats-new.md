@@ -6,11 +6,11 @@ This page summarizes new features, improvements, and issues resolved in version 
 
 ### Combine Edit Mode and Play Mode tests
 
-This version removes the previous requirement to keep Edit Mode and Play Mode tests in separate assemblies by introducing the [RequiresPlayModeAttribute](https://docs.unity3d.com/Packages/com.unity.test-framework@latest/index.html?subfolder=/api/UnityEngine.TestTools.RequiresPlayModeAttribute.html). An Editor-only test assembly can now include tests that will run in the Editor's Play Mode if given the `[RequiresPlayMode]` attribute. Likewise, a platform-specific assembly can include Edit Mode tests and exempt them from running in Play Mode if the tests are given the `[RequiresPlayMode(False)]` attribute.
+This version removes the previous requirement to keep Edit Mode and Play Mode tests in separate assemblies by introducing the [RequiresPlayModeAttribute](https://docs.unity3d.com/Packages/com.unity.test-framework@2.0/api/UnityEngine.TestTools.RequiresPlayModeAttribute.html). An Editor-only test assembly can now include tests that will run in the Editor's Play Mode if given the `[RequiresPlayMode]` attribute. Likewise, a platform-specific assembly can include Edit Mode tests and exempt them from running in Play Mode if the tests are given the `[RequiresPlayMode(False)]` attribute.
 
 ### Ignore tests based on arguments
 
-This version introduces the [ParameterizedIgnoreAttribute](https://docs.unity3d.com/Packages/com.unity.test-framework@latest/index.html?subfolder=/api/UnityEngine.TestTools.ParameterizedIgnoreAttribute.html) which allows ignoring tests based on arguments which were passed to the test method of a [parameterized test](./reference-tests-parameterized.md).
+This version introduces the [ParameterizedIgnoreAttribute](https://docs.unity3d.com/Packages/com.unity.test-framework@2.0/api/UnityEngine.TestTools.ParameterizedIgnoreAttribute.html) which allows ignoring tests based on arguments which were passed to the test method of a [parameterized test](./reference-tests-parameterized.md).
 
 ### Async tests
 
