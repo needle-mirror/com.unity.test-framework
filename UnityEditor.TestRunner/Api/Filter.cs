@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.TestTools.TestRunner.GUI;
 
@@ -51,6 +52,15 @@ namespace UnityEditor.TestTools.TestRunner.Api
                 assemblyNames = assemblyNames,
                 synchronousOnly = synchronousOnly
             };
+        }
+        
+        
+        internal bool HasAny()
+        {
+            return assemblyNames != null && assemblyNames.Any()
+                   || categoryNames != null && categoryNames.Any()
+                   || groupNames != null && groupNames.Any()
+                   || testNames != null && testNames.Any();
         }
     }
 }

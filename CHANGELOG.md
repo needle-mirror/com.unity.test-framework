@@ -1,4 +1,8 @@
 # Changelog
+## [1.1.31] - 2022-02-03
+- Fixed "Open source code" on tests when located inside a package.
+- Added editor analytics events.
+- Added `buildPlayerPath` argument. Path to where built player with tests is saved.
 
 ## [1.1.30] - 2021-10-15
 - Added validation of IEnumerator return type for parameterized tests with UnityTest attribute (DSTP-743).

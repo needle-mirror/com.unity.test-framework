@@ -48,6 +48,7 @@ namespace UnityEditor.TestTools.TestRunner.Api
         /// </summary>
         [SerializeField]
         public int playerHeartbeatTimeout = 60*10;
+        internal string playerSavePath { get; set; }
 
         internal bool EditModeIncluded()
         {

@@ -30,13 +30,15 @@ namespace UnityEditor.TestTools.TestRunner
         private ITestRunSettings m_OverloadTestRunSettings;
         private string m_SceneName;
         private int m_HeartbeatTimeout;
+        private string m_PlayerWithTestsPath;
 
-        public PlayerLauncher(PlaymodeTestsControllerSettings settings, BuildTarget? targetPlatform, ITestRunSettings overloadTestRunSettings, int heartbeatTimeout)
+        public PlayerLauncher(PlaymodeTestsControllerSettings settings, BuildTarget? targetPlatform, ITestRunSettings overloadTestRunSettings, int heartbeatTimeout, string playerWithTestsPath)
         {
             m_Settings = settings;
             m_TargetPlatform = targetPlatform ?? EditorUserBuildSettings.activeBuildTarget;
             m_OverloadTestRunSettings = overloadTestRunSettings;
             m_HeartbeatTimeout = heartbeatTimeout;
+            m_PlayerWithTestsPath = playerWithTestsPath;
         }
 
         protected override RuntimePlatform? TestTargetPlatform
@@ -220,8 +222,7 @@ namespace UnityEditor.TestTools.TestRunner
                     Directory.CreateDirectory(uniqueTempPathInProject);
                 }
 
-                var tempPath = Path.GetFullPath(uniqueTempPathInProject);
-                buildLocation = Path.Combine(tempPath, playerDirectoryName);
+                buildLocation = Path.Combine(string.IsNullOrEmpty(m_PlayerWithTestsPath) ? Path.GetFullPath(uniqueTempPathInProject) : m_PlayerWithTestsPath, playerDirectoryName);
 
                 // iOS builds create a folder with Xcode project instead of an executable, therefore no executable name is added
                 if (m_TargetPlatform == BuildTarget.iOS)

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEditor.TestTools.TestRunner.Api;
+using UnityEditor.TestTools.TestRunner.Api.Analytics;
 using UnityEngine.TestRunner.NUnitExtensions;
 using UnityEngine.TestTools;
 
@@ -41,6 +42,7 @@ namespace UnityEditor.TestTools.TestRunner
 
                 test.Current.ParseForNameDuplicates();
                 m_TestListCache.CacheTest(platform, test.Current);
+                AnalyticsReporter.AnalyzeTestTreeAndReport(test.Current);
                 yield return m_TestAdaptorFactory.Create(test.Current);
             }
         }

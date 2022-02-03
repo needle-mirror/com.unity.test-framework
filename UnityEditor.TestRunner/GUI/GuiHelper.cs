@@ -17,7 +17,6 @@ namespace UnityEditor.TestTools.TestRunner.GUI
         {
             MonoCecilHelper = monoCecilHelper;
             AssetsDatabaseHelper = assetsDatabaseHelper;
-            Editor = new DefaultExternalCodeEditor();
             GetCSFiles = (dirPath, fileExtension) =>
             {
                 return Directory.GetFiles(dirPath, $"*{fileExtension}", SearchOption.AllDirectories)
@@ -48,7 +47,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
 
             if (!fileOpenInfo.FilePath.Contains("Assets"))
             {
-                Editor.OpenProject(fileOpenInfo.FilePath, fileOpenInfo.LineNumber, 1);
+                (Editor ?? CodeEditor.CurrentEditor).OpenProject(fileOpenInfo.FilePath, fileOpenInfo.LineNumber, 1);
             }
             else
             { 

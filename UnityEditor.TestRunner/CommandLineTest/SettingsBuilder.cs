@@ -33,6 +33,8 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
             int? playerHeartbeatTimeout = null;
             bool runSynchronously = false;
             string[] testAssemblyNames = null;
+            string buildPlayerPath = string.Empty;
+
 
             var optionSet = new CommandLineOptionSet(
                 new CommandLineOption("quit", () => { quit = true; }),
@@ -45,7 +47,8 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
                 new CommandLineOption("testRepetitions", reps => { testRepetitions = int.Parse(reps); }),
                 new CommandLineOption("playerHeartbeatTimeout", timeout => { playerHeartbeatTimeout = int.Parse(timeout); }),
                 new CommandLineOption("runSynchronously", () => { runSynchronously = true; }),
-                new CommandLineOption("assemblyNames", assemblyNames => { testAssemblyNames = assemblyNames; })
+                new CommandLineOption("assemblyNames", assemblyNames => { testAssemblyNames = assemblyNames; }),
+                new CommandLineOption("buildPlayerPath", buildPath => { buildPlayerPath = buildPath; })
             );
             optionSet.Parse(commandLineArgs);
 
@@ -80,7 +83,8 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
                 filters = new []{filter},
                 overloadTestRunSettings = new RunSettings(testSettings),
                 targetPlatform = buildTarget,
-                runSynchronously = runSynchronously
+                runSynchronously = runSynchronously,
+                playerSavePath = buildPlayerPath
             };
 
             if (playerHeartbeatTimeout != null)

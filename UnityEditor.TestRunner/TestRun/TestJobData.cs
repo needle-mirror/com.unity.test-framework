@@ -11,6 +11,9 @@ namespace UnityEditor.TestTools.TestRunner.TestRun
         [SerializeField] 
         public string guid;
         
+        [SerializeField]
+        public string startTime;
+        
         [SerializeField] 
         public int taskIndex;
 
@@ -44,6 +47,7 @@ namespace UnityEditor.TestTools.TestRunner.TestRun
             isRunning = false;
             taskIndex = 0;
             taskPC = 0;
+            startTime = DateTime.Now.ToString("o");
         }
     }
 }
