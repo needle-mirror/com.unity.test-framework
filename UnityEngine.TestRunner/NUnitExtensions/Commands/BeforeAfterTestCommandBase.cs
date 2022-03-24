@@ -24,8 +24,6 @@ namespace UnityEngine.TestTools
             m_AfterErrorPrefix = afterErrorPrefix;
         }
 
-        internal Func<long> GetUtcNow = () => new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds();
-
         protected T[] BeforeActions = new T[0];
 
         protected T[] AfterActions = new T[0];
@@ -109,7 +107,6 @@ namespace UnityEngine.TestTools
 
             while (state.NextBeforeStepIndex < BeforeActions.Length)
             {
-                state.Timestamp = GetUtcNow();
                 var action = BeforeActions[state.NextBeforeStepIndex];
                 IEnumerator enumerator;
                 try
@@ -161,13 +158,6 @@ namespace UnityEngine.TestTools
                         }
 
                         yield return enumerator.Current;
-
-                        if (GetUtcNow() - state.Timestamp > unityContext.TestCaseTimeout || CoroutineTimedOut(unityContext))
-                        {
-                            context.CurrentResult.RecordPrefixedError(m_BeforeErrorPrefix, new UnityTestTimeoutException(unityContext.TestCaseTimeout).Message);
-                            state.TestHasRun = true;
-                            break;
-                        }
                     }
                 }
 
@@ -197,7 +187,6 @@ namespace UnityEngine.TestTools
 
             while (state.NextAfterStepIndex < AfterActions.Length)
             {
-                state.Timestamp = GetUtcNow();
                 state.TestAfterStarted = true;
                 var action = AfterActions[state.NextAfterStepIndex];
                 IEnumerator enumerator;
@@ -244,13 +233,6 @@ namespace UnityEngine.TestTools
                         state.NextAfterStepPc = ActivePcHelper.GetEnumeratorPC(enumerator);
                         state.StoreContext(unityContext);
                         
-
-                        if (GetUtcNow() - state.Timestamp > unityContext.TestCaseTimeout || CoroutineTimedOut(unityContext))
-                        {
-                            context.CurrentResult.RecordPrefixedError(m_AfterErrorPrefix, new UnityTestTimeoutException(unityContext.TestCaseTimeout).Message);
-                            yield break;
-                        }
-                        
                         if (!AllowFrameSkipAfterAction(action))
                         {
                             break;
@@ -273,15 +255,6 @@ namespace UnityEngine.TestTools
         }
 
         private static TestCommandPcHelper pcHelper;
-        private static bool CoroutineTimedOut(ITestExecutionContext unityContext)
-        {
-            if (string.IsNullOrEmpty(unityContext.CurrentResult.Message))
-            {
-                return false;
-            }
-            return unityContext.CurrentResult.ResultState.Equals(ResultState.Failure) &&
-                       unityContext.CurrentResult.Message.Contains(new UnityTestTimeoutException(unityContext.TestCaseTimeout).Message);
-        }
 
 
         internal static TestCommandPcHelper ActivePcHelper

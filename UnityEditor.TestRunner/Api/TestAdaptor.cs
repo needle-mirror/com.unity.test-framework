@@ -33,7 +33,7 @@ namespace UnityEditor.TestTools.TestRunner.Api
             }
             else
             {
-                TestCaseTimeout = CoroutineRunner.k_DefaultTimeout;
+                TestCaseTimeout = TimeoutCommand.k_DefaultTimeout;
             }
 
             TypeInfo = test.TypeInfo;

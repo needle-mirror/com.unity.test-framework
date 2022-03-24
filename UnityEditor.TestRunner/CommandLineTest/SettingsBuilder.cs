@@ -74,6 +74,7 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
                 filters = new []{ filter },
                 overloadTestRunSettings = new RunSettings(testSettings),
                 ignoreTests = testSettings?.ignoreTests,
+                featureFlags = testSettings?.featureFlags,
                 targetPlatform = GetBuildTarget(testPlatform),
                 runSynchronously = runSynchronously,
                 playerSavePath = buildPlayerPath,
@@ -137,7 +138,7 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
             }
             return testSettings;
         }
-        
+
         private string[] GetOrderedTestList(string orderedTestListFilePath)
         {
             if (!string.IsNullOrEmpty(orderedTestListFilePath))

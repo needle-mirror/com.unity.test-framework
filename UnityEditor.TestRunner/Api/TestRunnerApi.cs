@@ -4,6 +4,7 @@ using UnityEditor.TestTools.TestRunner.CommandLineTest;
 using UnityEditor.TestTools.TestRunner.TestRun;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.TestRunner.NUnitExtensions.Runner;
 using UnityEngine.TestRunner.TestLaunchers;
 using UnityEngine.TestTools;
 using UnityEngine.TestTools.NUnitExtensions;
@@ -72,6 +73,11 @@ namespace UnityEditor.TestTools.TestRunner.Api
                 executionSettings.filters.Length > 0)
             {
                 executionSettings.targetPlatform = executionSettings.filters[0].targetPlatform;
+            }
+
+            if (executionSettings.featureFlags == null)
+            {
+                executionSettings.featureFlags = new FeatureFlags();
             }
 
             return ScheduleJob(executionSettings);
@@ -149,7 +155,7 @@ namespace UnityEditor.TestTools.TestRunner.Api
             {
                 throw new ArgumentNullException(nameof(executionSettings));
             }
-            
+
             var firstFilter = executionSettings.filters?.FirstOrDefault() ?? executionSettings.filter;
             RetrieveTestList(firstFilter.testMode, callback);
         }
@@ -194,7 +200,7 @@ namespace UnityEditor.TestTools.TestRunner.Api
 
             return runner.CancelRun();
         }
-        
+
         internal static bool IsRunActive()
         {
             return m_testJobDataHolder.GetAllRunners().Any(r => r.GetData().isRunning);
@@ -204,7 +210,7 @@ namespace UnityEditor.TestTools.TestRunner.Api
         {
             return (((testMode & TestMode.EditMode) == TestMode.EditMode) ? TestPlatform.EditMode : 0) | (((testMode & TestMode.PlayMode) == TestMode.PlayMode) ? TestPlatform.PlayMode : 0);
         }
-        
+
         internal class RunProgressChangedEvent : UnityEvent<TestRunProgress> {}
         internal static RunProgressChangedEvent runProgressChanged = new RunProgressChangedEvent();
 

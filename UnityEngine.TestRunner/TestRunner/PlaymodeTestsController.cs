@@ -41,6 +41,7 @@ namespace UnityEngine.TestTools.TestRunner
         [SerializeField]
         internal RunFinishedEvent runFinishedEvent = new RunFinishedEvent();
 
+        //DO NOT change this string, third party code is using this string to identify the test runner game object.
         internal const string kPlaymodeTestControllerName = "Code-based tests runner";
 
         [SerializeField]
@@ -50,6 +51,10 @@ namespace UnityEngine.TestTools.TestRunner
 
         public IEnumerator Start()
         {
+            UnityTestExecutionContext.CurrentContext = new UnityTestExecutionContext()
+            {
+                FeatureFlags = settings.featureFlags
+            };
             ActiveController = this;
             //Skip 2 frame because Unity.
             yield return null;
@@ -93,11 +98,8 @@ namespace UnityEngine.TestTools.TestRunner
                 yield return null;
             }
 
-            var context = new UnityTestExecutionContext();
-            UnityTestExecutionContext.CurrentContext = context;
-
             var testListUtil = new PlayerTestAssemblyProvider(new AssemblyLoadProxy(), m_AssembliesWithTests);
-            m_Runner = new UnityTestAssemblyRunner(new UnityTestAssemblyBuilder(settings.orderedTestNames), new PlaymodeWorkItemFactory(), context);
+            m_Runner = new UnityTestAssemblyRunner(new UnityTestAssemblyBuilder(settings.orderedTestNames), new PlaymodeWorkItemFactory(), UnityTestExecutionContext.CurrentContext);
 
             var loadedTests = m_Runner.Load(testListUtil.GetUserAssemblies().Select(a => a.Assembly).ToArray(), TestPlatform.PlayMode, UnityTestAssemblyBuilder.GetNUnitTestBuilderSettings(TestPlatform.PlayMode));
             loadedTests.ParseForNameDuplicates();

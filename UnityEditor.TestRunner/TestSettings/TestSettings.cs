@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor.TestTools.TestRunner.Api;
 using UnityEngine.Rendering;
+using UnityEngine.TestRunner.NUnitExtensions.Runner;
 
 namespace UnityEditor.TestTools.TestRunner
 {
@@ -144,8 +145,32 @@ namespace UnityEditor.TestTools.TestRunner
                 androidAppBundle =>
                 {
                     EditorUserBuildSettings.buildAppBundle = androidAppBundle.Value;
+#if UNITY_2023_1_OR_NEWER
+                    PlayerSettings.Android.splitApplicationBinary = androidAppBundle.Value;
+#else
                     PlayerSettings.Android.useAPKExpansionFiles = androidAppBundle.Value;
-                })
+#endif
+                }),
+            new TestSetting<bool?>(
+                settings => settings.featureFlags.requiresSplashScreen,
+                () => PlayerSettings.SplashScreen.show,
+                requiresSplashScreen =>
+                {
+                    if (requiresSplashScreen != null)
+                    {
+                        PlayerSettings.SplashScreen.show = requiresSplashScreen.Value;
+                    }
+                }),
+            new TestSetting<bool?>(
+                settings => settings.featureFlags.requiresSplashScreen,
+                () => PlayerSettings.SplashScreen.showUnityLogo,
+                requiresSplashScreen =>
+                {
+                    if (requiresSplashScreen != null)
+                    {
+                        PlayerSettings.SplashScreen.showUnityLogo = requiresSplashScreen.Value;
+                    }
+                }),
         };
 
         private bool m_Disposed;
@@ -169,6 +194,7 @@ namespace UnityEditor.TestTools.TestRunner
         public bool? androidBuildAppBundle { get; set; }
 
         public IgnoreTest[] ignoreTests { get; set; }
+        public FeatureFlags featureFlags { get; set; } = new FeatureFlags();
 
         public void Dispose()
         {

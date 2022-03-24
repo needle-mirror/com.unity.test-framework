@@ -42,13 +42,6 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
                 yield break;
             }
 
-            if (m_Command is ApplyChangesToContextCommand)
-            {
-                var applyChangesToContextCommand = (ApplyChangesToContextCommand)m_Command;
-                applyChangesToContextCommand.ApplyChanges(Context);
-                m_Command = applyChangesToContextCommand.GetInnerCommand();
-            }
-
             var enumerableTestMethodCommand = (IEnumerableTestMethodCommand)m_Command;
             try
             {
@@ -56,11 +49,6 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
 
                 var coroutineRunner = new CoroutineRunner(monoBehaviourCoroutineRunner, Context);
                 yield return coroutineRunner.HandleEnumerableTest(executeEnumerable);
-
-                if (coroutineRunner.HasFailedWithTimeout())
-                {
-                    Context.CurrentResult.SetResult(ResultState.Failure, new UnityTestTimeoutException(Context.TestCaseTimeout).Message);
-                }
 
                 while (executeEnumerable.MoveNext()) {}
 

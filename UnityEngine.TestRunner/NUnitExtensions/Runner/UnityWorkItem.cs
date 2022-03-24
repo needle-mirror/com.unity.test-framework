@@ -106,6 +106,13 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
 
             Context.TestObject = null;
             Test.Fixture = null;
+
+            // Reset the states, in case of errors in the middle of their execution. E.g. Timeout.
+            if (!Test.IsSuite)
+            {
+                Context.SetUpTearDownState.Reset();
+                Context.OuterUnityTestActionState.Reset();
+            }
         }
 
         public virtual void Cancel(bool force)

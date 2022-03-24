@@ -76,6 +76,7 @@ namespace UnityEditor.TestTools.TestRunner
 
             m_ShowUnitySplashScreen = PlayerSettings.SplashScreen.show;
             PlayerSettings.SplashScreen.show = false;
+            PlayerSettings.SplashScreen.showUnityLogo = false;
 
             m_OldproductName = PlayerSettings.productName;
             PlayerSettings.productName = string.Join("_", Application.productName.Split(Path.GetInvalidFileNameChars()));
@@ -100,6 +101,7 @@ namespace UnityEditor.TestTools.TestRunner
 #pragma warning restore 618
             PlayerSettings.resizableWindow = m_ResizableWindow;
             PlayerSettings.SplashScreen.show = m_ShowUnitySplashScreen;
+            PlayerSettings.SplashScreen.showUnityLogo = m_ShowUnitySplashScreen;
             PlayerSettings.productName = m_OldproductName;
             PlayerSettings.aotOptions = m_OldAotOptions;
 #pragma warning disable 618

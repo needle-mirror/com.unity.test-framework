@@ -1,4 +1,11 @@
 # Changelog
+## [1.3.4] - 2022-03-24
+- Fixes output message concurrency issue with async Setup.
+- Fixed multiple issues where tests would not time out, when running longer than the default timeout or the timeout defined in a TimeoutAttribute (DSTR-607).  
+- Added `UNITY_TEST_FRAMEWORK` define constraint to filter out test framework assemblies from normal platform and asset bundle builds. (DSTR-791)
+- Ensured that all playmode tests have a disabled splashscreen and unity logo by default if Unity license permits such action.
+- Added strictDomainReload feature to enable cheching for pending domain reloads/compilations at the end of managed tests (DSTR-793).
+
 ## [1.3.3] - 2023-02-10
 - Fixes an issue where a test body would be skipped under certain conditions regarding domain reload.
 - Fixed an issue where the "uncategorized" category filter would not apply correctly to parameterized tests with a category in the fixture (DSTR-700).

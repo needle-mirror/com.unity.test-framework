@@ -107,15 +107,16 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
 
             command = new EnumerableSetUpTearDownCommand(command);
             command = new OuterUnityTestActionCommand(command);
-
+            
             IApplyToContext[] changes = test.Method.GetCustomAttributes<IApplyToContext>(true);
             if (changes.Length > 0)
             {
                 command = new EnumerableApplyChangesToContextCommand(command, changes);
             }
 
+            command = new TimeoutCommand(command);
             command = new IgnoreTestCommand(command, test);
-
+            command = new StrictCheckCommand(command);
             return command;
         }
 

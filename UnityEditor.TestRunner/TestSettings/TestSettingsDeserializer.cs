@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using UnityEditor.TestTools.TestRunner.Api;
 using UnityEngine;
+using UnityEngine.TestRunner.NUnitExtensions.Runner;
 
 namespace UnityEditor.TestTools.TestRunner
 {
@@ -50,6 +51,25 @@ namespace UnityEditor.TestTools.TestRunner
 
                     throw new Exception("Wrong format for ignore test. Expected \"test\" and \"ignoreComment\".");
                 }).ToArray();
+            }),
+            new SettingsMap<Dictionary<string, object>>("featureFlags", (settings, dictionary) =>
+            {
+                var converted = dictionary.ToDictionary(pair => pair.Key, pair => (bool)pair.Value);
+                var featureFlags = new FeatureFlags();
+                if (converted.ContainsKey("fileCleanUpCheck"))
+                {
+                    featureFlags.fileCleanUpCheck = converted["fileCleanUpCheck"];
+                }
+                if (converted.ContainsKey("strictDomainReload"))
+                {
+                    featureFlags.strictDomainReload = converted["strictDomainReload"];
+                }
+                if (converted.ContainsKey("requiresSplashScreen"))
+                {
+                    featureFlags.requiresSplashScreen = converted["requiresSplashScreen"];
+                }
+
+                settings.featureFlags = featureFlags;
             })
         };
 

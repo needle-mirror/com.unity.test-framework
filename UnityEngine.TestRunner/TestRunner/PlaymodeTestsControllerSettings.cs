@@ -3,6 +3,7 @@ using System.Linq;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal.Filters;
 using UnityEngine.SceneManagement;
+using UnityEngine.TestRunner.NUnitExtensions.Runner;
 using UnityEngine.TestTools.TestRunner.GUI;
 
 namespace UnityEngine.TestTools.TestRunner
@@ -18,9 +19,10 @@ namespace UnityEngine.TestTools.TestRunner
         public bool runInBackgroundValue;
         public bool consoleErrorPaused;
         public string[] orderedTestNames;
+        public FeatureFlags featureFlags;
 
 
-        public static PlaymodeTestsControllerSettings CreateRunnerSettings(RuntimeTestRunnerFilter[] filters, string[] orderedTestNames)
+        public static PlaymodeTestsControllerSettings CreateRunnerSettings(RuntimeTestRunnerFilter[] filters, string[] orderedTestNames, FeatureFlags featureFlags)
         {
             var settings = new PlaymodeTestsControllerSettings
             {
@@ -28,7 +30,8 @@ namespace UnityEngine.TestTools.TestRunner
                 sceneBased = false,
                 originalScene = SceneManager.GetActiveScene().path,
                 bootstrapScene = null,
-                orderedTestNames = orderedTestNames
+                orderedTestNames = orderedTestNames,
+                featureFlags = featureFlags
             };
             return settings;
         }

@@ -14,9 +14,9 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
         internal Action<Action<PlayModeStateChange>> UnsubscribePlayModeStateChanged = callback => 
             EditorApplication.playModeStateChanged -= callback;
         internal Action<Application.LogCallback> SubscribeLogMessageReceivedThreaded =
-            callback => Application.logMessageReceivedThreaded += callback;
+            callback => Application.logMessageReceived += callback;
         internal Action<Application.LogCallback> UnsubscribeLogMessageReceivedThreaded =
-            callback => Application.logMessageReceivedThreaded -= callback;
+            callback => Application.logMessageReceived -= callback;
 
         internal Func<TextWriter> GetCurrentContextWriter = () => TestContext.Out;
 

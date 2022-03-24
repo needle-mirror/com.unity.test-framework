@@ -8,7 +8,7 @@ using UnityEngine.TestRunner.NUnitExtensions.Runner;
 
 namespace UnityEngine.TestTools
 {
-    internal class IgnoreTestCommand: DelegatingTestCommand, IEnumerableTestMethodCommand
+    internal class IgnoreTestCommand : DelegatingTestCommand, IEnumerableTestMethodCommand
     {
         private ITest _test;
         public IgnoreTestCommand(TestCommand innerCommand, ITest test) : base(innerCommand)

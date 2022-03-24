@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using NUnit.Framework;
@@ -19,7 +20,6 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
         private readonly ITestFilter _childFilter;
         private TestCommand _setupCommand;
         private TestCommand _teardownCommand;
-        private bool HasOneSetUpOrTearDown { get; set; }
 
         public List<UnityWorkItem> Children { get; private set; }
 
@@ -27,8 +27,6 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
 
         private CountdownEvent _childTestCountdown;
 
-        public static readonly string OneTimeSetUpDuration = "OneTimeSetUpDuration:";
-        public static readonly string OneTimeTearDownDuration = "OneTimeTearDownDuration:";
         public CompositeWorkItem(TestSuite suite, ITestFilter childFilter, WorkItemFactory factory)
             : base(suite, factory)
         {
@@ -153,7 +151,6 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
 
             _setupCommand = CommandBuilder.MakeOneTimeSetUpCommand(_suite, setUpTearDownItems, actionItems);
             _teardownCommand = CommandBuilder.MakeOneTimeTearDownCommand(_suite, setUpTearDownItems, actionItems);
-            HasOneSetUpOrTearDown = setUpTearDownItems.Count > 0; 
         }
 
         private void PerformOneTimeSetUp()
@@ -161,18 +158,7 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
             var logScope = new LogScope();
             try
             {
-                var startTime = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds();
                 _setupCommand.Execute(Context);
-                if (HasOneSetUpOrTearDown)
-                {
-                    var endTime = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds();
-                
-                    // Don't change string without also changing the parser in UtpMessageReporter.cs
-                    var duration = (OneTimeSetUpDuration + $" {endTime - startTime}ms;");  
-                    var result = Context.CurrentResult;
-                    result.OutWriter.WriteLine(duration);
-                }
-
                 logScope.EvaluateLogScope(true);
             }
             catch (Exception ex)
@@ -305,18 +291,7 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
             var logScope = new LogScope();
             try
             {
-                var startTime = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds();
                 _teardownCommand.Execute(Context);
-                if (HasOneSetUpOrTearDown)
-                {
-                    var endTime = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds();
-
-                    // Don't change string without also changing the parser in UtpMessageReporter.cs
-                    var duration = (OneTimeTearDownDuration + $" {endTime - startTime}ms;");
-                    var result = Context.CurrentResult;
-                    result.OutWriter.WriteLine(duration);
-                }
-
                 logScope.EvaluateLogScope(true);
             }
             catch (Exception ex)

@@ -74,7 +74,7 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
             OuterUnityTestActionState = new BeforeAfterTestCommandState();
             EnumerableTestState = new EnumerableTestState();
         }
-        
+
         public UnityTestExecutionContext(BeforeAfterTestCommandState setUpTearDownState,
             BeforeAfterTestCommandState outerUnityTestActionState, EnumerableTestState enumerableTestState) : this()
         {
@@ -104,6 +104,7 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
             CurrentUICulture = other.CurrentUICulture;
             TestMode = other.TestMode;
             IgnoreTests = other.IgnoreTests;
+            FeatureFlags = other.FeatureFlags;
             CurrentContext = this;
         }
 
@@ -121,6 +122,7 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
         public BeforeAfterTestCommandState OuterUnityTestActionState { get; set; }
         public EnumerableTestState EnumerableTestState { get; set; }
         public IgnoreTest[] IgnoreTests { get; set; }
+        public FeatureFlags FeatureFlags { get; set; }
 
         internal int AssertCount
         {

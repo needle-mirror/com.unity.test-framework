@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Linq;
+using UnityEngine.TestRunner.NUnitExtensions.Runner;
 using UnityEngine.TestTools.TestRunner;
 
 namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
@@ -13,9 +14,9 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
         }
         public override IEnumerator Execute(TestJobData testJobData)
         {
-            var settings = PlaymodeTestsControllerSettings.CreateRunnerSettings(testJobData.executionSettings.filters.Select(filter => filter.ToRuntimeTestRunnerFilter(testJobData.executionSettings.runSynchronously)).ToArray(), testJobData.executionSettings.orderedTestNames);
+            var settings = PlaymodeTestsControllerSettings.CreateRunnerSettings(testJobData.executionSettings.filters.Select(filter => filter.ToRuntimeTestRunnerFilter(testJobData.executionSettings.runSynchronously)).ToArray(), testJobData.executionSettings.orderedTestNames,  testJobData.executionSettings.featureFlags);
             var launcher = new PlaymodeLauncher(settings);
-            
+
             launcher.Run();
 
             while (!PlaymodeLauncher.HasFinished)

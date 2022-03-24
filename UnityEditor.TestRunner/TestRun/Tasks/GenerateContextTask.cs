@@ -33,6 +33,8 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
                 testJobData.Context.IgnoreTests = testJobData.executionSettings.ignoreTests.Select(ignoreTest => ignoreTest.ParseToEngine()).ToArray();
             }
 
+            testJobData.Context.FeatureFlags = testJobData.executionSettings.featureFlags;
+
             UnityTestExecutionContext.CurrentContext = testJobData.Context;
 
             yield break;

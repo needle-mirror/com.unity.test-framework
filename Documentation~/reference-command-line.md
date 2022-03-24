@@ -64,7 +64,8 @@ Path to a *TestSettings.json* file that allows you to set up extra options for y
 {
   "scriptingBackend":"WinRTDotNET",
   "Architecture":null,
-  "apiProfile":0
+  "apiProfile":0,
+  "featureFlags": { "requiresSplashScreen": true }
 }
 ```
 
@@ -147,3 +148,12 @@ Unity.Framework.Tests.OrderedTests.ParametrizedTestF(False, 1)
 Unity.Framework.Tests.OrderedTests.ParametrizedTestG(float.NaN)
 Unity.Framework.Tests.OrderedTests.ParametrizedTestH(SomeEnum)
 ```
+
+### featureFlags
+Map of strings and boolean values which can switch Unity Test Framework features on or off. The currently supported features are:
+
+* fileCleanUpCheck
+Throws an error message (instead of warning) if tests generate files which are not cleaned up. False (off) by default.
+
+* requiresSplashScreen
+By default UTR disables the Made with Unity splash screen to speed up building the player and running tests. Set this flag to `true` to override the default and always require a splash screen to be built.

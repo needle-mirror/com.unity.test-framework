@@ -5,11 +5,13 @@ using UnityEngine;
 
 namespace UnityEditor.TestRunner.UnityTestProtocol
 {
-    public interface ITestRunDataHolder
+    [Obsolete("No longer in use")]
+	public interface ITestRunDataHolder
     {
-        IList<TestRunData> TestRunDataList { get; }
+		IList<TestRunData> TestRunDataList { get; }
     }
 
+    [Obsolete("No longer in use")]
     public class TestRunDataHolder: ScriptableSingleton<TestRunDataHolder>, ISerializationCallbackReceiver, ITestRunDataHolder
     {
         [SerializeField]

@@ -50,8 +50,10 @@ namespace UnityEditor.TestTools.TestRunner.TestRun
 
             if (settings.PlayModeInEditorIncluded() && !PlayerSettings.runPlayModeTestAsEditModeTest)
             {
+                yield return new GenerateContextTask();
                 yield return new SaveModifiedSceneTask();
                 yield return new LegacyPlayModeRunTask();
+                yield return new CleanUpContext();
                 yield return new UnlockReloadAssembliesTask();
                 yield break;
             }

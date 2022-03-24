@@ -35,7 +35,6 @@ Unity Test Framework version 1.0.18 includes the following known limitations:
 * The `UnityTest` attribute does not support the `NUnit` [Repeat](https://github.com/nunit/docs/wiki/Repeat-Attribute) attribute.
 * Nested test fixture cannot run from the Editor UI. 
 * When using the `NUnit` [Retry](https://github.com/nunit/docs/wiki/Retry-Attribute) attribute in PlayMode tests, it throws `InvalidCastException`.
-* Async tests are not supported in the current version of UTF.
 
 ## Package contents
 

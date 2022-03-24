@@ -12,7 +12,7 @@ namespace UnityEditor.TestTools
         /// <summary>
         /// Initializes and returns an instance of TestPlayerBuildModifierAttribute or throws an <see cref="ArgumentException"/>.
         /// </summary>
-        /// <param name="type"></param>
+        /// <param name="type">A target type that implements ITestPlayerBuildModifier.</param>
         /// <exception cref="ArgumentException">Throws a <see cref="ArgumentException"/> if the type provided does not implemented the `ITestPlayerBuildModifier` interface. </exception>
         public TestPlayerBuildModifierAttribute(Type type)
         {

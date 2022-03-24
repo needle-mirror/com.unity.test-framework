@@ -4,6 +4,7 @@ using System.Text;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal.Filters;
 using UnityEngine;
+using UnityEngine.TestRunner.NUnitExtensions.Runner;
 
 namespace UnityEditor.TestTools.TestRunner.Api
 {
@@ -57,6 +58,9 @@ namespace UnityEditor.TestTools.TestRunner.Api
 
         [SerializeField]
         internal IgnoreTest[] ignoreTests;
+
+        [SerializeField]
+        internal FeatureFlags featureFlags;
 
         internal string playerSavePath { get; set; }
 
@@ -137,7 +141,7 @@ namespace UnityEditor.TestTools.TestRunner.Api
                     stringBuilder.AppendLine($"   {filterString}");
                 }
             }
-            
+
             if (ignoreTests == null || ignoreTests.Length == 0)
             {
                 stringBuilder.AppendLine($"{nameof(ignoreTests)} = {{}}");
@@ -150,8 +154,21 @@ namespace UnityEditor.TestTools.TestRunner.Api
                 }
             }
 
+            if (featureFlags == null)
+            {
+                stringBuilder.AppendLine($"{nameof(featureFlags)} = null");
+            }
+            else
+            {
+                stringBuilder.AppendLine("Feature Flags:");
+                stringBuilder.AppendLine($"  {nameof(featureFlags.fileCleanUpCheck)} = {featureFlags.fileCleanUpCheck}");
+				stringBuilder.AppendLine($"  {nameof(featureFlags.requiresSplashScreen)} = {featureFlags.requiresSplashScreen}");
+				stringBuilder.AppendLine($"  {nameof(featureFlags.strictDomainReload)} = {featureFlags.strictDomainReload}");
+            }
+
+
             stringBuilder.AppendLine();
-            
+
             return stringBuilder.ToString();
         }
     }

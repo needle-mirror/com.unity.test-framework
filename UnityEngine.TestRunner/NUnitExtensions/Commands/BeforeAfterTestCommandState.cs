@@ -21,7 +21,6 @@ namespace UnityEngine.TestTools
         public string CurrentTestMessage;
         public string CurrentTestStrackTrace;
         public bool TestAfterStarted;
-        public long Timestamp;
         public string Output;
         public long StartTicks;
         public double StartTimeOA;
