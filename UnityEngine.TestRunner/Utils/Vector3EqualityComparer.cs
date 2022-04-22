@@ -8,8 +8,8 @@ namespace UnityEngine.TestTools.Utils
     /// </summary>
     public class Vector3EqualityComparer : IEqualityComparer<Vector3>
     {
-        private const float k_DefaultError = 0.0001f;
-        private readonly float AllowedError;
+        internal const float k_DefaultError = 0.0001f;
+        internal readonly float AllowedError;
 
         private static readonly Vector3EqualityComparer m_Instance = new Vector3EqualityComparer();
 
@@ -21,13 +21,14 @@ namespace UnityEngine.TestTools.Utils
         private Vector3EqualityComparer() : this(k_DefaultError) {}
 
         /// <summary>
-        /// Initializes an instance of Vector3Equality comparer with custom allowed calculation error.
-        /// </summary>
+        /// A comparer instance with the default calculation error value equal to 0.0001f.
+        ///</summary>
         /// <param name="allowedError">This value identifies the calculation error allowed.</param>
         public Vector3EqualityComparer(float allowedError)
         {
             this.AllowedError = allowedError;
         }
+
         ///<summary>
         /// Compares the actual and expected Vector3 objects
         /// for equality using <see cref="Utils.AreFloatsEqual"/> to compare the x, y, and z attributes of Vector3.
@@ -49,7 +50,7 @@ namespace UnityEngine.TestTools.Utils
         ///     var expected = new Vector3(0f, 0f, 0f);
         ///     var comparer = new Vector3EqualityComparer(10e-6f);
         ///
-        /// 
+        ///
         ///     Assert.That(actual, Is.EqualTo(expected).Using(comparer));
         ///
         ///     //Default error 0.0001f

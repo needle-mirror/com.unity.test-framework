@@ -69,7 +69,7 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
                             }
                             catch (Exception e)
                             {
-                                Context.CurrentResult.RecordException(e);
+                                Context.CurrentResult.RecordExceptionWithHint(e);
                                 break;
                             }
 

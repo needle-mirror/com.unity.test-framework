@@ -38,20 +38,20 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
             Result = test.MakeTestResult();
             State = WorkItemState.Ready;
             m_ExecuteTestStartEvent = ShouldExecuteStartEvent();
-            m_DontRunRestoringResult = ShouldRestore(test);
+            m_DontRunRestoringResult = TestHasAlreadyExecuted(test);
         }
 
-        protected static bool ShouldRestore(ITest loadedTest)
+        protected static bool TestHasAlreadyExecuted(ITest loadedTest)
         {
             return UnityWorkItemDataHolder.alreadyExecutedTests != null &&
-                   UnityWorkItemDataHolder.alreadyExecutedTests.Contains(loadedTest.GetUniqueName());
+                UnityWorkItemDataHolder.alreadyExecutedTests.Contains(loadedTest.GetUniqueName());
         }
 
         protected bool ShouldExecuteStartEvent()
         {
             return UnityWorkItemDataHolder.alreadyStartedTests != null &&
-                   UnityWorkItemDataHolder.alreadyStartedTests.All(x => x != Test.GetUniqueName()) &&
-                   !ShouldRestore(Test);
+                UnityWorkItemDataHolder.alreadyStartedTests.All(x => x != Test.GetUniqueName()) &&
+                !TestHasAlreadyExecuted(Test);
         }
 
         protected abstract IEnumerable PerformWork();
@@ -99,7 +99,10 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
 
             //Result.AssertCount += Context.AssertCount;
 
-            Context.Listener.TestFinished(Result);
+            if (!TestHasAlreadyExecuted(Test))
+            {
+                Context.Listener.TestFinished(Result);
+            }
 
             if (Completed != null)
                 Completed(this, EventArgs.Empty);

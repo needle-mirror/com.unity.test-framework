@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyTitle("UnityEngine.TestRunner")]
 
 [assembly: InternalsVisibleTo("UnityEditor.TestRunner")]
+[assembly: InternalsVisibleTo("Unity.Build.Playmode.TestRunner")]
 [assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
 [assembly: InternalsVisibleTo("Unity.PerformanceTesting")]
 [assembly: InternalsVisibleTo("Unity.PerformanceTesting.Editor")]

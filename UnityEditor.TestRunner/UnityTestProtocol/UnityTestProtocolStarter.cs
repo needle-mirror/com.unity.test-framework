@@ -15,9 +15,8 @@ namespace UnityEditor.TestTools.TestRunner.UnityTestProtocol
             var commandLineArgs = Environment.GetCommandLineArgs();
             if (commandLineArgs.Contains("-automated") && commandLineArgs.Contains("-runTests")) // wanna have it only for utr run
             {
-                var api = ScriptableObject.CreateInstance<TestRunnerApi>();
                 var listener = ScriptableObject.CreateInstance<UnityTestProtocolListener>();
-                api.RegisterCallbacks(listener);
+                TestRunnerApi.RegisterTestCallback(listener);
             }
         }
     }

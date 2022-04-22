@@ -4,19 +4,14 @@ using System.Linq;
 using System.Reflection;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
-using UnityEngine.TestTools.TestRunner;
 
 namespace UnityEngine.TestRunner.Utils
 {
-    internal class TestRunCallbackListener : ScriptableObject, ITestRunnerListener
+    internal class TestRunCallbackListener : ScriptableObject
     {
-        private ITestRunCallback[] m_Callbacks;
-        public void RunStarted(ITest testsToRun)
-        {
-            InvokeAllCallbacks(callback => callback.RunStarted(testsToRun));
-        }
+        internal ITestRunCallback[] m_Callbacks;
 
-        private static ITestRunCallback[] GetAllCallbacks()
+        internal static ITestRunCallback[] GetAllCallbacks()
         {
             var allAssemblies = AppDomain.CurrentDomain.GetAssemblies();
             allAssemblies = allAssemblies.Where(x => x.GetReferencedAssemblies().Any(z => z.Name == "UnityEngine.TestRunner")).ToArray();
@@ -43,6 +38,11 @@ namespace UnityEngine.TestRunner.Utils
                     throw;
                 }
             }
+        }
+
+        public void RunStarted(ITest testsToRun)
+        {
+            InvokeAllCallbacks(callback => callback.RunStarted(testsToRun));
         }
 
         public void RunFinished(ITestResult testResults)

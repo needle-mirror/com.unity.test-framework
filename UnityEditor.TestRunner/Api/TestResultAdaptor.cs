@@ -34,32 +34,6 @@ namespace UnityEditor.TestTools.TestRunner.Api
             m_Result = result;
         }
 
-        internal TestResultAdaptor(RemoteTestResultData result, RemoteTestResultDataWithTestData allData)
-        {
-            Test = new TestAdaptor(allData.tests.First(t => t.id == result.testId));
-            Name = result.name;
-            FullName = result.fullName;
-            ResultState = result.resultState;
-            TestStatus = ParseTestStatus(result.testStatus);
-            Duration = result.duration;
-            StartTime = result.startTime;
-            EndTime = result.endTime;
-            Message = result.message;
-            StackTrace = result.stackTrace;
-            AssertCount = result.assertCount;
-            FailCount = result.failCount;
-            PassCount = result.passCount;
-            SkipCount = result.skipCount;
-            InconclusiveCount = result.inconclusiveCount;
-            HasChildren = result.hasChildren;
-            Output = result.output;
-            Children = result.childrenIds.Select(childId => new TestResultAdaptor(allData.results.First(r => r.testId == childId), allData)).ToArray();
-            if (!string.IsNullOrEmpty(result.xml))
-            {
-                m_Node = TNode.FromXml(result.xml);
-            }
-        }
-
         public ITestAdaptor Test { get; private set; }
         public string Name { get; private set; }
         public string FullName { get; private set; }

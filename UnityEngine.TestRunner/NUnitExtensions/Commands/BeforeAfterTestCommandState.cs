@@ -5,7 +5,8 @@ using NUnit.Framework.Internal;
 
 namespace UnityEngine.TestTools
 {
-    internal class BeforeAfterTestCommandState : ScriptableObject
+    [Serializable]
+    internal class BeforeAfterTestCommandState
     {
         public int NextBeforeStepIndex;
         public int NextBeforeStepPc;

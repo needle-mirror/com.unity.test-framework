@@ -46,15 +46,20 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
                 EditModeTestCallbacks.RestoringTestContext();
             }
 
-            if (!CheckForCancellation())
+            if (!ReportAsCanceledIfNotRunning())
+            {
                 if (Test.RunState == RunState.Explicit && !_childFilter.IsExplicitMatch(Test))
+                {
                     SkipFixture(ResultState.Explicit, GetSkipReason(), null);
+                }
                 else
+                {
                     switch (Test.RunState)
                     {
                         default:
                         case RunState.Runnable:
                         case RunState.Explicit:
+                        {
                             Result.SetResult(ResultState.Success);
 
                             CreateChildWorkItems();
@@ -69,14 +74,15 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
                                     PerformOneTimeSetUp();
                                 }
 
-                                if (!CheckForCancellation())
+                                if (!ReportAsCanceledIfNotRunning())
                                 {
                                     switch (Result.ResultState.Status)
                                     {
                                         case TestStatus.Passed:
+                                        {
                                             foreach (var child in RunChildren())
                                             {
-                                                if (CheckForCancellation())
+                                                if (ReportAsCanceledIfNotRunning())
                                                 {
                                                     yield break;
                                                 }
@@ -84,11 +90,15 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
                                                 yield return child;
                                             }
                                             break;
+                                        }
+
                                         case TestStatus.Skipped:
                                         case TestStatus.Inconclusive:
                                         case TestStatus.Failed:
+                                        {
                                             SkipChildren(_suite, Result.ResultState.WithSite(FailureSite.Parent), "OneTimeSetUp: " + Result.Message);
                                             break;
+                                        }
                                     }
                                 }
 
@@ -98,26 +108,36 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
                                 }
                             }
                             break;
+                        }
 
                         case RunState.Skipped:
+                        {
                             SkipFixture(ResultState.Skipped, GetSkipReason(), null);
                             break;
+                        }
 
                         case RunState.Ignored:
+                        {
                             SkipFixture(ResultState.Ignored, GetSkipReason(), null);
                             break;
+                        }
 
                         case RunState.NotRunnable:
+                        {
                             SkipFixture(ResultState.NotRunnable, GetSkipReason(), GetProviderStackTrace());
                             break;
+                        }
                     }
+                }
+            }
+
             if (!ResultedInDomainReload)
             {
                 WorkItemComplete();
             }
         }
 
-        private bool CheckForCancellation()
+        private bool ReportAsCanceledIfNotRunning()
         {
             if (Context.ExecutionStatus != TestExecutionStatus.Running)
             {
@@ -166,12 +186,12 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
                 if (ex is NUnitException || ex is TargetInvocationException)
                     ex = ex.InnerException;
 
-                Result.RecordException(ex, FailureSite.SetUp);
+                Result.RecordExceptionWithHint(ex, FailureSite.SetUp);
             }
 
             if (logScope.AnyFailingLogs())
             {
-                Result.RecordException(new UnhandledLogMessageException(logScope.FailingLogs.First()));
+                Result.RecordExceptionWithHint(new UnhandledLogMessageException(logScope.FailingLogs.First()));
             }
             logScope.Dispose();
         }
@@ -186,7 +206,7 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
 
             foreach (UnityWorkItem child in Children)
             {
-                if (CheckForCancellation())
+                if (ReportAsCanceledIfNotRunning())
                 {
                     yield break;
                 }
@@ -209,6 +229,8 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
                 _suiteResult.AddResult(child.Result);
                 childCount--;
             }
+
+            ReportAsCanceledIfNotRunning();
 
             if (childCount > 0)
             {
@@ -275,6 +297,10 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
         {
             foreach (Test child in suite.Tests)
             {
+                if (TestHasAlreadyExecuted(child))
+                {
+                    continue;
+                }
                 if (_childFilter.Pass(child))
                 {
                     Context.Listener.TestStarted(child);
@@ -302,12 +328,12 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
                 if (ex is NUnitException || ex is TargetInvocationException)
                     ex = ex.InnerException;
 
-                Result.RecordException(ex, FailureSite.SetUp);
+                Result.RecordExceptionWithHint(ex, FailureSite.TearDown);
             }
 
             if (logScope.AnyFailingLogs())
             {
-                Result.RecordException(new UnhandledLogMessageException(logScope.FailingLogs.First()));
+                Result.RecordExceptionWithHint(new UnhandledLogMessageException(logScope.FailingLogs.First()));
             }
             logScope.Dispose();
         }

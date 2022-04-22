@@ -34,7 +34,7 @@ namespace UnityEngine.TestTools
             }
             catch (Exception ex)
             {
-                context.CurrentResult.RecordException(ex);
+                context.CurrentResult.RecordExceptionWithHint(ex);
                 yield break;
             }
 
@@ -89,9 +89,10 @@ namespace UnityEngine.TestTools
                     break;
                 }
 
-                if (enumerator.Current is IEnumerator nestedEnumerator)
+                if (enumerator.Current is IEnumerator)
                 {
-                    yield return ExecuteEnumerableAndRecordExceptions(nestedEnumerator, context);
+                    var current = (IEnumerator)enumerator.Current;
+                    yield return ExecuteEnumerableAndRecordExceptions(current, context);
                 }
                 else
                 {
@@ -121,7 +122,7 @@ namespace UnityEngine.TestTools
                 {
                     return;
                 }
-                m_Context.CurrentResult.RecordException(ex);
+                m_Context.CurrentResult.RecordExceptionWithHint(ex);
                 ExceptionWasRecorded = true;
             }
         }

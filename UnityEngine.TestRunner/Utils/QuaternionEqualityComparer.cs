@@ -11,8 +11,8 @@ namespace UnityEngine.TestTools.Utils
     /// </summary>
     public class QuaternionEqualityComparer : IEqualityComparer<Quaternion>
     {
-        private const float k_DefaultError = 0.00001f;
-        private readonly float AllowedError;
+        internal const float k_DefaultError = 0.00001f;
+        internal readonly float AllowedError;
 
         private static readonly QuaternionEqualityComparer m_Instance = new QuaternionEqualityComparer();
         /// <summary>

@@ -2,8 +2,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using NUnit.Framework;
 using UnityEditor.Scripting.ScriptCompilation;
 using UnityEngine.TestTools;
+using UnityEngine.TestTools.NUnitExtensions;
 using UnityEngine.TestTools.Utils;
 
 namespace UnityEditor.TestTools.TestRunner
@@ -25,26 +27,21 @@ namespace UnityEditor.TestTools.TestRunner
             m_AllPrecompiledAssemblies = compilationInterfaceProxy.GetAllPrecompiledAssemblies();
         }
 
-        public List<IAssemblyWrapper> GetAssembliesGroupedByType(TestPlatform mode)
+        public IList<AssemblyWithPlatform> GetAssemblies()
         {
-            var assemblies = GetAssembliesGroupedByTypeAsync(mode);
+            var assemblies = GetAssembliesAsync();
             while (assemblies.MoveNext())
             {
             }
 
-            return assemblies.Current.Where(pair => mode.IsFlagIncluded(pair.Key)).SelectMany(pair => pair.Value).ToList();
+            return assemblies.Current;
         }
 
-        public IEnumerator<IDictionary<TestPlatform, List<IAssemblyWrapper>>> GetAssembliesGroupedByTypeAsync(TestPlatform mode)
+        public IEnumerator<IList<AssemblyWithPlatform>> GetAssembliesAsync()
         {
             IAssemblyWrapper[] loadedAssemblies = m_EditorAssembliesProxy.loadedAssemblies;
-
-            IDictionary<TestPlatform, List<IAssemblyWrapper>> result = new Dictionary<TestPlatform, List<IAssemblyWrapper>>()
-            {
-                {TestPlatform.EditMode, new List<IAssemblyWrapper>() },
-                {TestPlatform.PlayMode, new List<IAssemblyWrapper>() }
-            };
             var filteredAssemblies = FilterAssembliesWithTestReference(loadedAssemblies);
+            var result = new List<AssemblyWithPlatform>();
 
             foreach (var loadedAssembly in filteredAssemblies)
             {
@@ -58,33 +55,40 @@ namespace UnityEditor.TestTools.TestRunner
 
                 var assemblyFlags = scriptAssemblies.Any() ? scriptAssemblies.Single().Flags : precompiledAssemblies.Single().Flags;
                 var assemblyType = (assemblyFlags & AssemblyFlags.EditorOnly) == AssemblyFlags.EditorOnly ? TestPlatform.EditMode : TestPlatform.PlayMode;
-                result[assemblyType].Add(loadedAssembly);
+                result.Add(new AssemblyWithPlatform(loadedAssembly, assemblyType));
                 yield return null;
             }
 
             yield return result;
         }
-        
+
         private IAssemblyWrapper[] FilterAssembliesWithTestReference(IAssemblyWrapper[] loadedAssemblies)
         {
             var filteredResults = new Dictionary<IAssemblyWrapper, bool>();
+            var assembliesByName = new Dictionary<string, IAssemblyWrapper>();
             foreach (var assembly in loadedAssemblies)
             {
-                FilterAssemblyForTestReference(assembly, loadedAssemblies, filteredResults, new Dictionary<IAssemblyWrapper, bool>());
+                if (!assembliesByName.ContainsKey(assembly.Name.Name))
+                    assembliesByName.Add(assembly.Name.Name, assembly);
+            }
+
+            foreach (var assembly in loadedAssemblies)
+            {
+                FilterAssemblyForTestReference(assembly, assembliesByName, filteredResults);
             }
 
             return filteredResults.Where(pair => pair.Value).Select(pair => pair.Key).ToArray();
         }
-        
-        private void FilterAssemblyForTestReference(IAssemblyWrapper assemblyToFilter, IAssemblyWrapper[] loadedAssemblies, 
-            IDictionary<IAssemblyWrapper, bool> filterResults, IDictionary<IAssemblyWrapper, bool> resultsAlreadyAnalyzed)
+
+        private void FilterAssemblyForTestReference(IAssemblyWrapper assemblyToFilter, Dictionary<string, IAssemblyWrapper> assembliesByName, IDictionary<IAssemblyWrapper, bool> filterResults)
         {
-            if(resultsAlreadyAnalyzed.ContainsKey(assemblyToFilter))
+            if (filterResults.ContainsKey(assemblyToFilter))
             {
                 return;
             }
 
-            resultsAlreadyAnalyzed[assemblyToFilter] = true;
+            // Default to false, as well as avoid circular dependencies creating stack overflow
+            filterResults[assemblyToFilter] = false;
 
             var references = assemblyToFilter.GetReferencedAssemblies();
             if (references.Any(IsTestReference))
@@ -95,29 +99,24 @@ namespace UnityEditor.TestTools.TestRunner
 
             foreach (var reference in references)
             {
-                var referencedAssembly = loadedAssemblies.FirstOrDefault(a => a.Name.Name == reference.Name);
-                if (referencedAssembly == null)
-                {
+                if (!assembliesByName.TryGetValue(reference.Name, out var referencedAssembly))
                     continue;
-                }
 
-                FilterAssemblyForTestReference(referencedAssembly, loadedAssemblies, filterResults, resultsAlreadyAnalyzed);
-                
-                if (filterResults.ContainsKey(referencedAssembly) && filterResults[referencedAssembly])
+                FilterAssemblyForTestReference(referencedAssembly, assembliesByName, filterResults);
+
+                if (filterResults[referencedAssembly])
                 {
                     filterResults[assemblyToFilter] = true;
                     return;
                 }
             }
-            
-            filterResults[assemblyToFilter] = false;
         }
 
         private static bool IsTestReference(AssemblyName assemblyName)
         {
-            return assemblyName.Name == k_NunitAssemblyName || 
-                   assemblyName.Name == k_TestRunnerAssemblyName ||
-                   assemblyName.Name == k_PerformanceTestingAssemblyName;
+            return assemblyName.Name == k_NunitAssemblyName ||
+                assemblyName.Name == k_TestRunnerAssemblyName ||
+                assemblyName.Name == k_PerformanceTestingAssemblyName;
         }
     }
 }

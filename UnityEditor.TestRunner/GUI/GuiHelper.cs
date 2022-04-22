@@ -23,6 +23,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                     .Select(Paths.UnifyDirectorySeparator);
             };
         }
+
         internal Func<string, string, IEnumerable<string>> GetCSFiles;
         protected IMonoCecilHelper MonoCecilHelper { get; private set; }
         public IAssetsDatabaseHelper AssetsDatabaseHelper { get; private set; }
@@ -50,10 +51,9 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                 (Editor ?? CodeEditor.CurrentEditor).OpenProject(fileOpenInfo.FilePath, fileOpenInfo.LineNumber, 1);
             }
             else
-            { 
+            {
                 AssetsDatabaseHelper.OpenAssetInItsDefaultExternalEditor(fileOpenInfo.FilePath, fileOpenInfo.LineNumber);
             }
-            
         }
 
         public IFileOpenInfo GetFileOpenInfo(Type type, MethodInfo method)
@@ -82,13 +82,14 @@ namespace UnityEditor.TestTools.TestRunner.GUI
         internal static string GetTestFileName(Type type)
         {
             //This handles the case of a test in a nested class, getting the name of the base class
-            if (type.FullName != null && type.Namespace!=null && type.FullName.Contains("+"))
+            if (type.FullName != null && type.Namespace != null && type.FullName.Contains("+"))
             {
-                var removedNamespace = type.FullName.Substring(type.Namespace.Length+1);
-                return removedNamespace.Substring(0,removedNamespace.IndexOf("+", StringComparison.Ordinal));
+                var removedNamespace = type.FullName.Substring(type.Namespace.Length + 1);
+                return removedNamespace.Substring(0, removedNamespace.IndexOf("+", StringComparison.Ordinal));
             }
             return type.Name;
         }
+
         public string FilePathToAssetsRelativeAndUnified(string filePath)
         {
             if (string.IsNullOrEmpty(filePath))

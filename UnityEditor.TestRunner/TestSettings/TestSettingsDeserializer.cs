@@ -27,6 +27,10 @@ namespace UnityEditor.TestTools.TestRunner
                 settings.autoGraphicsAPIs = false;
                 settings.playerGraphicsAPIs = new[] {value};
             }),
+            new SettingsMap<bool>("androidBuildAppBundle", (settings, value) =>
+            {
+                settings.androidBuildAppBundle = value;
+            })
         };
 
         private readonly Func<ITestSettings> m_TestSettingsFactory;
@@ -48,7 +52,7 @@ namespace UnityEditor.TestTools.TestRunner
 
             foreach (var settingsMap in s_SettingsMapping)
             {
-                if (!settingsDictionary.ContainsKey(settingsMap.Key))
+                if (!settingsDictionary.ContainsKey(settingsMap.Key) || settingsDictionary[settingsMap.Key] == null)
                 {
                     continue;
                 }

@@ -4,7 +4,6 @@ using System.Linq;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
-using UnityEditor.TestTools.TestRunner.TestRun;
 using UnityEngine;
 using UnityEngine.TestRunner.NUnitExtensions;
 using UnityEngine.TestTools;
@@ -36,20 +35,20 @@ namespace UnityEditor.TestTools.TestRunner.Api.Analytics
         [InitializeOnLoadMethod]
         private static void RegisterCallbacks()
         {
-            ScriptableObject.CreateInstance<TestRunnerApi>().RegisterCallbacks(new AnalyticsTestCallback(ReportRunFinished));
+            TestRunnerApi.RegisterTestCallback(new AnalyticsTestCallback(ReportRunFinished));
         }
 
         private static void ReportRunFinished(ITestResultAdaptor testResult)
         {
             SetUpIfNeeded();
 
-            var activeRuns = TestJobDataHolder.instance.TestRuns;
-            if (activeRuns.Count == 0)
+            var activeRuns = TestRunnerApi.GetActiveRunGuids();
+            if (activeRuns.Length == 0)
             {
                 return;
             }
 
-            var executionSettings = activeRuns[0].executionSettings;
+            var executionSettings = TestRunnerApi.GetExecutionSettings(activeRuns[0]);
             var filter = executionSettings.filters.First();
             var runFinishedData = new RunFinishedData()
             {
@@ -61,12 +60,12 @@ namespace UnityEditor.TestTools.TestRunner.Api.Analytics
                 testModeFilter = (int)filter.testMode,
                 targetPlatform = executionSettings.targetPlatform != null ? executionSettings.targetPlatform.ToString() : "editor",
                 runSynchronously = executionSettings.runSynchronously,
-                isCustomRunner = false,
+                isCustomRunner = !string.IsNullOrEmpty(executionSettings.customRunnerName),
                 isFiltering = executionSettings.filters.Any(f => f.HasAny()),
                 isAutomated = IsCommandLineArgSet("-automated"),
                 isFromCommandLine = IsCommandLineArgSet("-runTests"),
                 totalTestDuration = testResult.Duration,
-                totalRunDuration = (DateTime.Now - Convert.ToDateTime(activeRuns[0].startTime)).TotalSeconds
+                totalRunDuration = (DateTime.Now - TestRunnerApi.GetRunStartTime(activeRuns[0])).TotalSeconds
             };
 
             EditorAnalytics.SendEventWithLimit(RunFinishedEventName, runFinishedData, 1);
@@ -110,6 +109,21 @@ namespace UnityEditor.TestTools.TestRunner.Api.Analytics
             if (attributes.OfType<ConditionalIgnoreAttribute>().Any())
             {
                 data.numConditionalIgnoreAttributes++;
+            }
+            if (attributes.OfType<RequiresPlayModeAttribute>().Any())
+            {
+                var requiresPlayMode = RequiresPlayModeAttribute.GetValueForTest(node);
+                if (requiresPlayMode.HasValue)
+                {
+                    if (requiresPlayMode.Value)
+                    {
+                        data.numRequiresPlayModeAttributesTrue++;
+                    }
+                    else
+                    {
+                        data.numRequiresPlayModeAttributesFalse++;
+                    }
+                }
             }
             if (attributes.OfType<UnityPlatformAttribute>().Any())
             {

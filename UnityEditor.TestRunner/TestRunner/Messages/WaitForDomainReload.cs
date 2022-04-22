@@ -32,7 +32,7 @@ namespace UnityEngine.TestTools
         /// <summary>
         /// Returns true if the instruction expects a domain reload to occur.
         /// </summary>
-        public bool ExpectDomainReload { get;  }
+        public bool ExpectDomainReload { get; }
         /// <summary>
         /// Returns true if the instruction expects the Unity Editor to be in **Play Mode**.
         /// </summary>
@@ -55,9 +55,9 @@ namespace UnityEngine.TestTools
             // Add this point the domain reload should have occured and stopped any further progress on the instruction.
             EditorApplication.LockReloadAssemblies();
             throw new Exception(
-                EditorUtility.scriptCompilationFailed ? 
-                    "Script compilation failed" : 
-                    "Expected domain reload, but it did not occur");
+                EditorUtility.scriptCompilationFailed ?
+                "Script compilation failed" :
+                "Expected domain reload, but it did not occur");
         }
     }
 }

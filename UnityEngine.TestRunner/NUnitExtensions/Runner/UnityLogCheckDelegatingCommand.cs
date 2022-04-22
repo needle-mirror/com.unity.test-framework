@@ -57,7 +57,7 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
 
                 if (!CheckLogs(context.CurrentResult, logScope))
                     yield break;
-                
+
                 PostTestValidation(logScope, innerCommand, context.CurrentResult);
             }
         }
@@ -71,11 +71,11 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
             }
             catch (Exception e)
             {
-                result.RecordException(e);
+                result.RecordExceptionWithHint(e);
                 return false;
             }
         }
-        
+
         static bool ExecuteAndCheckLog(LogScope logScope, TestResult result, Action action)
             => CaptureException(result, action) && CheckLogs(result, logScope);
 
@@ -86,50 +86,50 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
         }
 
         static bool CheckLogs(TestResult result, LogScope logScope)
-            => CheckFailingLogs(logScope, result) && CheckExpectedLogs(logScope, result); 
+            => CheckFailingLogs(logScope, result) && CheckExpectedLogs(logScope, result);
 
         static bool CheckFailingLogs(LogScope logScope, TestResult result)
         {
             if (!logScope.AnyFailingLogs())
                 return true;
-            
+
             var failingLog = logScope.FailingLogs.First();
-            result.RecordException(new UnhandledLogMessageException(failingLog));
+            result.RecordExceptionWithHint(new UnhandledLogMessageException(failingLog));
             return false;
         }
-        
+
         static bool CheckExpectedLogs(LogScope logScope, TestResult result)
         {
             if (!logScope.ExpectedLogs.Any())
                 return true;
-            
+
             var expectedLog = logScope.ExpectedLogs.Peek();
-            result.RecordException(new UnexpectedLogMessageException(expectedLog));
+            result.RecordExceptionWithHint(new UnexpectedLogMessageException(expectedLog));
             return false;
         }
-        
+
         static bool MustExpect(MemberInfo method)
         {
             // method
-            
+
             var methodAttr = method.GetCustomAttributes<TestMustExpectAllLogsAttribute>(true).FirstOrDefault();
             if (methodAttr != null)
                 return methodAttr.MustExpect;
-            
+
             // fixture
-            
+
             var fixture = method.DeclaringType;
             if (!s_AttributeCache.TryGetValue(fixture, out var mustExpect))
             {
                 var fixtureAttr = fixture.GetCustomAttributes<TestMustExpectAllLogsAttribute>(true).FirstOrDefault();
                 mustExpect = s_AttributeCache[fixture] = fixtureAttr?.MustExpect;
             }
-            
+
             if (mustExpect != null)
                 return mustExpect.Value;
 
             // assembly
-            
+
             var assembly = fixture.Assembly;
             if (!s_AttributeCache.TryGetValue(assembly, out mustExpect))
             {

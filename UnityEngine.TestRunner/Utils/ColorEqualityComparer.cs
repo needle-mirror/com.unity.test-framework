@@ -7,8 +7,8 @@ namespace UnityEngine.TestTools.Utils
     /// </summary>
     public class ColorEqualityComparer : IEqualityComparer<Color>
     {
-        private const float k_DefaultError = 0.01f;
-        private readonly float AllowedError;
+        internal const float k_DefaultError = 0.01f;
+        internal readonly float AllowedError;
 
 
         private static readonly ColorEqualityComparer m_Instance = new ColorEqualityComparer();
@@ -46,14 +46,14 @@ namespace UnityEngine.TestTools.Utils
         ///         // Using default error
         ///         var firstColor = new Color(0f, 0f, 0f, 0f);
         ///         var secondColor = new Color(0f, 0f, 0f, 0f);
-        /// 
+        ///
         ///         Assert.That(firstColor, Is.EqualTo(secondColor).Using(ColorEqualityComparer.Instance));
-        /// 
+        ///
         ///         // Allowed error 10e-5f
         ///         var comparer = new ColorEqualityComparer(10e-5f);
         ///         firstColor = new Color(0f, 0f, 0f, 1f);
         ///         secondColor = new Color(10e-6f, 0f, 0f, 1f);
-        /// 
+        ///
         ///         Assert.That(firstColor, Is.EqualTo(secondColor).Using(comparer));
         ///     }
         /// }

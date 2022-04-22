@@ -11,35 +11,33 @@ namespace UnityEditor.TestTools.TestRunner
         [SerializeField]
         private bool m_Stripping;
 
-        public void Setup()
-        {
-            m_oldApplicationIdentifier = PlayerSettings.GetApplicationIdentifier(BuildTargetGroup.Android);
-            PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.Android, "com.UnityTestRunner.UnityTestRunner");
+        bool RequiresLegacyConnectionMechanism =>
+#if !UNITY_2021_2_OR_NEWER
+             true;
+#else
+            false;
+#endif
 
+        void PerformLegacySetup()
+        {
             m_oldDeviceSocketAddress = EditorUserBuildSettings.androidDeviceSocketAddress;
+
             var androidDeviceConnection = Environment.GetEnvironmentVariable("ANDROID_DEVICE_CONNECTION");
-            EditorUserBuildSettings.waitForPlayerConnection = true;
             if (androidDeviceConnection != null)
             {
                 EditorUserBuildSettings.androidDeviceSocketAddress = androidDeviceConnection;
             }
-            m_Stripping = PlayerSettings.stripEngineCode;
-            PlayerSettings.stripEngineCode = false;
         }
 
-        public void PostBuildAction()
+        void PerformLegacyCleanup()
         {
-            PlayerSettings.stripEngineCode = m_Stripping;
+            EditorUserBuildSettings.androidDeviceSocketAddress = m_oldDeviceSocketAddress;
         }
 
-        public void PostSuccessfulBuildAction()
-        {
-        }
-
-        public void PostSuccessfulLaunchAction()
+        void PerformLegacyPostSuccessfulLaunchAction()
         {
             var connectionResult = -1;
-            var maxTryCount = 10;
+            var maxTryCount = 30;
             var tryCount = maxTryCount;
             while (tryCount-- > 0 && connectionResult == -1)
             {
@@ -57,9 +55,39 @@ namespace UnityEditor.TestTools.TestRunner
                     "Timed out trying to connect to the player. Player failed to launch or crashed soon after launching");
         }
 
+        public void Setup()
+        {
+            m_oldApplicationIdentifier = PlayerSettings.GetApplicationIdentifier(BuildTargetGroup.Android);
+            PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.Android, "com.UnityTestRunner.UnityTestRunner");
+
+            if (RequiresLegacyConnectionMechanism)
+                PerformLegacySetup();
+
+            EditorUserBuildSettings.waitForPlayerConnection = true;
+            m_Stripping = PlayerSettings.stripEngineCode;
+            PlayerSettings.stripEngineCode = false;
+        }
+
+        public void PostBuildAction()
+        {
+            PlayerSettings.stripEngineCode = m_Stripping;
+        }
+
+        public void PostSuccessfulBuildAction()
+        {
+        }
+
+        public void PostSuccessfulLaunchAction()
+        {
+            if (RequiresLegacyConnectionMechanism)
+                PerformLegacyPostSuccessfulLaunchAction();
+        }
+
         public void CleanUp()
         {
-            EditorUserBuildSettings.androidDeviceSocketAddress = m_oldDeviceSocketAddress;
+            if (RequiresLegacyConnectionMechanism)
+                PerformLegacyCleanup();
+
             PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.Android, m_oldApplicationIdentifier);
         }
     }

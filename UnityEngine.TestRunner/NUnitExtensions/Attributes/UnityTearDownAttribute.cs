@@ -14,13 +14,13 @@ namespace UnityEngine.TestTools
     ///     {
     ///         yield return new EnterPlayMode();
     ///     }
-    /// 
+    ///
     ///     [Test]
     ///     public void MyTest()
     ///     {
     ///         Debug.Log("This runs inside playmode");
     ///     }
-    /// 
+    ///
     ///     [UnityTearDown]
     ///     public IEnumerator TearDown()
     ///     {

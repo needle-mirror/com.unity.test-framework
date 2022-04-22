@@ -12,21 +12,12 @@ namespace UnityEngine.TestTools.TestRunner
     {
         [SerializeField]
         public RuntimeTestRunnerFilter[] filters;
-        public bool sceneBased;
-        public string originalScene;
-        public string bootstrapScene;
-        public bool runInBackgroundValue;
-        public bool consoleErrorPaused;
-
 
         public static PlaymodeTestsControllerSettings CreateRunnerSettings(RuntimeTestRunnerFilter[] filters)
         {
             var settings = new PlaymodeTestsControllerSettings
             {
-                filters = filters,
-                sceneBased = false,
-                originalScene = SceneManager.GetActiveScene().path,
-                bootstrapScene = null
+                filters = filters
             };
             return settings;
         }

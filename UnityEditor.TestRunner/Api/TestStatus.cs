@@ -1,7 +1,7 @@
 namespace UnityEditor.TestTools.TestRunner.Api
 {
     /// <summary>
-    /// The TestStatus enum indicates the test result status. 
+    /// The TestStatus enum indicates the test result status.
     /// </summary>
     public enum TestStatus
     {
