@@ -71,7 +71,7 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
                 {
                     Func<bool> compilationCheck = () => EditorUtility.scriptCompilationFailed;
                     Action<string> actionLogger = (string msg) => { Debug.LogFormat(LogType.Log, LogOption.NoStacktrace, null, msg); };
-                    var apiSettingsBuilder = new SettingsBuilder(new TestSettingsDeserializer(() => new TestSettings()), actionLogger, Debug.LogWarning, File.Exists, compilationCheck);
+                    var apiSettingsBuilder = new SettingsBuilder(new TestSettingsDeserializer(() => new TestSettings()), actionLogger, Debug.LogWarning, compilationCheck);
                     s_Executer = new Executer(ScriptableObject.CreateInstance<TestRunnerApi>(), apiSettingsBuilder, Debug.LogErrorFormat, Debug.LogException, EditorApplication.Exit, compilationCheck);
                 }
 

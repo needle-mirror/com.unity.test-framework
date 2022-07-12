@@ -15,6 +15,12 @@ namespace UnityEditor.TestTools.TestRunner
 {
     internal abstract class RuntimeTestLauncherBase : TestLauncherBase
     {
+        internal readonly PlaymodeTestsControllerSettings m_Settings;
+
+        protected RuntimeTestLauncherBase(PlaymodeTestsControllerSettings mSettings)
+        {
+            m_Settings = mSettings;
+        }
         protected Scene CreateBootstrapScene(string sceneName, Action<PlaymodeTestsController> runnerSetup)
         {
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
@@ -25,6 +31,7 @@ namespace UnityEditor.TestTools.TestRunner
             var runner = go.AddComponent<PlaymodeTestsController>();
             runnerSetup(runner);
             runner.settings.bootstrapScene = sceneName;
+            runner.settings.orderedTestNames = m_Settings.orderedTestNames;
             runner.AssembliesWithTests = editorLoadedTestAssemblyProvider.GetAssembliesGroupedByType(TestPlatform.PlayMode).Select(x => x.Assembly.GetName().Name).ToList();
 
             EditorSceneManager.MarkSceneDirty(scene);
@@ -44,7 +51,7 @@ namespace UnityEditor.TestTools.TestRunner
             var editorLoadedTestAssemblyProvider = new EditorLoadedTestAssemblyProvider(new EditorCompilationInterfaceProxy(), new EditorAssembliesProxy());
             var assembliesWithTests = editorLoadedTestAssemblyProvider.GetAssembliesGroupedByType(TestPlatform.PlayMode).Select(x => x.Assembly.GetName().Name).ToList();
 
-            var nUnitTestAssemblyRunner = new UnityTestAssemblyRunner(new UnityTestAssemblyBuilder(), null);
+            var nUnitTestAssemblyRunner = new UnityTestAssemblyRunner(new UnityTestAssemblyBuilder(m_Settings.orderedTestNames), null);
             var assemblyProvider = new PlayerTestAssemblyProvider(new AssemblyLoadProxy(), assembliesWithTests);
             nUnitTestAssemblyRunner.Load(assemblyProvider.GetUserAssemblies().Select(a => a.Assembly).ToArray(), TestPlatform.PlayMode, UnityTestAssemblyBuilder.GetNUnitTestBuilderSettings(TestPlatform.PlayMode));
             return nUnitTestAssemblyRunner;

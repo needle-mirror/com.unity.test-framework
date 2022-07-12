@@ -135,7 +135,7 @@ namespace UnityEditor.TestTools.TestRunner.Api
             var testAssemblyProvider = new EditorLoadedTestAssemblyProvider(new EditorCompilationInterfaceProxy(), new EditorAssembliesProxy());
             var testAdaptorFactory = new TestAdaptorFactory();
             var testListCache = new TestListCache(testAdaptorFactory, new RemoteTestResultDataFactory(), TestListCacheData.instance);
-            var testListProvider = new TestListProvider(testAssemblyProvider, new UnityTestAssemblyBuilder());
+            var testListProvider = new TestListProvider(testAssemblyProvider, new UnityTestAssemblyBuilder(null));
             var cachedTestListProvider = new CachingTestListProvider(testListProvider, testListCache, testAdaptorFactory);
 
             var job = new TestListJob(cachedTestListProvider, platform, (testRoot) =>

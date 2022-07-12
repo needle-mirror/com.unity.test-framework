@@ -112,13 +112,7 @@ namespace UnityEngine.TestTools.NUnitExtensions
                         m_StateSerializer.RestoreClassFromJson(ref m_Result);
                     }
                 }
-                if (logScope.AnyFailingLogs())
-                {
-                    var failingLog = logScope.FailingLogs.First();
-                    throw new UnhandledLogMessageException(failingLog);
-                }
-                if (logScope.ExpectedLogs.Any())
-                    throw new UnexpectedLogMessageException(LogScope.Current.ExpectedLogs.Peek());
+                logScope.EvaluateLogScope(true);
             }
             catch (Exception e)
             {

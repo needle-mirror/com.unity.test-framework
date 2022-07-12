@@ -37,12 +37,12 @@ namespace UnityEditor.TestTools.TestRunner
             ScriptableObject.CreateInstance<TestRunnerApi>().Execute(new ExecutionSettings(apiFilter));
         }
 
-        public EditModeLauncher(Filter[] filters, TestPlatform platform, bool runSynchronously)
+        public EditModeLauncher(Filter[] filters, TestPlatform platform, bool runSynchronously, string[] orderedTestNames)
         {
             TestEnumerator.Reset();
             m_EditModeRunner = ScriptableObject.CreateInstance<EditModeRunner>();
             m_EditModeRunner.UnityTestAssemblyRunnerFactory = new UnityTestAssemblyRunnerFactory();
-            m_EditModeRunner.Init(filters, platform, runSynchronously);
+            m_EditModeRunner.Init(filters, platform, runSynchronously, orderedTestNames);
         }
 
         public override void Run()

@@ -13,7 +13,7 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
         
         public override IEnumerator Execute(TestJobData testJobData)
         {
-            var testLauncher = new EditModeLauncher(testJobData.executionSettings.filters, TestPlatform.EditMode, testJobData.executionSettings.runSynchronously);
+            var testLauncher = new EditModeLauncher(testJobData.executionSettings.filters, TestPlatform.EditMode, testJobData.executionSettings.runSynchronously, testJobData.executionSettings.orderedTestNames);
             testJobData.editModeRunner = testLauncher.m_EditModeRunner;
             testLauncher.Run();
             

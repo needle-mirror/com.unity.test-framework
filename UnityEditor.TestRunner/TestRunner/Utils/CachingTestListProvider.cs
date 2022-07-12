@@ -39,8 +39,7 @@ namespace UnityEditor.TestTools.TestRunner
                 {
                     yield return null;
                 }
-
-                test.Current.ParseForNameDuplicates();
+                
                 m_TestListCache.CacheTest(platform, test.Current);
                 AnalyticsReporter.AnalyzeTestTreeAndReport(test.Current);
                 yield return m_TestAdaptorFactory.Create(test.Current);

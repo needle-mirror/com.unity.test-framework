@@ -92,7 +92,7 @@ namespace UnityEngine.TestTools.TestRunner
             }
 
             var testListUtil = new PlayerTestAssemblyProvider(new AssemblyLoadProxy(), m_AssembliesWithTests);
-            m_Runner = new UnityTestAssemblyRunner(new UnityTestAssemblyBuilder(), new PlaymodeWorkItemFactory());
+            m_Runner = new UnityTestAssemblyRunner(new UnityTestAssemblyBuilder(settings.orderedTestNames), new PlaymodeWorkItemFactory());
 
             var loadedTests = m_Runner.Load(testListUtil.GetUserAssemblies().Select(a => a.Assembly).ToArray(), TestPlatform.PlayMode, UnityTestAssemblyBuilder.GetNUnitTestBuilderSettings(TestPlatform.PlayMode));
             loadedTests.ParseForNameDuplicates();

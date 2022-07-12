@@ -18,15 +18,13 @@ namespace UnityEditor.TestTools.TestRunner
         public static bool IsRunning;
         private Scene m_Scene;
         private bool m_IsTestSetupPerformed;
-        private readonly PlaymodeTestsControllerSettings m_Settings;
         private ITestFilter testFilter;
 
         [SerializeField]
         private List<Type> m_EventHandlers = new List<Type>();
 
-        public PlaymodeLauncher(PlaymodeTestsControllerSettings settings)
+        public PlaymodeLauncher(PlaymodeTestsControllerSettings settings) : base(settings)
         {
-            m_Settings = settings;
         }
 
         public override void Run()

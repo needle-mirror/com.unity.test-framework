@@ -128,7 +128,13 @@ namespace UnityEngine.TestTools
                         {
                             if (!enumerator.MoveNext())
                             {
+                                logScope.EvaluateLogScope(true);
                                 break;
+                            }
+
+                            if (m_SkipYieldAfterActions) // Evaluate the log scope right away for the commands where we do not yield
+                            {
+                                logScope.EvaluateLogScope(true);
                             }
                         }
                         catch (Exception ex)
@@ -156,13 +162,6 @@ namespace UnityEngine.TestTools
                             state.TestHasRun = true;
                             break;
                         }
-                    }
-
-                    if (logScope.AnyFailingLogs())
-                    {
-                        state.TestHasRun = true;
-                        context.CurrentResult.RecordPrefixedError(m_BeforeErrorPrefix, new UnhandledLogMessageException(logScope.FailingLogs.First()).Message);
-                        state.StoreTestResult(context.CurrentResult);
                     }
                 }
 
@@ -216,7 +215,13 @@ namespace UnityEngine.TestTools
                         {
                             if (!enumerator.MoveNext())
                             {
+                                logScope.EvaluateLogScope(true);
                                 break;
+                            }
+                            
+                            if (m_SkipYieldAfterActions) // Evaluate the log scope right away for the commands where we do not yield
+                            {
+                                logScope.EvaluateLogScope(true);
                             }
                         }
                         catch (Exception ex)
@@ -244,13 +249,6 @@ namespace UnityEngine.TestTools
                         {
                             yield return enumerator.Current;
                         }
-                    }
-
-                    if (logScope.AnyFailingLogs())
-                    {
-                        state.TestHasRun = true;
-                        context.CurrentResult.RecordPrefixedError(m_AfterErrorPrefix, new UnhandledLogMessageException(logScope.FailingLogs.First()).Message);
-                        state.StoreTestResult(context.CurrentResult);
                     }
                 }
 

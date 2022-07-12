@@ -18,7 +18,7 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
         }
 
         internal IEditorLoadedTestAssemblyProvider m_testAssemblyProvider = new EditorLoadedTestAssemblyProvider(new EditorCompilationInterfaceProxy(), new EditorAssembliesProxy());
-        internal IAsyncTestAssemblyBuilder m_testAssemblyBuilder = new UnityTestAssemblyBuilder();
+        internal Func<string[], IAsyncTestAssemblyBuilder> m_testAssemblyBuilderFactory = orderedTestNames => new UnityTestAssemblyBuilder(orderedTestNames);
         internal ICallbacksDelegator m_CallbacksDelegator = CallbacksDelegator.instance;
 
         public override IEnumerator Execute(TestJobData testJobData)
@@ -27,7 +27,7 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
             {
                 yield break;
             }
-            
+
             var assembliesEnumerator = m_testAssemblyProvider.GetAssembliesGroupedByTypeAsync(m_TestPlatform);
             while (assembliesEnumerator.MoveNext())
             {
@@ -38,10 +38,11 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
             {
                 throw new Exception("Assemblies not retrieved.");
             }
-            
+
             var assemblies = assembliesEnumerator.Current.Where(pair => m_TestPlatform.IsFlagIncluded(pair.Key)).SelectMany(pair => pair.Value).Select(x => x.Assembly).ToArray();
             var buildSettings = UnityTestAssemblyBuilder.GetNUnitTestBuilderSettings(m_TestPlatform);
-            var enumerator = m_testAssemblyBuilder.BuildAsync(assemblies, Enumerable.Repeat(m_TestPlatform, assemblies.Length).ToArray(), buildSettings);
+            var testAssemblyBuilder = m_testAssemblyBuilderFactory(testJobData.executionSettings.orderedTestNames);
+            var enumerator = testAssemblyBuilder.BuildAsync(assemblies, Enumerable.Repeat(m_TestPlatform, assemblies.Length).ToArray(), buildSettings);
             while (enumerator.MoveNext())
             {
                 yield return null;
@@ -53,7 +54,6 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
                 throw new Exception("Test list not retrieved.");
             }
             
-            testList.ParseForNameDuplicates();
             testJobData.testTree = testList;
             m_CallbacksDelegator.TestTreeRebuild(testList);
         }

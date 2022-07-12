@@ -111,6 +111,14 @@ namespace UnityEditor.TestTools.TestRunner
                             PlayerSettings.SetGraphicsAPIs(EditorUserBuildSettings.activeBuildTarget, graphicsAPIs.ToArray());
                     }
                 }),
+            new TestSetting<bool?>(
+                settings => settings.androidBuildAppBundle,
+                () => EditorUserBuildSettings.buildAppBundle,
+                androidAppBundle =>
+                {
+                    EditorUserBuildSettings.buildAppBundle = androidAppBundle.Value;
+                    PlayerSettings.Android.useAPKExpansionFiles = androidAppBundle.Value;
+                })
         };
 
         private bool m_Disposed;
@@ -129,6 +137,7 @@ namespace UnityEditor.TestTools.TestRunner
         public string tvOSManualProvisioningProfileID { get; set; }
         public string[] playerGraphicsAPIs { get; set; }
         public bool autoGraphicsAPIs { get; set; }
+        public bool? androidBuildAppBundle { get; set; }
 
         public void Dispose()
         {

@@ -25,16 +25,14 @@ namespace UnityEditor.TestTools.TestRunner
     [Serializable]
     internal class PlayerLauncher : RuntimeTestLauncherBase
     {
-        private readonly PlaymodeTestsControllerSettings m_Settings;
         private readonly BuildTarget m_TargetPlatform;
         private ITestRunSettings m_OverloadTestRunSettings;
         private string m_SceneName;
         private int m_HeartbeatTimeout;
         private string m_PlayerWithTestsPath;
 
-        public PlayerLauncher(PlaymodeTestsControllerSettings settings, BuildTarget? targetPlatform, ITestRunSettings overloadTestRunSettings, int heartbeatTimeout, string playerWithTestsPath)
+        public PlayerLauncher(PlaymodeTestsControllerSettings settings, BuildTarget? targetPlatform, ITestRunSettings overloadTestRunSettings, int heartbeatTimeout, string playerWithTestsPath) : base(settings)
         {
-            m_Settings = settings;
             m_TargetPlatform = targetPlatform ?? EditorUserBuildSettings.activeBuildTarget;
             m_OverloadTestRunSettings = overloadTestRunSettings;
             m_HeartbeatTimeout = heartbeatTimeout;
@@ -128,13 +126,14 @@ namespace UnityEditor.TestTools.TestRunner
         {
             Debug.LogFormat(LogType.Log, LogOption.NoStacktrace, null, "Building player with following options:\n{0}", buildOptions);
 
-
+#if !UNITY_2021_2_OR_NEWER
             // Android has to be in listen mode to establish player connection
+		    // Only flip connect to host if we are older than Unity 2021.2
             if (buildOptions.BuildPlayerOptions.target == BuildTarget.Android)
             {
                 buildOptions.BuildPlayerOptions.options &= ~BuildOptions.ConnectToHost;
             }
-
+#endif
             // For now, so does Lumin
             if (buildOptions.BuildPlayerOptions.target == BuildTarget.Lumin)
             {
@@ -165,6 +164,7 @@ namespace UnityEditor.TestTools.TestRunner
 
             buildOptions.options |= BuildOptions.Development | BuildOptions.ConnectToHost | BuildOptions.IncludeTestAssemblies | BuildOptions.StrictMode;
             buildOptions.target = m_TargetPlatform;
+
 #if UNITY_2021_2_OR_NEWER
             buildOptions.subtarget = EditorUserBuildSettings.GetActiveSubtargetFor(m_TargetPlatform);
 #endif
@@ -181,6 +181,7 @@ namespace UnityEditor.TestTools.TestRunner
                 buildOptions.options |= BuildOptions.AutoRunPlayer;
 
             var buildTargetGroup = EditorUserBuildSettings.activeBuildTargetGroup;
+            buildOptions.targetGroup = buildTargetGroup;
 
             //Check if Lz4 is supported for the current buildtargetgroup and enable it if need be
             if (PostprocessBuildPlayer.SupportsLz4Compression(buildTargetGroup, m_TargetPlatform))

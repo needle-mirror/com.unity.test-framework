@@ -170,5 +170,24 @@ namespace UnityEngine.TestRunner.NUnitExtensions
 
             return null;
         }
+        
+        internal static string GetFullName(string testFullName, int childIndex)
+        {
+            return childIndex != -1 ? GetIndexedTestCaseName(testFullName, childIndex) : testFullName;
+        }
+        private static string GetIndexedTestCaseName(string fullName, int index)
+        {
+            var generatedTestSuffix = " GeneratedTestCase" + index;
+            if (fullName.EndsWith(")"))
+            {
+                // Test names from generated TestCaseSource look like Test(TestCaseSourceType)
+                // This inserts a unique test case index in the name, so that it becomes Test(TestCaseSourceType GeneratedTestCase0)
+                return fullName.Substring(0, fullName.Length - 1) + generatedTestSuffix + fullName[fullName.Length - 1];
+            }
+
+            // In some cases there can be tests with duplicate names generated in other ways and they won't have () in their name
+            // We just append a suffix at the end of the name in that case
+            return fullName + generatedTestSuffix;
+        }
     }
 }

@@ -11,13 +11,13 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
         private ITestSettingsDeserializer m_TestSettingsDeserializer;
         private Action<string> m_LogAction;
         private Action<string> m_LogWarningAction;
-        private Func<string, bool> m_FileExistsCheck;
+        internal Func<string, bool> fileExistsCheck = File.Exists;
         private Func<bool> m_ScriptCompilationFailedCheck;
-        public SettingsBuilder(ITestSettingsDeserializer testSettingsDeserializer, Action<string> logAction, Action<string> logWarningAction, Func<string, bool> fileExistsCheck, Func<bool> scriptCompilationFailedCheck)
+        internal Func<string, string[]> readAllLines = filePath => File.ReadAllText(filePath).Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+        public SettingsBuilder(ITestSettingsDeserializer testSettingsDeserializer, Action<string> logAction, Action<string> logWarningAction, Func<bool> scriptCompilationFailedCheck)
         {
             m_LogAction = logAction;
             m_LogWarningAction = logWarningAction;
-            m_FileExistsCheck = fileExistsCheck;
             m_ScriptCompilationFailedCheck = scriptCompilationFailedCheck;
             m_TestSettingsDeserializer = testSettingsDeserializer;
         }
@@ -34,6 +34,7 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
             bool runSynchronously = false;
             string[] testAssemblyNames = null;
             string buildPlayerPath = string.Empty;
+            string orderedTestListFilePath = null;
 
 
             var optionSet = new CommandLineOptionSet(
@@ -48,7 +49,8 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
                 new CommandLineOption("playerHeartbeatTimeout", timeout => { playerHeartbeatTimeout = int.Parse(timeout); }),
                 new CommandLineOption("runSynchronously", () => { runSynchronously = true; }),
                 new CommandLineOption("assemblyNames", assemblyNames => { testAssemblyNames = assemblyNames; }),
-                new CommandLineOption("buildPlayerPath", buildPath => { buildPlayerPath = buildPath; })
+                new CommandLineOption("buildPlayerPath", buildPath => { buildPlayerPath = buildPath; }),
+                new CommandLineOption("orderedTestListFile", filePath => { orderedTestListFilePath = filePath; })
             );
             optionSet.Parse(commandLineArgs);
 
@@ -84,7 +86,8 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
                 overloadTestRunSettings = new RunSettings(testSettings),
                 targetPlatform = buildTarget,
                 runSynchronously = runSynchronously,
-                playerSavePath = buildPlayerPath
+                playerSavePath = buildPlayerPath,
+                orderedTestNames = GetOrderedTestList(orderedTestListFilePath)
             };
 
             if (playerHeartbeatTimeout != null)
@@ -152,7 +155,7 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
             ITestSettings testSettings = null;
             if (!string.IsNullOrEmpty(testSettingsFilePath))
             {
-                if (!m_FileExistsCheck(testSettingsFilePath))
+                if (!fileExistsCheck(testSettingsFilePath))
                 {
                     throw new SetupException(SetupException.ExceptionType.TestSettingsFileNotFound, testSettingsFilePath);
                 }
@@ -160,6 +163,20 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
                 testSettings = m_TestSettingsDeserializer.GetSettingsFromJsonFile(testSettingsFilePath);
             }
             return testSettings;
+        }
+        
+        private string[] GetOrderedTestList(string orderedTestListFilePath)
+        {
+            if (!string.IsNullOrEmpty(orderedTestListFilePath))
+            {
+                if (!fileExistsCheck(orderedTestListFilePath))
+                {
+                    throw new SetupException(SetupException.ExceptionType.OrderedTestListFileNotFound, orderedTestListFilePath);
+                }
+
+                return readAllLines(orderedTestListFilePath);
+            }
+            return null;
         }
 
         static BuildTarget? SetFilterAndGetBuildTarget(string testPlatform, Filter filter)

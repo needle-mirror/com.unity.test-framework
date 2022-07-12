@@ -17,16 +17,18 @@ namespace UnityEngine.TestTools.TestRunner
         public string bootstrapScene;
         public bool runInBackgroundValue;
         public bool consoleErrorPaused;
+        public string[] orderedTestNames;
 
 
-        public static PlaymodeTestsControllerSettings CreateRunnerSettings(RuntimeTestRunnerFilter[] filters)
+        public static PlaymodeTestsControllerSettings CreateRunnerSettings(RuntimeTestRunnerFilter[] filters, string[] orderedTestNames)
         {
             var settings = new PlaymodeTestsControllerSettings
             {
                 filters = filters,
                 sceneBased = false,
                 originalScene = SceneManager.GetActiveScene().path,
-                bootstrapScene = null
+                bootstrapScene = null,
+                orderedTestNames = orderedTestNames
             };
             return settings;
         }

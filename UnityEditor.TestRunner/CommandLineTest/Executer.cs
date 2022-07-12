@@ -1,8 +1,10 @@
 using System;
+using System.IO;
 using System.Linq;
 using UnityEditor.TestRunner.TestLaunchers;
 using UnityEditor.TestTools.TestRunner.Api;
 using UnityEngine;
+using UnityEngine.TestRunner.NUnitExtensions;
 
 namespace UnityEditor.TestTools.TestRunner.CommandLineTest
 {
@@ -113,7 +115,8 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
         {
             new ExceptionHandling(SetupException.ExceptionType.ScriptCompilationFailed, "Scripts had compilation errors.", ReturnCodes.RunError),
             new ExceptionHandling(SetupException.ExceptionType.PlatformNotFound, "Test platform not found ({0}).", ReturnCodes.PlatformNotFoundReturnCode),
-            new ExceptionHandling(SetupException.ExceptionType.TestSettingsFileNotFound, "Test settings file not found at {0}.", ReturnCodes.RunError)
+            new ExceptionHandling(SetupException.ExceptionType.TestSettingsFileNotFound, "Test settings file not found at {0}.", ReturnCodes.RunError),
+            new ExceptionHandling(SetupException.ExceptionType.OrderedTestListFileNotFound, "Ordered test list file not found at {0}.", ReturnCodes.RunError)
         };
 
         private static string ExecutionSettingsToString(Api.ExecutionSettings executionSettings)

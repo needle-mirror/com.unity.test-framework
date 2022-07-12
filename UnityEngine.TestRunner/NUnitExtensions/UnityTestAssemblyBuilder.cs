@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -5,14 +6,19 @@ using NUnit;
 using NUnit.Framework.Api;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
+using UnityEngine.TestRunner.NUnitExtensions;
 
 namespace UnityEngine.TestTools.NUnitExtensions
 {
     internal class UnityTestAssemblyBuilder : DefaultTestAssemblyBuilder, IAsyncTestAssemblyBuilder
     {
         private readonly string m_ProductName;
-        public UnityTestAssemblyBuilder()
+        private readonly ITestSuiteModifier[] m_TestSuiteModifiers;
+        public UnityTestAssemblyBuilder(string[] orderedTestNames)
         {
+            m_TestSuiteModifiers = orderedTestNames != null && orderedTestNames.Length > 0
+                ? new ITestSuiteModifier[] {new OrderedTestSuiteModifier(orderedTestNames)}
+                : new ITestSuiteModifier[0];
             m_ProductName = Application.productName;
         }
 
@@ -43,6 +49,13 @@ namespace UnityEngine.TestTools.NUnitExtensions
                 }
 
                 yield return null;
+            }
+            
+            suite.ParseForNameDuplicates();
+
+            foreach (var testSuiteModifier in m_TestSuiteModifiers)
+            {
+                suite = testSuiteModifier.ModifySuite(suite);
             }
 
             yield return suite;

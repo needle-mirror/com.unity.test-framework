@@ -20,16 +20,18 @@ namespace UnityEditor.TestTools.TestRunner.Api
         {
             filters = filtersToExecute;
         }
-        
+
         [SerializeField]
-        internal BuildTarget? targetPlatform;
+        private BuildTarget m_TargetPlatform;
+        [SerializeField]
+        private bool m_HasTargetPlatform;
 
         /// <summary>
         /// An instance of <see cref="ITestRunSettings"/> to set up before running tests on a Player.
         /// </summary>
         // Note: Is not available after serialization
         public ITestRunSettings overloadTestRunSettings;
-        
+
         [SerializeField]
         internal Filter filter;
         ///<summary>
@@ -47,14 +49,17 @@ namespace UnityEditor.TestTools.TestRunner.Api
         /// The time, in seconds, the editor should wait for heartbeats after starting a test run on a player. This defaults to 10 minutes.
         /// </summary>
         [SerializeField]
-        public int playerHeartbeatTimeout = 60*10;
+        public int playerHeartbeatTimeout = 60 * 10;
+
+        [SerializeField]
+        internal string[] orderedTestNames;
         internal string playerSavePath { get; set; }
 
         internal bool EditModeIncluded()
         {
             return filters.Any(f => IncludesTestMode(f.testMode, TestMode.EditMode));
         }
-        
+
         internal bool PlayModeInEditorIncluded()
         {
             return filters.Any(f => IncludesTestMode(f.testMode, TestMode.PlayMode) && targetPlatform == null);
@@ -69,10 +74,33 @@ namespace UnityEditor.TestTools.TestRunner.Api
         {
             return (testMode & modeToCheckFor) == modeToCheckFor;
         }
-        
+
         internal ITestFilter BuildNUnitFilter()
         {
             return new OrFilter(filters.Select(f => f.ToRuntimeTestRunnerFilter(runSynchronously).BuildNUnitFilter()).ToArray());
+        }
+
+        /// <returns>
+        /// The <see cref="BuildTarget"/> platform to run the test on. If set to null, then the Editor is the target for the tests.
+        /// </returns>
+        internal BuildTarget? targetPlatform
+        {
+            get { return m_HasTargetPlatform ? (BuildTarget?)m_TargetPlatform : null; }
+            set
+            {
+                {
+                    if (value.HasValue)
+                    {
+                        m_HasTargetPlatform = true;
+                        m_TargetPlatform = value.Value;
+                    }
+                    else
+                    {
+                        m_HasTargetPlatform = false;
+                        m_TargetPlatform = default;
+                    }
+                }
+            }
         }
     }
 }

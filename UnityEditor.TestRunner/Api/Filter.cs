@@ -38,6 +38,7 @@ namespace UnityEditor.TestTools.TestRunner.Api
         public string[] assemblyNames;
         /// <summary>
         /// The <see cref="BuildTarget"/> platform to run the test on. If set to null, then the Editor is the target for the tests.
+        /// Obsolete. Use the targetPlatform property on the <see cref="ExecutionSettings"/>.
         /// </summary>
         [SerializeField]
         public BuildTarget? targetPlatform;

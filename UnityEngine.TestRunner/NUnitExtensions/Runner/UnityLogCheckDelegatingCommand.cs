@@ -86,26 +86,33 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
         }
 
         static bool CheckLogs(TestResult result, LogScope logScope)
-            => CheckFailingLogs(logScope, result) && CheckExpectedLogs(logScope, result); 
+        {
+            try
+            {
+                logScope.EvaluateLogScope(true);
+            }
+            catch (Exception e)
+            {
+                result.RecordException(e);
+                return false;
+            }
+
+            return true;
+        }
 
         static bool CheckFailingLogs(LogScope logScope, TestResult result)
         {
-            if (!logScope.AnyFailingLogs())
-                return true;
-            
-            var failingLog = logScope.FailingLogs.First();
-            result.RecordException(new UnhandledLogMessageException(failingLog));
-            return false;
-        }
-        
-        static bool CheckExpectedLogs(LogScope logScope, TestResult result)
-        {
-            if (!logScope.ExpectedLogs.Any())
-                return true;
-            
-            var expectedLog = logScope.ExpectedLogs.Peek();
-            result.RecordException(new UnexpectedLogMessageException(expectedLog));
-            return false;
+            try
+            {
+                logScope.EvaluateLogScope(false);
+            }
+            catch (Exception e)
+            {
+                result.RecordException(e);
+                return false;
+            }
+
+            return true;
         }
         
         static bool MustExpect(MemberInfo method)

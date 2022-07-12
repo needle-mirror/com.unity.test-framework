@@ -14,6 +14,7 @@ namespace UnityEngine.TestTools
     {
         /// <summary>
         /// Verifies that a log message of a specified type appears in the log. A test won't fail from an expected error, assertion, or exception log message. It does fail if an expected message does not appear in the log.
+        /// If multiple LogAssert.Expect are used to expect multiple messages, they are expected to be logged in that order. 
         /// </summary>
         /// <param name="type">A type of log to expect. It can take one of the [LogType enum](https://docs.unity3d.com/ScriptReference/LogType.html) values.</param>
         /// <param name="message">A string value that should equate to the expected message.</param>

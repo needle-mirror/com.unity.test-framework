@@ -21,21 +21,9 @@ namespace UnityEngine.TestTools.Utils
             LoadAssemblies();
         }
 
-        public ITest GetTestsWithNUnit()
-        {
-            return BuildTests(TestPlatform.PlayMode, m_LoadedAssemblies.ToArray());
-        }
-
         public List<IAssemblyWrapper> GetUserAssemblies()
         {
             return m_LoadedAssemblies;
-        }
-
-        protected static ITest BuildTests(TestPlatform testPlatform, IAssemblyWrapper[] assemblies)
-        {
-            var settings = UnityTestAssemblyBuilder.GetNUnitTestBuilderSettings(testPlatform);
-            var builder = new UnityTestAssemblyBuilder();
-            return builder.Build(assemblies.Select(a => a.Assembly).ToArray(), Enumerable.Repeat(testPlatform, assemblies.Length).ToArray(), settings);
         }
 
         private void LoadAssemblies()

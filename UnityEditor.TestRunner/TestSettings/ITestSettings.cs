@@ -18,6 +18,7 @@ namespace UnityEditor.TestTools.TestRunner
         string tvOSManualProvisioningProfileID { get; set; }
         string[] playerGraphicsAPIs { get; set; }
         bool autoGraphicsAPIs { get; set; }
+        bool? androidBuildAppBundle { get; set; }
 
         void SetupProjectParameters();
     }

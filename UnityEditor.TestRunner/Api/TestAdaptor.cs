@@ -22,7 +22,7 @@ namespace UnityEditor.TestTools.TestRunner.Api
             {
                 childIndex = (int)test.Properties["childIndex"][0];
             }
-            FullName = childIndex != -1 ? GetIndexedTestCaseName(test.FullName, childIndex) : test.FullName;
+            FullName = TestExtensions.GetFullName(test.FullName, childIndex);
             TestCaseCount = test.TestCaseCount;
             HasChildren = test.HasChildren;
             IsSuite = test.IsSuite;
@@ -72,7 +72,7 @@ namespace UnityEditor.TestTools.TestRunner.Api
         {
             Id = test.id;
             Name = test.name;
-            FullName = test.ChildIndex != -1 ? GetIndexedTestCaseName(test.fullName, test.ChildIndex) : test.fullName;
+            FullName = TestExtensions.GetFullName(test.fullName, test.ChildIndex);
             TestCaseCount = test.testCaseCount;
             HasChildren = test.hasChildren;
             IsSuite = test.isSuite;
@@ -123,20 +123,5 @@ namespace UnityEditor.TestTools.TestRunner.Api
         public string ParentUniqueName { get; }
         public int ChildIndex { get; }
         public TestMode TestMode { get; private set; }
-        
-        private static string GetIndexedTestCaseName(string fullName, int index)
-        {
-            var generatedTestSuffix = " GeneratedTestCase" + index;
-            if (fullName.EndsWith(")"))
-            {
-                // Test names from generated TestCaseSource look like Test(TestCaseSourceType)
-                // This inserts a unique test case index in the name, so that it becomes Test(TestCaseSourceType GeneratedTestCase0)
-                return fullName.Substring(0, fullName.Length - 1) + generatedTestSuffix + fullName[fullName.Length - 1];
-            }
-
-            // In some cases there can be tests with duplicate names generated in other ways and they won't have () in their name
-            // We just append a suffix at the end of the name in that case
-            return fullName + generatedTestSuffix;
-        }
     }
 }

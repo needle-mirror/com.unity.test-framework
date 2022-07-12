@@ -160,6 +160,7 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
             try
             {
                 _setupCommand.Execute(Context);
+                logScope.EvaluateLogScope(true);
             }
             catch (Exception ex)
             {
@@ -169,10 +170,6 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
                 Result.RecordException(ex, FailureSite.SetUp);
             }
 
-            if (logScope.AnyFailingLogs())
-            {
-                Result.RecordException(new UnhandledLogMessageException(logScope.FailingLogs.First()));
-            }
             logScope.Dispose();
         }
 
@@ -296,6 +293,7 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
             try
             {
                 _teardownCommand.Execute(Context);
+                logScope.EvaluateLogScope(true);
             }
             catch (Exception ex)
             {
@@ -305,10 +303,6 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
                 Result.RecordException(ex, FailureSite.SetUp);
             }
 
-            if (logScope.AnyFailingLogs())
-            {
-                Result.RecordException(new UnhandledLogMessageException(logScope.FailingLogs.First()));
-            }
             logScope.Dispose();
         }
 

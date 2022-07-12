@@ -13,7 +13,8 @@ namespace UnityEditor.TestTools.TestRunner.Api
         public ITestAdaptor Create(ITest test)
         {
             var uniqueName = test.GetUniqueName();
-            if (m_TestAdaptorCache.ContainsKey(uniqueName))
+            var elementIsModified = test.Properties.ContainsKey(OrderedTestSuiteModifier.suiteIsReorderedProperty);
+            if (!elementIsModified && m_TestAdaptorCache.ContainsKey(uniqueName))
             {
                 return m_TestAdaptorCache[uniqueName];
             }
@@ -23,7 +24,11 @@ namespace UnityEditor.TestTools.TestRunner.Api
             {
                 (child as TestAdaptor).SetParent(adaptor);
             }
-            m_TestAdaptorCache[uniqueName] = adaptor;
+            
+            if (!elementIsModified)
+            {
+                m_TestAdaptorCache[uniqueName] = adaptor;
+            }
             return adaptor;
         }
 

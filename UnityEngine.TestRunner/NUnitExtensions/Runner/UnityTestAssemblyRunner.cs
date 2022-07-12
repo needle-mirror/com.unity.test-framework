@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using NUnit;
@@ -72,7 +74,9 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
             if (settings.ContainsKey(FrameworkPackageSettings.RandomSeed))
                 Randomizer.InitialSeed = (int)settings[FrameworkPackageSettings.RandomSeed];
 
-            return LoadedTest = unityBuilder.Build(assemblies, Enumerable.Repeat(testPlatform, assemblies.Length).ToArray(), settings);
+            var tree = unityBuilder.Build(assemblies, Enumerable.Repeat(testPlatform, assemblies.Length).ToArray(), settings);
+
+            return LoadedTest = tree;
         }
 
         public IEnumerable Run(ITestListener listener, ITestFilter filter)

@@ -19,14 +19,14 @@ namespace UnityEditor.TestTools.TestRunner
 {
     internal interface IUnityTestAssemblyRunnerFactory
     {
-        IUnityTestAssemblyRunner Create(TestPlatform testPlatform, WorkItemFactory factory);
+        IUnityTestAssemblyRunner Create(TestPlatform testPlatform, string[] orderedTestNames, WorkItemFactory factory);
     }
 
     internal class UnityTestAssemblyRunnerFactory : IUnityTestAssemblyRunnerFactory
     {
-        public IUnityTestAssemblyRunner Create(TestPlatform testPlatform, WorkItemFactory factory)
+        public IUnityTestAssemblyRunner Create(TestPlatform testPlatform, string[] orderedTestNames, WorkItemFactory factory)
         {
-            return new UnityTestAssemblyRunner(new UnityTestAssemblyBuilder(), factory);
+            return new UnityTestAssemblyRunner(new UnityTestAssemblyBuilder(orderedTestNames), factory);
         }
     }
 
@@ -84,6 +84,9 @@ namespace UnityEditor.TestTools.TestRunner
         [SerializeField] 
         private EnumerableTestState m_EnumerableTestState;
 
+        [SerializeField]
+        private string[] m_OrderedTestNames;
+
         [SerializeField] 
         public bool RunFinished = false;
 
@@ -97,12 +100,13 @@ namespace UnityEditor.TestTools.TestRunner
 
         public IUnityTestAssemblyRunnerFactory UnityTestAssemblyRunnerFactory { get; set; }
 
-        public void Init(Filter[] filters, TestPlatform platform, bool runningSynchronously)
+        public void Init(Filter[] filters, TestPlatform platform, bool runningSynchronously, string[] orderedTestNames)
         {
             m_Filters = filters;
             m_TestPlatform = platform;
             m_AlreadyStartedTests = new List<string>();
             m_ExecutedTests = new List<TestResultSerializer>();
+            m_OrderedTestNames = orderedTestNames;
             RunningSynchronously = runningSynchronously;
             InitRunner();
         }
@@ -110,12 +114,11 @@ namespace UnityEditor.TestTools.TestRunner
         private void InitRunner()
         {
             //We give the EditMode platform here so we dont suddenly create Playmode work items in the test Runner.
-            m_Runner = (UnityTestAssemblyRunnerFactory ?? new UnityTestAssemblyRunnerFactory()).Create(TestPlatform.EditMode, new EditmodeWorkItemFactory());
+            m_Runner = (UnityTestAssemblyRunnerFactory ?? new UnityTestAssemblyRunnerFactory()).Create(TestPlatform.EditMode, m_OrderedTestNames, new EditmodeWorkItemFactory());
             var testAssemblyProvider = new EditorLoadedTestAssemblyProvider(new EditorCompilationInterfaceProxy(), new EditorAssembliesProxy());
             var assemblies = testAssemblyProvider.GetAssembliesGroupedByType(m_TestPlatform).Select(x => x.Assembly).ToArray();
             var loadedTests = m_Runner.Load(assemblies, TestPlatform.EditMode,
                 UnityTestAssemblyBuilder.GetNUnitTestBuilderSettings(m_TestPlatform));
-            loadedTests.ParseForNameDuplicates();
             CallbacksDelegator.instance.TestTreeRebuild(loadedTests);
             hideFlags |= HideFlags.DontSave;
             EnumerableSetUpTearDownCommand.ActivePcHelper = new EditModePcHelper();

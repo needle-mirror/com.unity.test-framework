@@ -114,3 +114,7 @@ Set to one of the following values:
 #### playerGraphicsAPI
 
  Set graphics API that will be used during test execution in the player. Value can be any [GraphicsDeviceType](https://docs.unity3d.com/ScriptReference/Rendering.GraphicsDeviceType.html) as a string literal enclosed in quotes. Value will only be set if it is supported on the target platform.
+
+### androidBuildAppBundle
+
+A boolean setting that allows to build an Android App Bundle (AAB) instead of APK for tests.

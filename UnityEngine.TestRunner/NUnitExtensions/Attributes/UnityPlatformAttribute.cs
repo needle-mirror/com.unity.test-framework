@@ -16,7 +16,7 @@ namespace UnityEngine.TestTools
     /// - Not explicitly specified in the included platforms list
     /// - In the excluded platforms list
     /// </summary>
-    [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
     public class UnityPlatformAttribute : NUnitAttribute, IApplyToTest
     {
         /// <summary>
@@ -60,7 +60,7 @@ namespace UnityEngine.TestTools
                 return;
             }
             test.RunState = RunState.Skipped;
-            test.Properties.Add("_SKIPREASON", m_skippedReason);
+            test.Properties.Add(PropertyNames.SkipReason, m_skippedReason);
         }
 
         internal bool IsPlatformSupported(RuntimePlatform testTargetPlatform)
@@ -73,7 +73,7 @@ namespace UnityEngine.TestTools
 
             if (exclude.Any(x => x == testTargetPlatform))
             {
-                m_skippedReason = string.Format("Not supported on  {0}", string.Join(", ", include.Select(x => x.ToString()).ToArray()));
+                m_skippedReason = string.Format("Not supported on  {0}", string.Join(", ", exclude.Select(x => x.ToString()).ToArray()));
                 return false;
             }
             return true;

@@ -27,6 +27,10 @@ namespace UnityEditor.TestTools.TestRunner
                 settings.autoGraphicsAPIs = false;
                 settings.playerGraphicsAPIs = new[] {value};
             }),
+            new SettingsMap<bool>("androidBuildAppBundle", (settings, value) =>
+            {
+                settings.androidBuildAppBundle = value;
+            })
         };
 
         private readonly Func<ITestSettings> m_TestSettingsFactory;

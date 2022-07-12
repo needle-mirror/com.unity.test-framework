@@ -1,4 +1,17 @@
 # Changelog
+## [1.1.33] - 2022-07-12
+- Fixed an issue where using Assert.Expect with the same string multiple times can lead to incorrect errors in some cases (DSTR-442).
+- Improved the logging when using multiple Assert.Expect that the logs appear in another order than expected (DSTR-442).
+- Moved the targetPlatform specified when running tests in the TestRunnerApi from the Filter to the ExecutionSettings (DSTR-186).
+- Fixed an issue where an inheritance of UnityPlatformAttribute which was not working (ESTT-70).
+- Fixed the log of excluded platforms which was not displaying the right information.
+- Added filename and linenumber to test finished message (DSTR-505).
+- Add the possibility of running tests in a specified order from a test list (DSTR-494).
+
+## [1.1.32] - 2022-04-06
+- Ensured that BuildTargetGroup is set correctly before TestPlayerBuildModifier is invoked (DSTR-394).
+- Added a TestSetting that allows to build an Android App Bundle instead of APK.
+
 ## [1.1.31] - 2022-02-03
 - Fixed "Open source code" on tests when located inside a package.
 - Added editor analytics events.
