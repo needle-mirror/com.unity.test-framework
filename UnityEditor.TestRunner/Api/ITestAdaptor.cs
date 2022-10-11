@@ -53,6 +53,10 @@ namespace UnityEditor.TestTools.TestRunner.Api
         /// </summary>
         IMethodInfo Method { get; }
         /// <summary>
+        /// The array of arguments that the test method/fixture will be invoked with.
+        /// </summary>
+        object[] Arguments { get; }
+        /// <summary>
         /// An array of the categories applied to the test or fixture.
         /// </summary>
         string[] Categories { get; }

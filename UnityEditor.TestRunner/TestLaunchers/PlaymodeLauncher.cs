@@ -65,30 +65,40 @@ namespace UnityEditor.TestTools.TestRunner
 
         public void UpdateCallback()
         {
-            if (m_IsTestSetupPerformed)
+            try
             {
-                if (m_Scene.IsValid())
-                    SceneManager.SetActiveScene(m_Scene);
-                EditorApplication.update -= UpdateCallback;
-                EditorApplication.isPlaying = true;
-            }
-            else
-            {
-                testFilter = m_Settings.BuildNUnitFilter();
-                var runner = LoadTests(testFilter);
-
-                var exceptionThrown = ExecutePreBuildSetupMethods(runner.LoadedTest, testFilter);
-                if (exceptionThrown)
+                if (m_IsTestSetupPerformed)
                 {
+                    if (m_Scene.IsValid())
+                        SceneManager.SetActiveScene(m_Scene);
                     EditorApplication.update -= UpdateCallback;
-                    IsRunning = false;
-                    var controller = PlaymodeTestsController.GetController();
-                    ReopenOriginalScene(controller);
-                    AssetDatabase.DeleteAsset(controller.settings.bootstrapScene);
-                    CallbacksDelegator.instance.RunFailed("Run Failed: One or more errors in a prebuild setup. See the editor log for details.");
-                    return;
+                    EditorApplication.isPlaying = true;
                 }
-                m_IsTestSetupPerformed = true;
+                else
+                {
+                    testFilter = m_Settings.BuildNUnitFilter();
+                    var runner = LoadTests(testFilter);
+
+                    var exceptionThrown = ExecutePreBuildSetupMethods(runner.LoadedTest, testFilter);
+                    if (exceptionThrown)
+                    {
+                        EditorApplication.update -= UpdateCallback;
+                        IsRunning = false;
+                        var controller = PlaymodeTestsController.GetController();
+                        ReopenOriginalScene(controller);
+                        AssetDatabase.DeleteAsset(controller.settings.bootstrapScene);
+                        CallbacksDelegator.instance.RunFailed("Run Failed: One or more errors in a prebuild setup. See the editor log for details.");
+                        return;
+                    }
+                    m_IsTestSetupPerformed = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                EditorApplication.update -= UpdateCallback;
+                IsRunning = false;
+                CallbacksDelegator.instance.RunFailed(ex.Message);
+                throw;
             }
         }
 

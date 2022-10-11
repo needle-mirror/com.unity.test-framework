@@ -1,6 +1,4 @@
-using System;
 using UnityEditor.TestTools.TestRunner.Api;
-using UnityEngine;
 
 namespace UnityEditor.TestTools.TestRunner.UnityTestProtocol
 {
@@ -20,7 +18,7 @@ namespace UnityEditor.TestTools.TestRunner.UnityTestProtocol
 
         public void RunFinished(ITestResultAdaptor testResults)
         {
-            // Apparently does nothing :)
+            m_UtpMessageReporter.ReportRunFinished();
         }
 
         public void TestStarted(ITestAdaptor test)

@@ -365,7 +365,7 @@ namespace UnityEditor.TestTools.TestRunner
                 return;
             }
 
-            Debug.LogError("EditMode test can only yield null");
+            UnityTestExecutionContext.CurrentContext.CurrentResult.RecordException(new InvalidOperationException("EditMode test can only yield null"));
         }
 
         private void CompilationFailureWatch()

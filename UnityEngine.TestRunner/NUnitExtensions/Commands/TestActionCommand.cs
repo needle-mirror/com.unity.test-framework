@@ -13,13 +13,18 @@ namespace UnityEngine.TestTools
         static readonly Dictionary<MethodInfo, List<ITestAction>> m_TestActionsCache = new Dictionary<MethodInfo, List<ITestAction>>();
 
         public TestActionCommand(TestCommand innerCommand)
-            : base(innerCommand, "BeforeTest", "AfterTest", true)
+            : base(innerCommand, "BeforeTest", "AfterTest")
         {
             if (Test.TypeInfo.Type != null)
             {
                 BeforeActions = GetTestActions(m_TestActionsCache, Test.Method.MethodInfo);
                 AfterActions = BeforeActions;
             }
+        }
+
+        protected override bool AllowFrameSkipAfterAction(ITestAction action)
+        {
+            return false;
         }
 
         protected override IEnumerator InvokeBefore(ITestAction action, Test test, UnityTestExecutionContext context)

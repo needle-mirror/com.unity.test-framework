@@ -37,6 +37,7 @@ namespace UnityEditor.TestTools.TestRunner.Api
 
             TypeInfo = test.TypeInfo;
             Method = test.Method;
+            Arguments = test is TestMethod testMethod ? testMethod.parms?.Arguments : (test as TestSuite)?.Arguments;
             Categories = test.GetAllCategoriesFromTest().Distinct().ToArray();
             IsTestAssembly = test is TestAssembly;
             RunState = (RunState)Enum.Parse(typeof(RunState), test.RunState.ToString());
@@ -111,6 +112,7 @@ namespace UnityEditor.TestTools.TestRunner.Api
         public int TestCaseTimeout { get; private set; }
         public ITypeInfo TypeInfo { get; private set; }
         public IMethodInfo Method { get; private set; }
+        public object[] Arguments { get; }
         private string[] m_ChildrenIds;
         public string[] Categories { get; private set; }
         public bool IsTestAssembly { get; private set; }

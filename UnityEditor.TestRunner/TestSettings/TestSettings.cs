@@ -70,6 +70,19 @@ namespace UnityEditor.TestTools.TestRunner
                     if (provisioningUUID != null)
                         PlayerSettings.iOS.iOSManualProvisioningProfileID = provisioningUUID;
                 }),
+            new TestSetting<string>(
+                settings => settings.iOSTargetSDK,
+                () => (PlayerSettings.iOS.sdkVersion).ToString(),
+                targetSDK =>
+                {
+                    if (targetSDK != null)
+                    {
+                        if (targetSDK == "DeviceSDK")
+                            PlayerSettings.iOS.sdkVersion = UnityEditor.iOSSdkVersion.DeviceSDK;
+                        else if (targetSDK == "SimulatorSDK")
+                            PlayerSettings.iOS.sdkVersion = UnityEditor.iOSSdkVersion.SimulatorSDK;
+                    }
+                }),
             new TestSetting<ProvisioningProfileType?>(
                 settings => settings.tvOSManualProvisioningProfileType,
                 () => PlayerSettings.iOS.tvOSManualProvisioningProfileType,
@@ -85,6 +98,19 @@ namespace UnityEditor.TestTools.TestRunner
                 {
                     if (provisioningUUID != null)
                         PlayerSettings.iOS.tvOSManualProvisioningProfileID = provisioningUUID;
+                }),
+            new TestSetting<string>(
+                settings => settings.tvOSTargetSDK,
+                () => (PlayerSettings.tvOS.sdkVersion).ToString(),
+                targetSDK =>
+                {
+                    if (targetSDK != null)
+                    {
+                        if (targetSDK == "DeviceSDK" || targetSDK == "Device")
+                            PlayerSettings.tvOS.sdkVersion = UnityEditor.tvOSSdkVersion.Device;
+                        else if (targetSDK == "SimulatorSDK" || targetSDK == "Simulator")
+                            PlayerSettings.tvOS.sdkVersion = UnityEditor.tvOSSdkVersion.Simulator;
+                    }
                 }),
             new TestSetting<bool>(
                 settings => settings.autoGraphicsAPIs,
@@ -133,8 +159,10 @@ namespace UnityEditor.TestTools.TestRunner
         public string appleDeveloperTeamID { get; set; }
         public ProvisioningProfileType? iOSManualProvisioningProfileType { get; set; }
         public string iOSManualProvisioningProfileID { get; set; }
+        public string iOSTargetSDK { get; set; }
         public ProvisioningProfileType? tvOSManualProvisioningProfileType { get; set; }
         public string tvOSManualProvisioningProfileID { get; set; }
+        public string tvOSTargetSDK { get; set; }
         public string[] playerGraphicsAPIs { get; set; }
         public bool autoGraphicsAPIs { get; set; }
         public bool? androidBuildAppBundle { get; set; }

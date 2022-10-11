@@ -16,6 +16,7 @@
 | `int TestCaseTimeout`     | The test case timeout in milliseconds. Note that this value is only available on TestFinished. |
 | `ITypeInfo TypeInfo`      | The type of test class as an `NUnit` [ITypeInfo](https://github.com/nunit/nunit/blob/master/src/NUnitFramework/framework/Interfaces/ITypeInfo.cs). If the node is not a test class, then the value is `null`. |
 | `IMethodInfo Method`      | The [Nunit IMethodInfo](https://github.com/nunit/nunit/blob/master/src/NUnitFramework/framework/Interfaces/IMethodInfo.cs) of the test method. If the node is not a test method, then the value is `null`. |
+| `object[] Arguments`      | The array of arguments that the test method/fixture will be invoked with. |
 | `string[] Categories`     | An array of the categories applied to the test or fixture. |
 | `bool IsTestAssembly`     | Whether the node represents a test assembly. |
 | `RunState RunState`       | The run state of the test node. Either `NotRunnable`, `Runnable`, `Explicit`, `Skipped`, or `Ignored`. |

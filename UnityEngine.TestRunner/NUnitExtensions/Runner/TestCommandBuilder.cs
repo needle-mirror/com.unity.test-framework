@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
@@ -19,16 +20,21 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
                 return new SkipCommand(test);
             }
 
-            var testReturnsIEnumerator = test.Method.ReturnType.Type == typeof(IEnumerator); 
-            
+            var testReturnsIEnumerator = test.Method.ReturnType.Type == typeof(IEnumerator);
+            var testReturnsTask = test.Method.ReturnType.Type == typeof(Task);
+
             TestCommand command;
-            if (!testReturnsIEnumerator)
+            if (testReturnsTask)
             {
-                command = new UnityTestMethodCommand(test);
+                command = new TaskTestMethodCommand(test);
+            }
+            else if (testReturnsIEnumerator)
+            {
+                command = new EnumerableTestMethodCommand(test);
             }
             else
             {
-                command = new EnumerableTestMethodCommand(test);
+                command = new UnityTestMethodCommand(test);
             }
             
             command = new UnityLogCheckDelegatingCommand(command);
@@ -58,15 +64,22 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
             }
 
             command = new UnityEngine.TestTools.TestActionCommand(command);
-            command = new UnityEngine.TestTools.SetUpTearDownCommand(command);
-            
-            if (!testReturnsIEnumerator)
+
+            if (!testReturnsIEnumerator && !testReturnsTask)
             {
                 command = new ImmediateEnumerableCommand(command);    
             }
             
+            command = new UnityEngine.TestTools.SetUpTearDownCommand(command);
+            
             foreach (var wrapper in test.Method.GetCustomAttributes<IWrapSetUpTearDown>(true))
             {
+                if (command is TestTools.SetUpTearDownCommand && !testReturnsIEnumerator && !testReturnsTask)
+                {
+                    // Ensure that we can use the immediate execute on the setup/teardown
+                    command = new ImmediateEnumerableCommand(command);
+                }
+
                 command = wrapper.Wrap(command);
                 if (command == null)
                 {

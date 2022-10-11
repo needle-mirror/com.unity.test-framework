@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
 using NUnit.Framework.Internal.Commands;
@@ -18,13 +17,11 @@ namespace UnityEngine.TestTools
     {
         private string m_BeforeErrorPrefix;
         private string m_AfterErrorPrefix;
-        private bool m_SkipYieldAfterActions;
-        protected BeforeAfterTestCommandBase(TestCommand innerCommand, string beforeErrorPrefix, string afterErrorPrefix, bool skipYieldAfterActions = false)
+        protected BeforeAfterTestCommandBase(TestCommand innerCommand, string beforeErrorPrefix, string afterErrorPrefix)
             : base(innerCommand)
         {
             m_BeforeErrorPrefix = beforeErrorPrefix;
             m_AfterErrorPrefix = afterErrorPrefix;
-            m_SkipYieldAfterActions = skipYieldAfterActions;
         }
 
         internal Func<long> GetUtcNow = () => new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds();
@@ -32,16 +29,16 @@ namespace UnityEngine.TestTools
         protected T[] BeforeActions = new T[0];
 
         protected T[] AfterActions = new T[0];
-        
-        protected static MethodInfo[] GetActions(IDictionary<Type, List<MethodInfo>> cacheStorage, Type fixtureType, Type attributeType, Type returnType)
+
+        protected static MethodInfo[] GetActions(IDictionary<Type, List<MethodInfo>> cacheStorage, Type fixtureType, Type attributeType, Type[] returnTypes)
         {
             if (cacheStorage.TryGetValue(fixtureType, out var result))
             {
                 return result.ToArray();
             }
-            
-            cacheStorage[fixtureType] = GetMethodsWithAttributeFromFixture(fixtureType,  attributeType, returnType);
-            
+
+            cacheStorage[fixtureType] = GetMethodsWithAttributeFromFixture(fixtureType,  attributeType, returnTypes);
+
             return cacheStorage[fixtureType].ToArray();
         }
         
@@ -66,11 +63,13 @@ namespace UnityEngine.TestTools
             
             return cacheStorage[methodInfo].ToArray();
         }
-    
-        private static List<MethodInfo> GetMethodsWithAttributeFromFixture(Type fixtureType, Type setUpType, Type returnType)
+
+        private static List<MethodInfo> GetMethodsWithAttributeFromFixture(Type fixtureType, Type setUpType, Type[] returnTypes)
         {
             MethodInfo[] methodsWithAttribute = Reflect.GetMethodsWithAttribute(fixtureType, setUpType, true);
-            return methodsWithAttribute.Where(x => x.ReturnType == returnType).ToList();
+            var methodsInfo = new List<MethodInfo>();
+            methodsInfo.AddRange(methodsWithAttribute.Where(method => returnTypes.Any(type => type == method.ReturnType)));
+            return methodsInfo;
         }
 
         protected abstract IEnumerator InvokeBefore(T action, Test test, UnityTestExecutionContext context);
@@ -88,6 +87,11 @@ namespace UnityEngine.TestTools
         }
 
         protected abstract BeforeAfterTestCommandState GetState(UnityTestExecutionContext context);
+
+        protected virtual bool AllowFrameSkipAfterAction(T action)
+        {
+            return true;
+        }
 
         public IEnumerable ExecuteEnumerable(ITestExecutionContext context)
         {
@@ -132,9 +136,13 @@ namespace UnityEngine.TestTools
                                 break;
                             }
 
-                            if (m_SkipYieldAfterActions) // Evaluate the log scope right away for the commands where we do not yield
+                            if (!AllowFrameSkipAfterAction(action)) // Evaluate the log scope right away for the commands where we do not yield
                             {
                                 logScope.EvaluateLogScope(true);
+                            }
+                            if (unityContext.TestMode == TestPlatform.PlayMode && enumerator.Current is IEditModeTestYieldInstruction)
+                            {
+                                throw new Exception($"PlayMode test are not allowed to yield {enumerator.Current.GetType().Name}");
                             }
                         }
                         catch (Exception ex)
@@ -147,7 +155,7 @@ namespace UnityEngine.TestTools
 
                         state.NextBeforeStepPc = ActivePcHelper.GetEnumeratorPC(enumerator);
                         state.StoreTestResult(context.CurrentResult);
-                        if (m_SkipYieldAfterActions)
+                        if (!AllowFrameSkipAfterAction(action))
                         {
                             break;
                         }
@@ -219,9 +227,13 @@ namespace UnityEngine.TestTools
                                 break;
                             }
                             
-                            if (m_SkipYieldAfterActions) // Evaluate the log scope right away for the commands where we do not yield
+                            if (!AllowFrameSkipAfterAction(action)) // Evaluate the log scope right away for the commands where we do not yield
                             {
                                 logScope.EvaluateLogScope(true);
+                            }
+                            if (unityContext.TestMode == TestPlatform.PlayMode && enumerator.Current is IEditModeTestYieldInstruction)
+                            {
+                                throw new Exception($"PlayMode test are not allowed to yield {enumerator.Current.GetType().Name}");
                             }
                         }
                         catch (Exception ex)
@@ -241,7 +253,7 @@ namespace UnityEngine.TestTools
                             yield break;
                         }
                         
-                        if (m_SkipYieldAfterActions)
+                        if (!AllowFrameSkipAfterAction(action))
                         {
                             break;
                         }

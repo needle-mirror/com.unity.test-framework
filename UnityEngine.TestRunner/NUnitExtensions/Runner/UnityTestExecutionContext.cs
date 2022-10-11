@@ -93,6 +93,7 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
             CurrentCulture = other.CurrentCulture;
             CurrentUICulture = other.CurrentUICulture;
             CurrentContext = this;
+            TestMode = other.TestMode;
         }
 
         public TextWriter OutWriter { get; private set; }
@@ -108,6 +109,7 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
         public BeforeAfterTestCommandState SetUpTearDownState { get; set; }
         public BeforeAfterTestCommandState OuterUnityTestActionState { get; set; }
         public EnumerableTestState EnumerableTestState { get; set; }
+        public TestPlatform TestMode { get; set; }
 
         internal int AssertCount
         {

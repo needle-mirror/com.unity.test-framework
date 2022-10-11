@@ -1,4 +1,13 @@
 # Changelog
+## [1.3.0] - 2022-10-11
+- Fixed Xcode not closing after building iOS/tvOS project via batchmode `-runTests` command (ANT-679).
+- Added TestSettings file options for setting `Target SDK` for iOS/tvOS (ANT-132).
+- Async test support with documentation and support for SetUp and TearDown.
+- Compute and share OneTimeSetup and OneTimeTearDown durations, these will be visible in the XML result under outputs (DSTR-597).
+- Made test method/fixture arguments available in the ITestAdaptor as the `Arguments` property (DSTR-592).
+- Added Learn Unity Test Framework section of documentation and related project files as importable package samples (DOCES-558).
+- Fix NullReferenceException when yielding EditMode intructions in PlayMode tests (DSTR-622).
+
 ## [1.1.33] - 2022-07-12
 - Fixed an issue where using Assert.Expect with the same string multiple times can lead to incorrect errors in some cases (DSTR-442).
 - Improved the logging when using multiple Assert.Expect that the logs appear in another order than expected (DSTR-442).

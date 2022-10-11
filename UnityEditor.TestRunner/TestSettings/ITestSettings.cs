@@ -14,8 +14,10 @@ namespace UnityEditor.TestTools.TestRunner
         string appleDeveloperTeamID { get; set; }
         ProvisioningProfileType? iOSManualProvisioningProfileType { get; set; }
         string iOSManualProvisioningProfileID { get; set; }
+        string iOSTargetSDK { get; set; }
         ProvisioningProfileType? tvOSManualProvisioningProfileType { get; set; }
         string tvOSManualProvisioningProfileID { get; set; }
+        string tvOSTargetSDK { get; set; }
         string[] playerGraphicsAPIs { get; set; }
         bool autoGraphicsAPIs { get; set; }
         bool? androidBuildAppBundle { get; set; }

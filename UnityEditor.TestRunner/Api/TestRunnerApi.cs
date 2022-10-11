@@ -4,6 +4,7 @@ using System.Threading;
 using UnityEditor.TestTools.TestRunner.CommandLineTest;
 using UnityEditor.TestTools.TestRunner.TestRun;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.TestRunner.TestLaunchers;
 using UnityEngine.TestTools;
 using UnityEngine.TestTools.NUnitExtensions;
@@ -24,19 +25,25 @@ namespace UnityEditor.TestTools.TestRunner.Api
     /// </summary>
     public class TestRunnerApi : ScriptableObject, ITestRunnerApi
     {
-        internal ICallbacksHolder callbacksHolder;
-
-        private ICallbacksHolder m_CallbacksHolder
+        internal static ICallbacksHolder callbacksHolder;
+        private static ICallbacksHolder CallbacksHolder
         {
             get
             {
                 if (callbacksHolder == null)
                 {
-                    return CallbacksHolder.instance;
+                    callbacksHolder = Api.CallbacksHolder.instance;
                 }
 
                 return callbacksHolder;
             }
+        }
+        
+        internal static ITestJobDataHolder testJobDataHolder;
+
+        private static ITestJobDataHolder m_testJobDataHolder
+        {
+            get { return testJobDataHolder ?? (testJobDataHolder = TestJobDataHolder.instance); }
         }
 
         internal Func<ExecutionSettings,string> ScheduleJob = (executionSettings) =>
@@ -85,13 +92,30 @@ namespace UnityEditor.TestTools.TestRunner.Api
         /// </param>
         public void RegisterCallbacks<T>(T testCallbacks, int priority = 0) where T : ICallbacks
         {
+            RegisterTestCallback(testCallbacks);
+        }
+        
+        /// <summary>
+        /// Sets up a given instance of <see cref="ICallbacks"/> to be invoked on test runs.
+        /// </summary>
+        /// <typeparam name="T">
+        /// Generic representing a type of callback.
+        /// </typeparam>
+        /// <param name="testCallbacks">The test callbacks to be invoked</param>
+        /// <param name="priority">
+        /// Sets the order in which the callbacks are invoked, starting with the highest value first.
+        /// </param>
+        public static void RegisterTestCallback<T>(T testCallbacks, int priority = 0) where T : ICallbacks
+        {
             if (testCallbacks == null)
             {
                 throw new ArgumentNullException(nameof(testCallbacks));
             }
 
-            m_CallbacksHolder.Add(testCallbacks, priority);
+            CallbacksHolder.Add(testCallbacks, priority);
         }
+        
+
         /// <summary>
         /// Unregister an instance of <see cref="ICallbacks"/> to no longer receive callbacks from test runs.
         /// </summary>
@@ -101,12 +125,24 @@ namespace UnityEditor.TestTools.TestRunner.Api
         /// <param name="testCallbacks">The test callbacks to unregister.</param>
         public void UnregisterCallbacks<T>(T testCallbacks) where T : ICallbacks
         {
+            UnregisterTestCallback(testCallbacks);
+        }
+
+        /// <summary>
+        /// Unregister an instance of <see cref="ICallbacks"/> to no longer receive callbacks from test runs.
+        /// </summary>
+        /// <typeparam name="T">
+        /// Generic representing a type of callback.
+        /// </typeparam>
+        /// <param name="testCallbacks">The test callbacks to unregister.</param>
+        public static void UnregisterTestCallback<T>(T testCallbacks) where T : ICallbacks
+        {
             if (testCallbacks == null)
             {
                 throw new ArgumentNullException(nameof(testCallbacks));
             }
 
-            m_CallbacksHolder.Remove(testCallbacks);
+            CallbacksHolder.Remove(testCallbacks);
         }
 
         internal void RetrieveTestList(ExecutionSettings executionSettings, Action<ITestAdaptor> callback)
@@ -154,5 +190,9 @@ namespace UnityEditor.TestTools.TestRunner.Api
         {
             return (((testMode & TestMode.EditMode) == TestMode.EditMode) ? TestPlatform.EditMode : 0) | (((testMode & TestMode.PlayMode) == TestMode.PlayMode) ? TestPlatform.PlayMode : 0);
         }
+        
+        internal class RunProgressChangedEvent : UnityEvent<TestRunProgress> {}
+        internal static RunProgressChangedEvent runProgressChanged = new RunProgressChangedEvent();
+
     }
 }

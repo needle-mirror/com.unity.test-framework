@@ -9,5 +9,6 @@ namespace UnityEditor.TestTools.TestRunner.UnityTestProtocol
         void ReportTestFinished(ITestResultAdaptor result);
         void ReportTestRunStarted(ITestAdaptor testsToRun);
         void ReportTestStarted(ITestAdaptor test);
+        void ReportRunFinished();
     }
 }

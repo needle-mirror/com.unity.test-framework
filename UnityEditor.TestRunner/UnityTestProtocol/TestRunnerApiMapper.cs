@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml;
+using UnityEditor.TestRunner.UnityTestProtocol;
 using UnityEditor.TestTools.TestRunner.Api;
 using UnityEditor.TestTools.TestRunner.GUI;
 
@@ -61,6 +62,14 @@ namespace UnityEditor.TestTools.TestRunner.UnityTestProtocol
                 stackTrace = result.StackTrace,
                 fileName = filePathString,
                 lineNumber = lineNumber
+            };
+        }
+
+        public TestSummaryMessage TestRunDataHolderToTestSummaryMessage(ITestRunDataHolder testRunDataHolder)
+        {
+            return new TestSummaryMessage
+            {
+                TestRunDataList = testRunDataHolder.TestRunDataList.ToArray()
             };
         }
 

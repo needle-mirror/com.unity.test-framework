@@ -14,7 +14,6 @@ namespace UnityEditor.TestTools.TestRunner
 {
     internal class EditModeLauncher : TestLauncherBase
     {
-        public static bool IsRunning;
         internal readonly EditModeRunner m_EditModeRunner;
         public bool launchedOutsideApi;
 
@@ -53,29 +52,22 @@ namespace UnityEditor.TestTools.TestRunner
                 return;
             }
 
-            IsRunning = true;
-            
-            SceneSetup[] previousSceneSetup;
-            if (!OpenNewScene(out previousSceneSetup))
+            if (!OpenNewScene())
                 return;
 
             var callback = AddEventHandler<EditModeRunnerCallback>();
-            callback.previousSceneSetup = previousSceneSetup;
             callback.runner = m_EditModeRunner;
             AddEventHandler<CallbacksDelegatorListener>();
 
             m_EditModeRunner.Run();
-            AddEventHandler<BackgroundListener>();
             AddEventHandler<TestRunCallbackListener>();
             
             if (m_EditModeRunner.RunningSynchronously)
                 m_EditModeRunner.CompleteSynchronously();
         }
 
-        private static bool OpenNewScene(out SceneSetup[] previousSceneSetup)
+        private static bool OpenNewScene()
         {
-            previousSceneSetup = null;
-
             var sceneCount = SceneManager.sceneCount;
 
             var scene = SceneManager.GetSceneAt(0);
@@ -90,8 +82,6 @@ namespace UnityEditor.TestTools.TestRunner
 
             // In case the user chose not to save the dirty scenes we reload them
             ReloadUnsavedDirtyScene();
-
-            previousSceneSetup = EditorSceneManager.GetSceneManagerSetup();
 
             scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Additive);
             SceneManager.SetActiveScene(scene);
@@ -130,26 +120,6 @@ namespace UnityEditor.TestTools.TestRunner
             foreach (Scene scene in scenesToClose)
             {
                 EditorSceneManager.CloseScene(scene, true);
-            }
-        }
-
-        public class BackgroundListener : ScriptableObject, ITestRunnerListener
-        {
-            public void RunStarted(ITest testsToRun)
-            {
-            }
-
-            public void RunFinished(ITestResult testResults)
-            {
-                IsRunning = false;
-            }
-
-            public void TestStarted(ITest test)
-            {
-            }
-
-            public void TestFinished(ITestResult result)
-            {
             }
         }
 

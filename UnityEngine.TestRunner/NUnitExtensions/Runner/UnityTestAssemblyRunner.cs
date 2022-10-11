@@ -70,6 +70,7 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
         public ITest Load(Assembly[] assemblies, TestPlatform testPlatform, IDictionary<string, object> settings)
         {
             Settings = settings;
+            Context.TestMode = testPlatform;
 
             if (settings.ContainsKey(FrameworkPackageSettings.RandomSeed))
                 Randomizer.InitialSeed = (int)settings[FrameworkPackageSettings.RandomSeed];

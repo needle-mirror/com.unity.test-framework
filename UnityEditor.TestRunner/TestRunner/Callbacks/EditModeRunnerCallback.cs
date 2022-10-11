@@ -13,7 +13,6 @@ namespace UnityEditor.TestTools.TestRunner
     internal class EditModeRunnerCallback : ScriptableObject, ITestRunnerListener
     {
         private EditModeLauncherContextSettings m_Settings;
-        public SceneSetup[] previousSceneSetup;
         public EditModeRunner runner;
 
         private bool m_Canceled;
@@ -102,29 +101,6 @@ namespace UnityEditor.TestTools.TestRunner
 
         public void RunFinished(ITestResult result)
         {
-            if (previousSceneSetup != null && previousSceneSetup.Length > 0)
-            {
-                try
-                {
-                    EditorSceneManager.RestoreSceneManagerSetup(previousSceneSetup);
-                }
-                catch (ArgumentException e)
-                {
-                    Debug.LogWarning(e.Message);
-                }
-            }
-            else
-            {
-                foreach (var obj in FindObjectsOfType<GameObject>())
-                {
-                    if (obj != null && obj.transform.parent != null && (obj.transform.parent.hideFlags & HideFlags.DontSaveInEditor) == HideFlags.DontSaveInEditor && obj.transform.parent.gameObject != null)
-                    {
-                        DestroyImmediate(obj.transform.parent.gameObject); 
-                    }
-                }
-
-                EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
-            }
             CleanUp();
         }
 
