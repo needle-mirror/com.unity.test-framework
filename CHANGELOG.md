@@ -1,4 +1,7 @@
 # Changelog
+## [1.3.1] - 2022-10-18
+- Fixed an issue where TestFinished sometimes causes failures when receiving fixture test results from a player (internal). 
+
 ## [1.3.0] - 2022-10-11
 - Fixed Xcode not closing after building iOS/tvOS project via batchmode `-runTests` command (ANT-679).
 - Added TestSettings file options for setting `Target SDK` for iOS/tvOS (ANT-132).

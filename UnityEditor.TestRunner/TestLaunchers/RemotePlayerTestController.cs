@@ -14,9 +14,6 @@ namespace UnityEditor.TestRunner.TestLaunchers
     internal class RemoteTestRunController : ScriptableSingleton<RemoteTestRunController>
     {
         internal const int k_HeartbeatTimeout = 60 * 10;
-        
-        [SerializeField]
-        private RemoteTestResultReciever m_RemoteTestResultReciever;
 
         [SerializeField]
         private PlatformSpecificSetup m_PlatformSpecificSetup;
@@ -29,6 +26,8 @@ namespace UnityEditor.TestRunner.TestLaunchers
         
         enum MessageType
         {
+            RunStarted,
+            RunFinished,
             TestStarted,
             TestFinished,
         }
@@ -38,6 +37,7 @@ namespace UnityEditor.TestRunner.TestLaunchers
         {
             public byte[] Bytes;
             public MessageType Type;
+            public int PlayerId;
         }
 
         [SerializeField]
@@ -53,7 +53,6 @@ namespace UnityEditor.TestRunner.TestLaunchers
             m_HearbeatTimeOut = heartbeatTimeout;
             m_PlatformSpecificSetup = new PlatformSpecificSetup(buildTarget);
             m_PlatformSpecificSetup.Setup();
-            m_RemoteTestResultReciever = new RemoteTestResultReciever();
             EditorConnection.instance.Initialize();
             if (!m_RegisteredConnectionCallbacks)
             {
@@ -66,8 +65,6 @@ namespace UnityEditor.TestRunner.TestLaunchers
         {
             m_RegisteredConnectionCallbacks = true;
             //This is needed because RemoteTestResultReceiver is not a ScriptableObject
-            EditorConnection.instance.Register(PlayerConnectionMessageIds.runStartedMessageId, RunStarted);
-            EditorConnection.instance.Register(PlayerConnectionMessageIds.runFinishedMessageId, RunFinished);
             EditorConnection.instance.Register(PlayerConnectionMessageIds.playerAliveHeartbeat, PlayerAliveHeartbeat);
 
             // When a message comes in, we should not immediately process it but instead enqueue it for processing later
@@ -76,6 +73,8 @@ namespace UnityEditor.TestRunner.TestLaunchers
             // minutes to react to all messages we receive because we only do 1ms of processing, then render all of the
             // editor etc. -- Instead, we use that 1ms time-window to enqueue messages and then react to them later
             // during the frame. This reduces the waiting time from minutes to seconds.
+            EditorConnection.instance.Register(PlayerConnectionMessageIds.runStartedMessageId, args => EnqueueMessage(args, MessageType.RunStarted));
+            EditorConnection.instance.Register(PlayerConnectionMessageIds.runFinishedMessageId, args => EnqueueMessage(args, MessageType.RunFinished));
             EditorConnection.instance.Register(PlayerConnectionMessageIds.testStartedMessageId, args => EnqueueMessage(args, MessageType.TestStarted));
             EditorConnection.instance.Register(PlayerConnectionMessageIds.testFinishedMessageId, args => EnqueueMessage(args, MessageType.TestFinished));
         }
@@ -98,6 +97,20 @@ namespace UnityEditor.TestRunner.TestLaunchers
                         CallbacksDelegator.instance.TestStartedRemotely(msg.Bytes);
                         break;
                     }
+                    case MessageType.RunStarted:
+                        m_TimeoutCallback?.Reset();
+                        CallbacksDelegator.instance.RunStartedRemotely(msg.Bytes);
+                        break;
+                    case MessageType.RunFinished:
+                        m_TimeoutCallback?.Clear();
+                        EditorConnection.instance.Send(PlayerConnectionMessageIds.quitPlayerMessageId, null, msg.PlayerId);
+                        EditorConnection.instance.DisconnectAll();
+                        m_PlatformSpecificSetup.CleanUp();
+
+                        CallbacksDelegator.instance.RunFinishedRemotely(msg.Bytes);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
             }
             m_IncomingMessages.Clear();
@@ -114,24 +127,9 @@ namespace UnityEditor.TestRunner.TestLaunchers
             m_IncomingMessages.Add(new Message
             {
                 Bytes = args.data,
-                Type = type
+                Type = type,
+                PlayerId = args.playerId
             });
-        }
-
-        private void RunStarted(MessageEventArgs messageEventArgs)
-        {
-            m_TimeoutCallback?.Reset();
-            m_RemoteTestResultReciever.RunStarted(messageEventArgs);
-            CallbacksDelegator.instance.RunStartedRemotely(messageEventArgs.data);
-        }
-
-        private void RunFinished(MessageEventArgs messageEventArgs)
-        {
-            m_TimeoutCallback?.Clear();
-            m_RemoteTestResultReciever.RunFinished(messageEventArgs);
-            m_PlatformSpecificSetup.CleanUp();
-
-            CallbacksDelegator.instance.RunFinishedRemotely(messageEventArgs.data);
         }
         
         private void PlayerAliveHeartbeat(MessageEventArgs messageEventArgs)

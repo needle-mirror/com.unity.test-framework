@@ -109,7 +109,11 @@ namespace UnityEditor.TestTools.TestRunner.UnityTestProtocol
 
         private string[] GetAllTestsInAFixture(ITestAdaptor testAdaptor, ICollection<string> allChildren)
         {
-            if (!testAdaptor.HasChildren) return allChildren.ToArray();
+            if (!testAdaptor.HasChildren || testAdaptor.Children == null)
+            {
+                return allChildren.ToArray();
+            }
+
             foreach (var child in testAdaptor.Children)
             {
                 allChildren.Add(child.FullName);
