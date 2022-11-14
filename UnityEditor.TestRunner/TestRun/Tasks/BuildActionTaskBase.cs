@@ -59,18 +59,7 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
                     using (var logScope = logScopeProvider())
                     {
                         Action(targetClass);
-
-                        if (logScope.AnyFailingLogs())
-                        {
-                            var failingLog = logScope.FailingLogs.First();
-                            throw new UnhandledLogMessageException(failingLog);
-                        }
-
-                        if (logScope.ExpectedLogs.Any())
-                        {
-                            var expectedLogs = logScope.ExpectedLogs.First();
-                            throw new UnexpectedLogMessageException(expectedLogs);
-                        }
+                        logScope.EvaluateLogScope(true);
                     }
                 }
                 catch (Exception ex)

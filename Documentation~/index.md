@@ -48,7 +48,7 @@ This version of the Unity Test Framework is compatible with the following versio
 
 Unity Test Framework version 2.0.1 includes the following known limitations:
 
-* The `UnityTest` attribute does not support WebGL and WSA platforms.
+* The `UnityTest` attribute does not support WSA platform.
 * The `UnityTest` attribute does not support [Parameterized tests](https://docs.nunit.org/articles/nunit/technical-notes/usage/Parameterized-Tests.html) (except for `ValueSource`).
 * The `UnityTest` attribute does not support the `NUnit` [Repeat](https://docs.nunit.org/articles/nunit/writing-tests/attributes/repeat.html) attribute.
 * Nested test fixture cannot run from the Editor UI. 

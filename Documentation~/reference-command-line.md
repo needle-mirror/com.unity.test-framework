@@ -17,6 +17,7 @@ A semicolon-separated list of test categories to include in the run. A semi-colo
 ### testFilter
 
 A semicolon-separated list of test names to run, or a regular expression pattern to match tests by their full name. A semi-colon separated list should be formatted as a string enclosed in quotation marks, e.g. `testFilter "Low;Medium"`. This argument supports negation using '!'. If using the test filter '!MyNamespace.Something.MyTest', then all tests except that test will be run.
+It is also possible to run a specific variation of a parameterized test like so: `"ClassName\.MethodName\(Param1,Param2\)"`
 
 ### testPlatform
 
@@ -113,6 +114,20 @@ Set to one of the following values:
 * 1 - Development 
 * 2 - Distribution iOSManualProvisioningProfileID
 
+#### iOSTargetSDK
+
+Target SDK for iOS. Set to one of the following values, which should be given as a string literal enclosed in quotes:
+
+* DeviceSDK
+* SimulatorSDK
+
+#### tvOSTargetSDK
+
+Target SDK for tvOS. Set to one of the following values, which should be given as a string literal enclosed in quotes:
+
+* DeviceSDK
+* SimulatorSDK
+
 #### scriptingBackend
 
  Set to one of the following values, which should be given as a string literal enclosed in quotes:
@@ -128,3 +143,17 @@ Set to one of the following values:
 ### androidAppBundle
 
 A boolean setting that allows to build an Android App Bundle (AAB) instead of APK for tests.
+
+### orderedTestListFile
+Path to a *.txt* file which contains a list of full test names you want to run in the specified order. The tests should be seperated by new lines and if they have parameters, these should be specified as well. A list of the file could look like this:
+```
+Unity.Framework.Tests.OrderedTests.NoParameters
+Unity.Framework.Tests.OrderedTests.ParametrizedTestA(3,2)
+Unity.Framework.Tests.OrderedTests.ParametrizedTestB(\"Assets/file.fbx\")
+Unity.Framework.Tests.OrderedTests.ParametrizedTestC(System.String[],\"foo.fbx\")
+Unity.Framework.Tests.OrderedTests.ParametrizedTestD(1.0f)
+Unity.Framework.Tests.OrderedTests.ParametrizedTestE(null)
+Unity.Framework.Tests.OrderedTests.ParametrizedTestF(False, 1)
+Unity.Framework.Tests.OrderedTests.ParametrizedTestG(float.NaN)
+Unity.Framework.Tests.OrderedTests.ParametrizedTestH(SomeEnum)
+```

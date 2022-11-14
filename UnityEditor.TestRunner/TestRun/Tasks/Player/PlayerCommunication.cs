@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Text;
 using UnityEditor.Networking.PlayerConnection;
 using UnityEngine;
@@ -17,6 +18,25 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks.Player
 
         [SerializeField]
         private int m_ActivePlayerId;
+
+        enum MessageType
+        {
+            TestStarted,
+            TestFinished,
+        }
+
+        [Serializable]
+        struct Message
+        {
+            public byte[] Bytes;
+            public MessageType Type;
+        }
+
+        [SerializeField]
+        private List<Message> m_IncomingMessages = new List<Message>();
+
+        [SerializeField]
+        private bool m_RegisteredMessageCallback;
 
         public TestStartedEvent OnTestStarted { get; } = new TestStartedEvent();
         public TestFinishedEvent OnTestFinished { get; } = new TestFinishedEvent();
@@ -38,23 +58,55 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks.Player
         private void DelegateEditorConnectionEvents()
         {
             m_RegisteredConnectionCallbacks = true;
-            EditorConnection.instance.Register(PlayerConnectionMessageIds.testStartedMessageId, TestStarted);
-            EditorConnection.instance.Register(PlayerConnectionMessageIds.testFinishedMessageId, TestFinished);
+            // When a message comes in, we should not immediately process it but instead enqueue it for processing later
+            // in the frame. The problem this solves is that Unity only reserves about 1ms worth of time every frame to
+            // process message from the player connection. When some tests run in a player, it can take the editor
+            // minutes to react to all messages we receive because we only do 1ms of processing, then render all of the
+            // editor etc. -- Instead, we use that 1ms time-window to enqueue messages and then react to them later
+            // during the frame. This reduces the waiting time from minutes to seconds.
+            EditorConnection.instance.Register(PlayerConnectionMessageIds.testStartedMessageId, args => EnqueueMessage(args, MessageType.TestStarted));
+            EditorConnection.instance.Register(PlayerConnectionMessageIds.testFinishedMessageId, args => EnqueueMessage(args, MessageType.TestFinished));
             EditorConnection.instance.Register(PlayerConnectionMessageIds.playerAliveHeartbeat, PlayerAliveHeartbeat);
         }
 
-        private void TestStarted(MessageEventArgs args)
+        private void FlushMessageQueue()
         {
-            m_ActivePlayerId = args.playerId;
-            var fullName = Encoding.UTF8.GetString(args.data);
-            OnTestStarted.Invoke(fullName);
+            EditorApplication.update -= FlushMessageQueue;
+            m_RegisteredMessageCallback = false;
+            foreach (var msg in m_IncomingMessages)
+            {
+                switch (msg.Type)
+                {
+                    case MessageType.TestFinished:
+                    {
+                        var result = JsonUtility.FromJson<TestResultSerializer>(Encoding.UTF8.GetString(msg.Bytes));
+                        OnTestFinished.Invoke(result);
+                        break;
+                    }
+                    case MessageType.TestStarted:
+                    {
+                        var fullName = Encoding.UTF8.GetString(msg.Bytes);
+                        OnTestStarted.Invoke(fullName);
+                        break;
+                    }
+                }
+            }
+            m_IncomingMessages.Clear();
         }
 
-        private void TestFinished(MessageEventArgs args)
+        private void EnqueueMessage(MessageEventArgs args, MessageType type)
         {
             m_ActivePlayerId = args.playerId;
-            var result = JsonUtility.FromJson<TestResultSerializer>(Encoding.UTF8.GetString(args.data));
-            OnTestFinished.Invoke(result);
+            if (!m_RegisteredMessageCallback)
+            {
+                EditorApplication.update += FlushMessageQueue;
+                m_RegisteredMessageCallback = true;
+            }
+            m_IncomingMessages.Add(new Message
+            {
+                Bytes = args.data,
+                Type = type
+            });
         }
 
         private void PlayerAliveHeartbeat(MessageEventArgs args)

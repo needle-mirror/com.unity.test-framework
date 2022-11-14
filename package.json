@@ -1,7 +1,7 @@
 {
   "name": "com.unity.test-framework",
   "displayName": "Test Framework",
-  "version": "2.0.1-exp.1",
+  "version": "2.0.1-exp.2",
   "unity": "2019.4",
   "unityRelease": "0a10",
   "description": "Test framework for running Edit mode and Play mode tests in Unity.",
@@ -13,20 +13,17 @@
   "repository": {
     "url": "https://github.com/Unity-Technologies/com.unity.test-framework.git",
     "type": "git",
-    "revision": "ff525a405548dba7b9a1a66fa342b893a11eff4a"
+    "revision": "ade18f90f3e1e61e28c7054ef70bd688ccbf7385"
   },
   "dependencies": {
-    "com.unity.ext.nunit": "2.0.2",
+    "com.unity.ext.nunit": "2.0.3",
     "com.unity.modules.imgui": "1.0.0",
     "com.unity.modules.jsonserialize": "1.0.0"
   },
-  "upm": {
-    "changelog": "- Reverted \"All tests are now run inside a InitTestScene, regardless of filter\".\r\n- Modify the RequiresPlayMode feature in order to be opt-in.\r\n- Refactored documentation for 2.0.\r\n- Fixed an issue where Oculus Quest headsets might timeout before the test run starts (DSTR-404).\r\n- Fixed an issue where Explicit tests were included in the run if the assembly or namespace was selected (DSTR-405).\r\n- Added stack traces for exceptions thrown in other threads while a test is running (DSTR-38).\r\n- Fixed \"Open source code\" on tests when located inside a package.\r\n- Added editor analytics.\r\n- Performance Improvements:\r\n  - greatly reduced the time taken to clear test results and build up the test filters\r\n  - optimized the workflow of running a subset of the tests from the test runner window by optimizing the filtering code"
-  },
   "relatedPackages": {
-    "com.unity.test-framework.tests": "2.0.1-exp.1"
+    "com.unity.test-framework.tests": "2.0.1-exp.2"
   },
   "upmCi": {
-    "footprint": "076f57aa70bac37436a17e684019f98ba7aa16cc"
+    "footprint": "1122b33e5babf78ee65a979f8b0cb5986126f3dd"
   }
 }

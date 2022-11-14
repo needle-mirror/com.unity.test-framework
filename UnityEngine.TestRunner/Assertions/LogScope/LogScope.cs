@@ -175,6 +175,27 @@ namespace UnityEngine.TestTools.Logging
             return FailingLogs.Any();
         }
 
+        public void EvaluateLogScope(bool endOfScopeCheck)
+        {
+            ProcessExpectedLogs();
+            if (FailingLogs.Any())
+            {
+                var failureInWrongOrder = FailingLogs.FirstOrDefault(log => ExpectedLogs.Any(expected => expected.Matches(log)));
+                if (failureInWrongOrder != null)
+                {
+                    var nextExpected = ExpectedLogs.Peek();
+                    throw new OutOfOrderExpectedLogMessageException(failureInWrongOrder, nextExpected);
+                }
+
+                var failingLog = FailingLogs.First();
+                throw new UnhandledLogMessageException(failingLog);
+            }
+            if (endOfScopeCheck && ExpectedLogs.Any())
+            {
+                throw new UnexpectedLogMessageException(ExpectedLogs.Peek());
+            }
+        }
+
         public void ProcessExpectedLogs()
         {
             lock (m_Lock)
@@ -187,6 +208,10 @@ namespace UnityEngine.TestTools.Logging
                 {
                     if (!ExpectedLogs.Any())
                         break;
+                    if (logEvent.IsHandled)
+                    {
+                        continue;
+                    }
                     if (expectedLog == null && ExpectedLogs.Any())
                         expectedLog = ExpectedLogs.Peek();
 

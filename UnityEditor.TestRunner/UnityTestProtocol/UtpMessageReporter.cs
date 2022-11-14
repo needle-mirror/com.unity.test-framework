@@ -10,9 +10,9 @@ namespace UnityEditor.TestTools.TestRunner.UnityTestProtocol
         public ITestRunnerApiMapper TestRunnerApiMapper;
         public IUtpLogger Logger;
 
-        public UtpMessageReporter(IUtpLogger utpLogger)
+        public UtpMessageReporter(IUtpLogger utpLogger, string projectRepoPath)
         {
-            TestRunnerApiMapper = new TestRunnerApiMapper();
+            TestRunnerApiMapper = new TestRunnerApiMapper(projectRepoPath);
             Logger = utpLogger;
         }
 

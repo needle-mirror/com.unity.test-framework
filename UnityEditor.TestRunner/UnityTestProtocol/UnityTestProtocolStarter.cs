@@ -1,9 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
-using UnityEditor.Compilation;
 using UnityEditor.TestTools.TestRunner.Api;
 using UnityEngine;
-using UnityEngine.TestTools;
 
 namespace UnityEditor.TestTools.TestRunner.UnityTestProtocol
 {
@@ -15,9 +14,21 @@ namespace UnityEditor.TestTools.TestRunner.UnityTestProtocol
             var commandLineArgs = Environment.GetCommandLineArgs();
             if (commandLineArgs.Contains("-automated") && commandLineArgs.Contains("-runTests")) // wanna have it only for utr run
             {
-                var listener = ScriptableObject.CreateInstance<UnityTestProtocolListener>();
+                var listener = new UnityTestProtocolListener(GetRepositoryPath(commandLineArgs));
                 TestRunnerApi.RegisterTestCallback(listener);
             }
+        }
+
+        private static string GetRepositoryPath(IReadOnlyList<string> commandLineArgs)
+        {
+            for (var i = 0; i < commandLineArgs.Count; i++)
+            {
+                if (commandLineArgs[i].Equals("-projectRepositoryPath"))
+                {
+                    return commandLineArgs[i + 1];
+                }
+            }
+            return string.Empty;
         }
     }
 }

@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.0.1] - 2022-01-05
+## [2.0.1] - 2022-09-27
 - Reverted "All tests are now run inside a InitTestScene, regardless of filter".
 - Modify the RequiresPlayMode feature in order to be opt-in.
 - Refactored documentation for 2.0.
@@ -12,6 +12,10 @@
 - Performance Improvements:
   - greatly reduced the time taken to clear test results and build up the test filters
   - optimized the workflow of running a subset of the tests from the test runner window by optimizing the filtering code
+- Remove XDK Xbox One platform after Unity 2020.3
+- Fixed inheriteance of UnityPlatformAttribute which was not working (ESTT-70).
+- Fixed the log of exluded platforms which was not displaying the right information.
+- Added TestSettings file options for setting `Target SDK` for iOS/tvOS (ANT-132).
 
 ## [2.0.0] - 2021-07-21
 - API improvements:

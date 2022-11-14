@@ -20,8 +20,10 @@ namespace UnityEditor.TestTools.TestRunner
             new SettingsMap<string>("appleDeveloperTeamID", (settings, value) => settings.appleDeveloperTeamID = value),
             new SettingsMap<ProvisioningProfileType>("iOSManualProvisioningProfileType", (settings, value) => settings.iOSManualProvisioningProfileType = value),
             new SettingsMap<string>("iOSManualProvisioningProfileID", (settings, value) => settings.iOSManualProvisioningProfileID = value),
+            new SettingsMap<string>("iOSTargetSDK", (settings, value) => settings.iOSTargetSDK = value),
             new SettingsMap<ProvisioningProfileType>("tvOSManualProvisioningProfileType", (settings, value) => settings.tvOSManualProvisioningProfileType = value),
             new SettingsMap<string>("tvOSManualProvisioningProfileID", (settings, value) => settings.tvOSManualProvisioningProfileID = value),
+            new SettingsMap<string>("tvOSTargetSDK", (settings, value) => settings.tvOSTargetSDK = value),
             new SettingsMap<string>("playerGraphicsAPI", (settings, value) =>
             {
                 settings.autoGraphicsAPIs = false;

@@ -11,8 +11,12 @@ namespace UnityEditor.TestTools.TestRunner
         private ApplePlatformSetup m_AppleiOSPlatformSetup = new ApplePlatformSetup(BuildTarget.iOS);
         [SerializeField]
         private ApplePlatformSetup m_AppleTvOSPlatformSetup = new ApplePlatformSetup(BuildTarget.tvOS);
+#if !UNITY_2021_1_OR_NEWER
+        // The XboxOne platform is being removed, and is not shipped as of Unity 2021.1.
+        // When 2020.3 LTS stops being released support for the XboxOne platform can be removed, it was replaced by GameCoreXboxOne from 2019.4 onwards.
         [SerializeField]
         private XboxOnePlatformSetup m_XboxOnePlatformSetup = new XboxOnePlatformSetup();
+#endif
         [SerializeField]
         private AndroidPlatformSetup m_AndroidPlatformSetup = new AndroidPlatformSetup();
         [SerializeField]
@@ -108,7 +112,11 @@ namespace UnityEditor.TestTools.TestRunner
             {
                 {BuildTarget.iOS, m_AppleiOSPlatformSetup},
                 {BuildTarget.tvOS, m_AppleTvOSPlatformSetup},
+#if !UNITY_2021_1_OR_NEWER
+                // The XboxOne platform is being removed, and is not shipped as of Unity 2021.1.
+                // When 2020.3 LTS stops being released support for the XboxOne platform can be removed, it was replaced by GameCoreXboxOne from 2019.4 onwards.
                 {BuildTarget.XboxOne, m_XboxOnePlatformSetup},
+#endif
                 {BuildTarget.Android, m_AndroidPlatformSetup},
                 {BuildTarget.WSAPlayer, m_UwpPlatformSetup},
                 {BuildTarget.Lumin, m_LuminPlatformSetup},

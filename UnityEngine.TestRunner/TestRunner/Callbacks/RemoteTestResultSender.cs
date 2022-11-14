@@ -78,11 +78,15 @@ namespace UnityEngine.TestTools.TestRunner.Callbacks
             //Some platforms don't quit, so we need to disconnect to make sure they will not connect to another editor instance automatically.
             PlayerConnection.instance.DisconnectAll();
 
+            // The XboxOne platform is being removed, and is not shipped as of Unity 2021.1.
+            // When 2020.3 LTS stops being released support for the XboxOne platform can be removed, it was replaced by GameCoreXboxOne from 2019.4 onwards.
+#if !UNITY_2021_1_OR_NEWER
             //XBOX has an error when quitting
             if (Application.platform == RuntimePlatform.XboxOne)
             {
                 return;
             }
+#endif
             Application.Quit();
         }
 

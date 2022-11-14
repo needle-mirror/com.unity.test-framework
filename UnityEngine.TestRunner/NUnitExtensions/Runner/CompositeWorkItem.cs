@@ -180,6 +180,7 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
             try
             {
                 _setupCommand.Execute(Context);
+                logScope.EvaluateLogScope(true);
             }
             catch (Exception ex)
             {
@@ -189,10 +190,6 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
                 Result.RecordExceptionWithHint(ex, FailureSite.SetUp);
             }
 
-            if (logScope.AnyFailingLogs())
-            {
-                Result.RecordExceptionWithHint(new UnhandledLogMessageException(logScope.FailingLogs.First()));
-            }
             logScope.Dispose();
         }
 
@@ -290,7 +287,7 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
         private void SkipFixture(ResultState resultState, string message, string stackTrace)
         {
             Result.SetResult(resultState.WithSite(FailureSite.SetUp), message, StackFilter.Filter(stackTrace));
-            SkipChildren(_suite, resultState.WithSite(FailureSite.Parent), "OneTimeSetUp: " + message);
+            SkipChildren(_suite, resultState.WithSite(FailureSite.Parent), message);
         }
 
         private void SkipChildren(TestSuite suite, ResultState resultState, string message)
@@ -322,6 +319,7 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
             try
             {
                 _teardownCommand.Execute(Context);
+                logScope.EvaluateLogScope(true);
             }
             catch (Exception ex)
             {
@@ -331,10 +329,6 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
                 Result.RecordExceptionWithHint(ex, FailureSite.TearDown);
             }
 
-            if (logScope.AnyFailingLogs())
-            {
-                Result.RecordExceptionWithHint(new UnhandledLogMessageException(logScope.FailingLogs.First()));
-            }
             logScope.Dispose();
         }
 

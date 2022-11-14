@@ -1,5 +1,8 @@
 namespace UnityEditor.TestTools.TestRunner
 {
+    // The XboxOne platform is being removed, and is not shipped as of Unity 2021.1.
+    // When 2020.3 LTS stops being released support for the XboxOne platform can be removed, it was replaced by GameCoreXboxOne from 2019.4 onwards.
+    #if !UNITY_2021_1_OR_NEWER
     internal class XboxOnePlatformSetup : IPlatformSetup
     {
         private XboxOneDeployMethod oldXboxOneDeployMethod;
@@ -44,4 +47,5 @@ namespace UnityEditor.TestTools.TestRunner
             EditorUserBuildSettings.xboxOneAdditionalDebugPorts = oldXboxOneAdditionalDebugPorts;
         }
     }
+    #endif
 }
