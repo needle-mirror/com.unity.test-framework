@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+using System;
 using UnityEditor.TestRunner.UnityTestProtocol;
 
 namespace UnityEditor.TestTools.TestRunner.UnityTestProtocol

@@ -5,15 +5,16 @@ using UnityEditor.SceneManagement;
 using UnityEditor.TestTools.TestRunner.Api;
 using UnityEditor.TestTools.TestRunner.TestRun.Tasks;
 using UnityEngine;
+using UnityEngine.TestTools.TestRunner;
 
 namespace UnityEditor.TestTools.TestRunner.TestRun
 {
     [Serializable]
-    internal class TestJobData: ISerializationCallbackReceiver
+    internal class TestJobData : ISerializationCallbackReceiver
     {
-        [SerializeField] 
+        [SerializeField]
         public string guid;
-        
+
         [SerializeField]
         public string startTime;
 
@@ -23,9 +24,9 @@ namespace UnityEditor.TestTools.TestRunner.TestRun
         [SerializeField] 
         public int taskPC;
 
-        [SerializeField] 
+        [SerializeField]
         public bool isRunning;
-        
+
         [SerializeField]
         public ExecutionSettings executionSettings;
 
@@ -35,24 +36,36 @@ namespace UnityEditor.TestTools.TestRunner.TestRun
         [SerializeField]
         public string[] existingFiles;
 
-        [SerializeField] 
+        [SerializeField]
         public int undoGroup = -1;
 
-        [SerializeField] 
+        [SerializeField]
         public EditModeRunner editModeRunner;
 
         [SerializeField]
         private TaskInfo[] savedTaskInfoStack;
 
-        [NonSerialized] 
+        [NonSerialized]
         public bool isHandledByRunner;
 
         [SerializeField]
         public SceneSetup[] SceneSetup;
         [NonSerialized]
         public TestTaskBase[] Tasks;
+
+        [SerializeField] 
+        public TestProgress testProgress;
         
         public ITest testTree;
+        
+        [NonSerialized]
+        public TestStartedEvent TestStartedEvent;
+        [NonSerialized]
+        public TestFinishedEvent TestFinishedEvent;
+        [NonSerialized]
+        public RunStartedEvent RunStartedEvent;
+        [NonSerialized]
+        public RunFinishedEvent RunFinishedEvent;
 
         public TestJobData(ExecutionSettings settings)
         {
@@ -61,7 +74,7 @@ namespace UnityEditor.TestTools.TestRunner.TestRun
             isRunning = false;
             startTime = DateTime.Now.ToString("o");
         }
-        
+
         public void OnBeforeSerialize()
         {
             savedTaskInfoStack = taskInfoStack.ToArray();

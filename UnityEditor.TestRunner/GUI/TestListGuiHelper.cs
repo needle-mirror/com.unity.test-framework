@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEditor.ProjectWindowCallback;
 using UnityEditor.Scripting.ScriptCompilation;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace UnityEditor.TestTools.TestRunner.GUI
 {
@@ -104,7 +105,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
         {
             var path = "Assets";
 
-            foreach (var obj in Selection.GetFiltered(typeof(UnityEngine.Object), SelectionMode.Assets))
+            foreach (var obj in Selection.GetFiltered(typeof(Object), SelectionMode.Assets))
             {
                 path = AssetDatabase.GetAssetPath(obj);
                 if (!string.IsNullOrEmpty(path) && File.Exists(path))

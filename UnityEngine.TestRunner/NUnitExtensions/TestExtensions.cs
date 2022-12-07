@@ -1,9 +1,10 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
 using UnityEngine.TestRunner.NUnitExtensions.Filters;
+using UnityEngine.TestTools;
 
 namespace UnityEngine.TestRunner.NUnitExtensions
 {
@@ -60,6 +61,15 @@ namespace UnityEngine.TestRunner.NUnitExtensions
             }
         }
 
+        public static void ApplyPlatformToPropertyBag(this ITest test, TestPlatform testPlatform)
+        {
+            test.Properties.Set("platform", testPlatform);
+            foreach (var child in test.Tests)
+            {
+                child.ApplyPlatformToPropertyBag(testPlatform);
+            }
+        }
+
         public static int GetChildIndex(this ITest test)
         {
             var index = test.Properties["childIndex"];
@@ -72,7 +82,7 @@ namespace UnityEngine.TestRunner.NUnitExtensions
             return index.Count > 0;
         }
 
-        static string GetAncestorPath(ITest test)
+        private static string GetAncestorPath(ITest test)
         {
             var path = "";
             var testParent = test.Parent;
@@ -154,7 +164,7 @@ namespace UnityEngine.TestRunner.NUnitExtensions
 
             return null;
         }
-        
+
         public static string GetParentFullName(this ITest test)
         {
             if (test.Parent != null)

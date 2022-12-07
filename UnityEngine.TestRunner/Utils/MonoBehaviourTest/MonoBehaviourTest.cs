@@ -1,3 +1,5 @@
+using System;
+
 namespace UnityEngine.TestTools
 {
     /// <summary>
@@ -24,7 +26,7 @@ namespace UnityEngine.TestTools
         /// {
         ///     yield return new MonoBehaviourTest&lt;MyMonoBehaviourTest&gt;();
         /// }
-        /// 
+        ///
         /// public class MyMonoBehaviourTest : MonoBehaviour, IMonoBehaviourTest
         /// {
         ///     private int frameCount;
@@ -32,7 +34,7 @@ namespace UnityEngine.TestTools
         ///     {
         ///         get { return frameCount &gt; 10; }
         ///     }
-        /// 
+        ///
         ///     void Update()
         ///     {
         ///         frameCount++;
@@ -49,6 +51,7 @@ namespace UnityEngine.TestTools
                 Object.DontDestroyOnLoad(go);
             }
         }
+
         /// <summary>
         /// (Inherited) Returns `true`` if the test is not finished yet, which keeps the coroutine suspended
         /// </summary>

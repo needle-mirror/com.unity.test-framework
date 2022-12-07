@@ -1,4 +1,5 @@
-﻿using NUnit.Framework.Interfaces;
+﻿using System;
+using NUnit.Framework.Interfaces;
 using UnityEngine.Networking.PlayerConnection;
 using UnityEngine.TestRunner.TestLaunchers;
 

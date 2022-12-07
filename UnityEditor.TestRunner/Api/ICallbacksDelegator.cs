@@ -1,3 +1,4 @@
+using System;
 using NUnit.Framework.Interfaces;
 
 namespace UnityEditor.TestTools.TestRunner.Api

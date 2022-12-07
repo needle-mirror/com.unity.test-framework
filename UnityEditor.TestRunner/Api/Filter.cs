@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Text;
 using UnityEngine;
 using UnityEngine.TestTools.TestRunner.GUI;
 
@@ -40,12 +41,30 @@ namespace UnityEditor.TestTools.TestRunner.Api
         /// The <see cref="BuildTarget"/> platform to run the test on. If set to null, then the Editor is the target for the tests.
         /// Obsolete. Use the targetPlatform property on the <see cref="ExecutionSettings"/>.
         /// </summary>
-        [SerializeField]
         public BuildTarget? targetPlatform;
 
+        /// <summary>
+        /// Implementation of ToString() that builds a string composed of the filter values.
+        /// </summary>
+        /// <returns>The current filter values as a string.</returns>
+        public override string ToString()
+        {
+            var stringBuilder = new StringBuilder();
+
+            stringBuilder.AppendLine($"{nameof(Filter)} with settings:");
+            stringBuilder.AppendLine($"{nameof(testMode)} = {testMode}");
+            stringBuilder.AppendLine($"{nameof(targetPlatform)} = {targetPlatform}");
+            stringBuilder.AppendLine($"{nameof(testNames)} = " + (testNames == null ? "null" : string.Join(", ", testNames)));
+            stringBuilder.AppendLine($"{nameof(groupNames)} = " + (groupNames == null ? "null" : string.Join(", ", groupNames)));
+            stringBuilder.AppendLine($"{nameof(categoryNames)} = " + (categoryNames == null ? "null" : string.Join(", ", categoryNames)));
+            stringBuilder.AppendLine($"{nameof(assemblyNames)} = " + (assemblyNames == null ? "null" : string.Join(", ", assemblyNames)));
+
+            return stringBuilder.ToString();
+        }
+        
         internal RuntimeTestRunnerFilter ToRuntimeTestRunnerFilter(bool synchronousOnly)
         {
-            return new RuntimeTestRunnerFilter()
+            return new RuntimeTestRunnerFilter
             {
                 testNames = testNames,
                 categoryNames = categoryNames,

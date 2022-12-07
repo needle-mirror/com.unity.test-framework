@@ -5,13 +5,13 @@ using UnityEngine.TestTools.TestRunner;
 
 namespace UnityEngine.TestTools.Logging
 {
-    sealed class LogScope : ILogScope
+    internal sealed class LogScope : ILogScope
     {
-        static List<LogScope> s_ActiveScopes = new List<LogScope>();
-        
-        readonly object m_Lock = new object();
-        bool m_Disposed;
-        bool m_NeedToProcessLogs;
+        private static List<LogScope> s_ActiveScopes = new List<LogScope>();
+
+        private readonly object m_Lock = new object();
+        private bool m_Disposed;
+        private bool m_NeedToProcessLogs;
 
         public Queue<LogMatch> ExpectedLogs { get; set; }
         public List<LogEvent> AllLogs { get; }
@@ -22,7 +22,7 @@ namespace UnityEngine.TestTools.Logging
         public bool IsNUnitInconclusiveException { get; private set; }
         public bool IsNUnitIgnoreException { get; private set; }
         public string NUnitExceptionMessage { get; private set; }
-        
+
         public static LogScope Current
         {
             get
@@ -47,7 +47,7 @@ namespace UnityEngine.TestTools.Logging
             Activate();
         }
 
-        void Activate()
+        private void Activate()
         {
             s_ActiveScopes.Insert(0, this);
             RegisterScope(this);
@@ -55,19 +55,19 @@ namespace UnityEngine.TestTools.Logging
             Application.logMessageReceivedThreaded += AddLog;
         }
 
-        void Deactivate()
+        private void Deactivate()
         {
             Application.logMessageReceivedThreaded -= AddLog;
             s_ActiveScopes.Remove(this);
             UnregisterScope(this);
         }
 
-        static void RegisterScope(LogScope logScope)
+        private static void RegisterScope(LogScope logScope)
         {
             Application.logMessageReceivedThreaded += logScope.AddLog;
         }
 
-        static void UnregisterScope(LogScope logScope)
+        private static void UnregisterScope(LogScope logScope)
         {
             Application.logMessageReceivedThreaded -= logScope.AddLog;
         }
@@ -127,7 +127,7 @@ namespace UnityEngine.TestTools.Logging
             }
         }
 
-        static bool IsNUnitResultStateException(string stacktrace, LogType logType)
+        private static bool IsNUnitResultStateException(string stacktrace, LogType logType)
         {
             if (logType != LogType.Exception)
                 return false;
@@ -135,7 +135,7 @@ namespace UnityEngine.TestTools.Logging
             return string.IsNullOrEmpty(stacktrace) || stacktrace.StartsWith("NUnit.Framework.Assert.");
         }
 
-        static bool IsFailingLog(LogType type)
+        private static bool IsFailingLog(LogType type)
         {
             switch (type)
             {
@@ -154,7 +154,7 @@ namespace UnityEngine.TestTools.Logging
             GC.SuppressFinalize(this);
         }
 
-        void Dispose(bool disposing)
+        private void Dispose(bool disposing)
         {
             if (m_Disposed)
             {

@@ -1,3 +1,4 @@
+using System;
 using UnityEditor.Scripting.ScriptCompilation;
 
 namespace UnityEditor.TestTools.TestRunner

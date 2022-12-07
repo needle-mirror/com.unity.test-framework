@@ -1,81 +1,95 @@
 using System;
-using System.IO;
 using UnityEditor.TestRunner.CommandLineParser;
 using UnityEditor.TestTools.TestRunner.Api;
 using UnityEngine;
-using UnityEditor.Compilation;
-using System.Linq;
-using UnityEngine.TestTools;
 
 namespace UnityEditor.TestTools.TestRunner.CommandLineTest
 {
-    [InitializeOnLoad]
-    static class TestStarter
+    internal class TestStarter
     {
-        static TestStarter()
+        [InitializeOnLoadMethod]
+        internal static void Initialize()
+        {
+            new TestStarter().Init();
+        }
+
+        internal Action<EditorApplication.CallbackFunction> registerEditorUpdateCallback = (action) =>
+        {
+            EditorApplication.update += action;
+        };
+        internal Action<EditorApplication.CallbackFunction> unregisterEditorUpdateCallback = (action) =>
+        {
+            EditorApplication.update -= action;
+        };
+        internal Func<bool> isCompiling = () => EditorApplication.isCompiling;
+        internal IRunData runData = RunData.instance;
+        internal Func<string[]> GetCommandLineArgs = Environment.GetCommandLineArgs;
+
+        internal void Init()
         {
             if (!ShouldRunTests())
             {
                 return;
             }
 
-            if (EditorApplication.isCompiling)
+            if (isCompiling())
             {
-                return;
-            }
-          
-            if (RunData.instance.isRunning)
-            {
-                executer.ExitOnCompileErrors();
-                executer.SetUpCallbacks(RunData.instance.executionSettings);
                 return;
             }
 
-            EditorApplication.update += UpdateWatch;
+            executer.ExitOnCompileErrors();
+
+            if (runData.IsRunning)
+            {
+                executer.SetUpCallbacks(runData.ExecutionSettings);
+                registerEditorUpdateCallback(executer.ExitIfRunIsCompleted);
+                return;
+            }
+
+            // Execute the test run on the next editor update to allow other framework components
+            // (the TestJobDataHolder.ResumeRunningJobs method in particular) to register themselves
+            // or modify the test run environment using InitializeOnLoad and InitializeOnLoadMethod calls
+            registerEditorUpdateCallback(InitializeAndExecuteRun);
         }
 
-        static void UpdateWatch()
+        internal void InitializeAndExecuteRun()
         {
-            EditorApplication.update -= UpdateWatch;
+            unregisterEditorUpdateCallback(InitializeAndExecuteRun);
 
-            if (RunData.instance.isRunning)
-            {
-                return;
-            }
-
-            RunData.instance.isRunning = true;
-            var commandLineArgs = Environment.GetCommandLineArgs();
-            RunData.instance.executionSettings = executer.BuildExecutionSettings(commandLineArgs);
-            executer.SetUpCallbacks(RunData.instance.executionSettings);
-            executer.InitializeAndExecuteRun(commandLineArgs);
+            runData.IsRunning = true;
+            var commandLineArgs = GetCommandLineArgs();
+            runData.ExecutionSettings = executer.BuildExecutionSettings(commandLineArgs);
+            executer.SetUpCallbacks(runData.ExecutionSettings);
+            runData.RunState = default;
+            runData.RunId = executer.InitializeAndExecuteRun(commandLineArgs);
+            registerEditorUpdateCallback(executer.ExitIfRunIsCompleted);
         }
 
-        static bool ShouldRunTests()
+        private bool ShouldRunTests()
         {
             var shouldRunTests = false;
             var optionSet = new CommandLineOptionSet(
                 new CommandLineOption("runTests", () => { shouldRunTests = true; }),
                 new CommandLineOption("runEditorTests", () => { shouldRunTests = true; })
             );
-            optionSet.Parse(Environment.GetCommandLineArgs());
+            optionSet.Parse(GetCommandLineArgs());
             return shouldRunTests;
         }
 
-        static Executer s_Executer;
-
-        static Executer executer
+        internal IExecuter m_Executer;
+        private IExecuter executer
         {
             get
             {
-                if (s_Executer == null)
+                if (m_Executer == null)
                 {
                     Func<bool> compilationCheck = () => EditorUtility.scriptCompilationFailed;
-                    Action<string> actionLogger = (string msg) => { Debug.LogFormat(LogType.Log, LogOption.NoStacktrace, null, msg); };
+                    Action<string> actionLogger = msg => { Debug.LogFormat(LogType.Log, LogOption.NoStacktrace, null, msg); };
                     var apiSettingsBuilder = new SettingsBuilder(new TestSettingsDeserializer(() => new TestSettings()), actionLogger, Debug.LogWarning, compilationCheck);
-                    s_Executer = new Executer(ScriptableObject.CreateInstance<TestRunnerApi>(), apiSettingsBuilder, Debug.LogErrorFormat, Debug.LogException, EditorApplication.Exit, compilationCheck);
+                    m_Executer = new Executer(ScriptableObject.CreateInstance<TestRunnerApi>(), apiSettingsBuilder, Debug.LogErrorFormat, Debug.LogException, Debug.Log, EditorApplication.Exit, compilationCheck, TestRunnerApi.IsRunActive);
                 }
 
-                return s_Executer;
+                return m_Executer;
             }
         }
     }

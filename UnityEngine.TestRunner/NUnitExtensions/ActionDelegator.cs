@@ -1,8 +1,6 @@
 using System;
-using System.Linq;
 using UnityEngine.TestRunner.NUnitExtensions.Runner;
 using UnityEngine.TestTools.Logging;
-using UnityEngine.TestTools.TestRunner;
 
 namespace UnityEngine.TestTools.NUnitExtensions
 {

@@ -14,13 +14,13 @@ namespace UnityEditor.TestTools.TestRunner.Api
         /// </summary>
         ITestAdaptor Test { get; }
         ///<summary>
-        ///The name of the test node. 
+        ///The name of the test node.
         ///</summary>
         string Name { get; }
         /// <summary>
         /// Gets the full name of the test result
         /// </summary>
-        ///<returns> 
+        ///<returns>
         ///The name of the test result.
         ///</returns>
         string FullName { get; }
@@ -35,7 +35,7 @@ namespace UnityEditor.TestTools.TestRunner.Api
         ///Gets the status of the test as an enum.
         ///</summary>
         ///<returns>
-        ///It returns one of these values:`Inconclusive`, `Skipped`, `Passed`, or `Failed` 
+        ///It returns one of these values:`Inconclusive`, `Skipped`, `Passed`, or `Failed`
         ///</returns>
         TestStatus TestStatus { get; }
         /// <summary>

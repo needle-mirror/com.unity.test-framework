@@ -1,12 +1,9 @@
 using System;
-using System.Linq;
 using NUnit.Framework.Interfaces;
 using Unity.Profiling;
 using UnityEngine;
-using UnityEngine.Profiling;
 using UnityEngine.TestTools;
 using UnityEngine.TestTools.Logging;
-using UnityEngine.TestTools.TestRunner;
 
 namespace UnityEditor.TestTools.TestRunner
 {

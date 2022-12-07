@@ -11,7 +11,7 @@ namespace UnityEditor.TestTools.TestRunner.UnityTestProtocol
 {
     internal class TestRunnerApiMapper : ITestRunnerApiMapper
     {
-        internal IGuiHelper guiHelper =  new GuiHelper(new MonoCecilHelper(),new AssetsDatabaseHelper());
+        internal IGuiHelper guiHelper =  new GuiHelper(new MonoCecilHelper(), new AssetsDatabaseHelper());
         private readonly string _projectRepoPath;
 
         public TestRunnerApiMapper(string projectRepoPath)
@@ -51,7 +51,7 @@ namespace UnityEditor.TestTools.TestRunner.UnityTestProtocol
                 filePathString = !string.IsNullOrEmpty(_projectRepoPath) ? Path.Combine(_projectRepoPath, fileOpenInfo.FilePath) : fileOpenInfo.FilePath;
                 lineNumber = fileOpenInfo.LineNumber;
             }
-           
+
             return new TestFinishedMessage
             {
                 name = result.Test.FullName,
@@ -93,16 +93,22 @@ namespace UnityEditor.TestTools.TestRunner.UnityTestProtocol
                 state = TestState.Skipped;
 
                 if (result.ResultState.ToLowerInvariant().EndsWith("ignored"))
+                {
                     state = TestState.Ignored;
+                }
             }
             else
             {
                 if (result.ResultState.ToLowerInvariant().Equals("inconclusive"))
+                {
                     state = TestState.Inconclusive;
+                }
 
                 if (result.ResultState.ToLowerInvariant().EndsWith("cancelled") ||
                     result.ResultState.ToLowerInvariant().EndsWith("error"))
+                {
                     state = TestState.Error;
+                }
             }
 
             return state;

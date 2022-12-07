@@ -4,7 +4,8 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEditor.TestRunner.UnityTestProtocol;
 using UnityEditor.TestTools.TestRunner.Api;
-using CompositeWorkItem = UnityEngine.TestRunner.NUnitExtensions.Runner.CompositeWorkItem;
+using UnityEngine.TestRunner.NUnitExtensions.Runner;
+
 namespace UnityEditor.TestTools.TestRunner.UnityTestProtocol
 {
     internal class UtpMessageReporter : IUtpMessageReporter
@@ -109,13 +110,20 @@ namespace UnityEditor.TestTools.TestRunner.UnityTestProtocol
 
         private string[] GetAllTestsInAFixture(ITestAdaptor testAdaptor, ICollection<string> allChildren)
         {
-            if (!testAdaptor.HasChildren || testAdaptor.Children == null)
+            // We have reached a leaf or an invalid node, return our results so far
+            if (testAdaptor == null || !testAdaptor.HasChildren || testAdaptor.Children == null)
             {
                 return allChildren.ToArray();
             }
-
+            // We are not at a leaf, process children
             foreach (var child in testAdaptor.Children)
             {
+                // Verify that the children are valid
+                if (child == null || string.IsNullOrEmpty(child.FullName))
+                {
+                    continue;
+                }
+                // Save and process the child node
                 allChildren.Add(child.FullName);
                 GetAllTestsInAFixture(child, allChildren);
             }

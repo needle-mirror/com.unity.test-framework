@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using System.Threading;
 using UnityEditor.TestTools.TestRunner.CommandLineTest;
 using UnityEditor.TestTools.TestRunner.TestRun;
 using UnityEngine;
@@ -13,7 +12,7 @@ namespace UnityEditor.TestTools.TestRunner.Api
 {
     /// <summary>
     /// The TestRunnerApi retrieves and runs tests programmatically from code inside the project, or inside other packages. TestRunnerApi is a [ScriptableObject](https://docs.unity3d.com/ScriptReference/ScriptableObject.html).
-    ///You can initialize the API like this:
+    /// You can initialize the API like this:
     /// <code>
     /// var testRunnerApi = ScriptableObject.CreateInstance&lt;TestRunnerApi&gt;();
     /// </code>
@@ -38,7 +37,7 @@ namespace UnityEditor.TestTools.TestRunner.Api
                 return callbacksHolder;
             }
         }
-        
+
         internal static ITestJobDataHolder testJobDataHolder;
 
         private static ITestJobDataHolder m_testJobDataHolder
@@ -46,7 +45,7 @@ namespace UnityEditor.TestTools.TestRunner.Api
             get { return testJobDataHolder ?? (testJobDataHolder = TestJobDataHolder.instance); }
         }
 
-        internal Func<ExecutionSettings,string> ScheduleJob = (executionSettings) =>
+        internal Func<ExecutionSettings,string> ScheduleJob = executionSettings =>
         {
             var runner = new TestJobRunner();
             return runner.RunJob(new TestJobData(executionSettings));
@@ -66,7 +65,7 @@ namespace UnityEditor.TestTools.TestRunner.Api
             if ((executionSettings.filters == null || executionSettings.filters.Length == 0) && executionSettings.filter != null)
             {
                 // Map filter (singular) to filters (plural), for backwards compatibility.
-                executionSettings.filters = new [] {executionSettings.filter};
+                executionSettings.filters = new[] { executionSettings.filter };
             }
 
             if (executionSettings.targetPlatform == null && executionSettings.filters != null &&
@@ -92,9 +91,9 @@ namespace UnityEditor.TestTools.TestRunner.Api
         /// </param>
         public void RegisterCallbacks<T>(T testCallbacks, int priority = 0) where T : ICallbacks
         {
-            RegisterTestCallback(testCallbacks);
+            RegisterTestCallback(testCallbacks, priority);
         }
-        
+
         /// <summary>
         /// Sets up a given instance of <see cref="ICallbacks"/> to be invoked on test runs.
         /// </summary>
@@ -114,7 +113,6 @@ namespace UnityEditor.TestTools.TestRunner.Api
 
             CallbacksHolder.Add(testCallbacks, priority);
         }
-        
 
         /// <summary>
         /// Unregister an instance of <see cref="ICallbacks"/> to no longer receive callbacks from test runs.
@@ -174,16 +172,32 @@ namespace UnityEditor.TestTools.TestRunner.Api
             var testListProvider = new TestListProvider(testAssemblyProvider, new UnityTestAssemblyBuilder(null));
             var cachedTestListProvider = new CachingTestListProvider(testListProvider, testListCache, testAdaptorFactory);
 
-            var job = new TestListJob(cachedTestListProvider, platform, (testRoot) =>
+            var job = new TestListJob(cachedTestListProvider, platform, testRoot =>
             {
                 callback(testRoot);
             });
             job.Start();
         }
 
+        /// <summary>
+        /// Cancel the test run with a given guid. The guid can be retrieved when executing the test run. Currently only supports EditMode tests.
+        /// </summary>
+        /// <param name="guid">Test run GUID.</param>
+        /// <returns></returns>
+        internal static bool CancelTestRun(string guid)
+        {
+            var runner = m_testJobDataHolder.GetRunner(guid);
+            if (runner == null || !runner.IsRunningJob())
+            {
+                return false;
+            }
+
+            return runner.CancelRun();
+        }
+        
         internal static bool IsRunActive()
         {
-            return RunData.instance.isRunning;
+            return m_testJobDataHolder.GetAllRunners().Any(r => r.GetData().isRunning);
         }
 
         private static TestPlatform ParseTestMode(TestMode testMode)

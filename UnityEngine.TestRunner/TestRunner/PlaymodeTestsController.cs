@@ -16,6 +16,8 @@ namespace UnityEngine.TestTools.TestRunner
     {
         private IEnumerator m_TestSteps;
 
+        public static PlaymodeTestsController ActiveController { get; private set; }
+
         [SerializeField]
         private List<string> m_AssembliesWithTests;
         public List<string> AssembliesWithTests
@@ -48,6 +50,7 @@ namespace UnityEngine.TestTools.TestRunner
 
         public IEnumerator Start()
         {
+            ActiveController = this;
             //Skip 2 frame because Unity.
             yield return null;
             yield return null;
@@ -74,7 +77,6 @@ namespace UnityEngine.TestTools.TestRunner
             if (m_Runner.IsTestComplete)
             {
                 runFinishedEvent.Invoke(m_Runner.Result);
-                Cleanup();
 
                 yield return null;
             }
@@ -113,7 +115,14 @@ namespace UnityEngine.TestTools.TestRunner
             }
             if (Application.isEditor)
             {
-                Destroy(gameObject);
+                if (Application.isPlaying)
+                {
+                    Destroy(gameObject);
+                }
+                else
+                {
+                    DestroyImmediate(gameObject);
+                }
             }
         }
 

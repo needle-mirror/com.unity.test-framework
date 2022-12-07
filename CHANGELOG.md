@@ -1,6 +1,14 @@
 # Changelog
+## [1.3.2] - 2022-12-07
+- Fixed context not being restored after a domain reload outside tests (DSTR-678)
+- Fixed TestMode being set only in on the aseembly level (DSTP-674)
+- Fixed an issue where RunFinished callbacks sometimes would not be executed before the editor quits in batchmode (DSTR-692).
+- Fixed problem of samples not loading for import in Package Manager window. (DSTR-702)
+- Fixed issue GuiHelper depending on FilePath being abosolute. Updated to handle both cases.
+- Fixed an issue where ITestRunCallback are invoked double when run in EditMode.
+
 ## [1.3.1] - 2022-10-18
-- Fixed an issue where TestFinished sometimes causes failures when receiving fixture test results from a player (internal). 
+- Fixed an issue where TestFinished sometimes causes failures when receiving fixture test results from a player (internal).
 
 ## [1.3.0] - 2022-10-11
 - Fixed Xcode not closing after building iOS/tvOS project via batchmode `-runTests` command (ANT-679).

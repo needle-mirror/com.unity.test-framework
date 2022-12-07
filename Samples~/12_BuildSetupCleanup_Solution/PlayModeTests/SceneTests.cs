@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Linq;
+using System.IO;
 using NUnit.Framework;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -33,8 +34,12 @@ namespace Tests
         public IEnumerator SetupBeforeTest()
         {
             originalScene = SceneManager.GetActiveScene().path;
+            if (!File.Exists(k_SceneName))
+            {
+                Assert.Inconclusive("The path to the Scene is not correct. Set the correct path for the k_SceneName variable.");
+            }
             SceneManager.LoadScene(k_SceneName);
-            yield return null; // Skip a frame
+            yield return null; // Skip a frame, allowing the scene to load.
         }
 
         [Test]

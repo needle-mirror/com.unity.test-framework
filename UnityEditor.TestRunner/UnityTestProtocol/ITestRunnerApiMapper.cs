@@ -1,10 +1,11 @@
+using System;
 using System.Collections.Generic;
 using UnityEditor.TestRunner.UnityTestProtocol;
 using UnityEditor.TestTools.TestRunner.Api;
 
 namespace UnityEditor.TestTools.TestRunner.UnityTestProtocol
 {
-    interface ITestRunnerApiMapper
+    internal interface ITestRunnerApiMapper
     {
         string GetRunStateFromResultNunitXml(ITestResultAdaptor result);
         TestState GetTestStateFromResult(ITestResultAdaptor result);

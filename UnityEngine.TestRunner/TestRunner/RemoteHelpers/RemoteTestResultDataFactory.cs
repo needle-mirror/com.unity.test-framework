@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework.Interfaces;
@@ -11,7 +12,7 @@ namespace UnityEngine.TestRunner.TestLaunchers
         {
             var tests = CreateTestDataList(result.Test);
             tests.First().testCaseTimeout = UnityTestExecutionContext.CurrentContext.TestCaseTimeout;
-            return new RemoteTestResultDataWithTestData()
+            return new RemoteTestResultDataWithTestData
             {
                 results = CreateTestResultDataList(result),
                 tests = tests
@@ -26,7 +27,7 @@ namespace UnityEngine.TestRunner.TestLaunchers
                 tests.First().testCaseTimeout = UnityTestExecutionContext.CurrentContext.TestCaseTimeout;
             }
 
-            return new RemoteTestResultDataWithTestData()
+            return new RemoteTestResultDataWithTestData
             {
                 tests = tests
             };

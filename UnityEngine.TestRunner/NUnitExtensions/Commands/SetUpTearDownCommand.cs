@@ -15,8 +15,8 @@ namespace UnityEngine.TestTools
 {
     internal class SetUpTearDownCommand : BeforeAfterTestCommandBase<MethodInfo>
     {
-        static readonly Dictionary<Type, List<MethodInfo>> m_BeforeActionsCache = new Dictionary<Type, List<MethodInfo>>();
-        static readonly Dictionary<Type, List<MethodInfo>> m_AfterActionsCache = new Dictionary<Type, List<MethodInfo>>();
+        private static readonly Dictionary<Type, List<MethodInfo>> m_BeforeActionsCache = new Dictionary<Type, List<MethodInfo>>();
+        private static readonly Dictionary<Type, List<MethodInfo>> m_AfterActionsCache = new Dictionary<Type, List<MethodInfo>>();
 
         public SetUpTearDownCommand(TestCommand innerCommand)
             : base(innerCommand, "SetUp", "TearDown")

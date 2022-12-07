@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using NUnit.Framework.Interfaces;
+using UnityEditor.Callbacks;
 using UnityEditor.TestTools.TestRunner.Api;
 using UnityEngine.TestRunner.TestLaunchers;
 using UnityEngine.TestTools;
@@ -46,7 +48,7 @@ namespace UnityEditor.TestTools.TestRunner
             yield return m_TestAdaptorFactory.Create(testData);
         }
 
-        [Callbacks.DidReloadScripts]
+        [DidReloadScripts]
         private static void ScriptReloaded()
         {
             TestListCacheData.instance.cachedData.Clear();

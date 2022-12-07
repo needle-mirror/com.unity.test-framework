@@ -2,11 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
-using NUnit.Framework.Internal.Commands;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
 using NUnit.Framework.Internal.Builders;
-using UnityEngine.TestRunner.NUnitExtensions.Runner;
 
 namespace UnityEngine.TestTools
 {
@@ -22,26 +20,26 @@ namespace UnityEngine.TestTools
     /// public IEnumerator EditorUtility_WhenExecuted_ReturnsSuccess()
     /// {
     ///     var utility = RunEditorUtilityInTheBackground();
-    /// 
+    ///
     ///     while (utility.isRunning)
     ///     {
     ///         yield return null;
     ///     }
-    /// 
+    ///
     ///     Assert.IsTrue(utility.isSuccess);
-    /// }    
+    /// }
     /// </code>
     /// </example>
     /// <example>
     /// ## Play Mode example
-    /// 
-    /// In Play Mode, a test runs as a coroutine attached to a [MonoBehaviour](https://docs.unity3d.com/ScriptReference/MonoBehaviour.html). So all the yield instructions available in coroutines, are also available in your test. 
-    /// 
+    ///
+    /// In Play Mode, a test runs as a coroutine attached to a [MonoBehaviour](https://docs.unity3d.com/ScriptReference/MonoBehaviour.html). So all the yield instructions available in coroutines, are also available in your test.
+    ///
     /// From a Play Mode test you can use one of Unity’s [Yield Instructions](https://docs.unity3d.com/ScriptReference/YieldInstruction.html):
-    /// 
+    ///
     /// - [WaitForFixedUpdate](https://docs.unity3d.com/ScriptReference/WaitForFixedUpdate.html): to ensure changes expected within the next cycle of physics calculations.
     /// - [WaitForSeconds](https://docs.unity3d.com/ScriptReference/WaitForSeconds.html): if you want to pause your test coroutine for a fixed amount of time. Be careful about creating long-running tests.
-    /// 
+    ///
     /// The simplest example is to yield to `WaitForFixedUpdate`:
     /// <code>
     /// [UnityTest]
@@ -50,18 +48,18 @@ namespace UnityEngine.TestTools
     ///     var go = new GameObject();
     ///     go.AddComponent&lt;Rigidbody&gt;();
     ///     var originalPosition = go.transform.position.y;
-    /// 
+    ///
     ///     yield return new WaitForFixedUpdate();
-    /// 
+    ///
     ///     Assert.AreNotEqual(originalPosition, go.transform.position.y);
     /// }
     /// </code>
     /// </example>
     /// </summary>
     [AttributeUsage(AttributeTargets.Method)]
-    public class UnityTestAttribute : CombiningStrategyAttribute, ISimpleTestBuilder, IImplyFixture, ITestBuilder, IApplyToTest
+    public class UnityTestAttribute : CombiningStrategyAttribute, IImplyFixture, ISimpleTestBuilder, ITestBuilder, IApplyToTest
     {
-        const string k_MethodMarkedWithUnitytestMustReturnIenumerator = "Method marked with UnityTest must return IEnumerator.";
+        private const string k_MethodMarkedWithUnitytestMustReturnIenumerator = "Method marked with UnityTest must return IEnumerator.";
 
         /// <summary>
         /// Initializes and returns an instance of UnityTestAttribute.
@@ -105,7 +103,7 @@ namespace UnityEngine.TestTools
             return testMethods;
         }
 
-        TestMethod CreateTestMethod(IMethodInfo method, Test suite)
+        private TestMethod CreateTestMethod(IMethodInfo method, Test suite)
         {
             TestCaseParameters parms = new TestCaseParameters
             {
@@ -117,7 +115,7 @@ namespace UnityEngine.TestTools
             return t;
         }
 
-        static void AdaptToUnityTestMethod(TestMethod t)
+        private static void AdaptToUnityTestMethod(TestMethod t)
         {
             if (t.parms != null)
             {
@@ -125,7 +123,7 @@ namespace UnityEngine.TestTools
             }
         }
 
-        static bool IsMethodReturnTypeIEnumerator(IMethodInfo method)
+        private static bool IsMethodReturnTypeIEnumerator(IMethodInfo method)
         {
             return !method.ReturnType.IsType(typeof(IEnumerator));
         }

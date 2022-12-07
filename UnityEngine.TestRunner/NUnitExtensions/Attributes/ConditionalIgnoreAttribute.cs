@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
@@ -10,8 +11,8 @@ namespace UnityEngine.TestTools
     /// </summary>
     public class ConditionalIgnoreAttribute : NUnitAttribute, IApplyToTest
     {
-        string m_ConditionKey;
-        string m_IgnoreReason;
+        private string m_ConditionKey;
+        private string m_IgnoreReason;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConditionalIgnoreAttribute"/> class with a condition key.
@@ -39,7 +40,7 @@ namespace UnityEngine.TestTools
             }
         }
 
-        static Dictionary<string, bool> m_ConditionMap = new Dictionary<string, bool>();
+        private static Dictionary<string, bool> m_ConditionMap = new Dictionary<string, bool>();
 
         /// <summary>
         /// Adds a flag indicating whether tests with the same key should be ignored.
@@ -52,7 +53,7 @@ namespace UnityEngine.TestTools
         /// using UnityEditor;
         /// using NUnit.Framework;
         /// using UnityEngine.TestTools;
-        /// 
+        ///
         /// [InitializeOnLoad]
         /// public class OnLoad
         /// {
@@ -62,11 +63,11 @@ namespace UnityEngine.TestTools
         ///         #if UNITY_EDITOR_OSX
         ///         editorIsOSX = true;
         ///         #endif
-        /// 
+        ///
         ///         ConditionalIgnoreAttribute.AddConditionalIgnoreMapping("IgnoreInMacEditor", editorIsOSX);
         ///     }
         /// }
-        /// 
+        ///
         /// public class MyTestClass
         /// {
         ///     [Test, ConditionalIgnore("IgnoreInMacEditor", "Ignored on Mac editor.")]

@@ -7,6 +7,8 @@ using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
 using NUnit.Framework.Internal.Commands;
 using UnityEngine.TestTools;
+using SetUpTearDownCommand = UnityEngine.TestTools.SetUpTearDownCommand;
+using TestActionCommand = UnityEngine.TestTools.TestActionCommand;
 
 namespace UnityEngine.TestRunner.NUnitExtensions.Runner
 {
@@ -36,7 +38,7 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
             {
                 command = new UnityTestMethodCommand(test);
             }
-            
+
             command = new UnityLogCheckDelegatingCommand(command);
             foreach (var wrapper in test.Method.GetCustomAttributes<IWrapTestMethod>(true))
             {
@@ -55,7 +57,7 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
                     {
                         continue;
                     }
-                    
+
                     var message = String.Format("'{0}' is not supported on {1} as it does not handle returning IEnumerator.",
                         wrapper.GetType().FullName,
                         GetTestBuilderName(test));
@@ -63,18 +65,18 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
                 }
             }
 
-            command = new UnityEngine.TestTools.TestActionCommand(command);
+            command = new TestActionCommand(command);
 
             if (!testReturnsIEnumerator && !testReturnsTask)
             {
-                command = new ImmediateEnumerableCommand(command);    
+                command = new ImmediateEnumerableCommand(command);
             }
             
-            command = new UnityEngine.TestTools.SetUpTearDownCommand(command);
+            command = new SetUpTearDownCommand(command);
             
             foreach (var wrapper in test.Method.GetCustomAttributes<IWrapSetUpTearDown>(true))
             {
-                if (command is TestTools.SetUpTearDownCommand && !testReturnsIEnumerator && !testReturnsTask)
+                if (command is SetUpTearDownCommand && !testReturnsIEnumerator && !testReturnsTask)
                 {
                     // Ensure that we can use the immediate execute on the setup/teardown
                     command = new ImmediateEnumerableCommand(command);
@@ -87,7 +89,7 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
                         wrapper.GetType().FullName);
                     return new FailCommand(test, ResultState.Failure, message);
                 }
-                
+
                 if (testReturnsIEnumerator && !(command is IEnumerableTestMethodCommand))
                 {
                     command = TryReplaceWithEnumerableCommand(command);
@@ -95,7 +97,7 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
                     {
                         continue;
                     }
-                    
+
                     var message = String.Format("'{0}' is not supported on {1} as it does not handle returning IEnumerator.",
                         wrapper.GetType().FullName,
                         GetTestBuilderName(test));

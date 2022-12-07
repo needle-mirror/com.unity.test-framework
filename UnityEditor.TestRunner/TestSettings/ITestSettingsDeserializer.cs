@@ -1,6 +1,8 @@
+using System;
+
 namespace UnityEditor.TestTools.TestRunner
 {
-    interface ITestSettingsDeserializer
+    internal interface ITestSettingsDeserializer
     {
         ITestSettings GetSettingsFromJsonFile(string jsonFilePath);
     }

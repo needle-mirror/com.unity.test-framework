@@ -1,9 +1,7 @@
 using System;
-using System.Linq;
 using NUnit.Framework.Internal;
 using UnityEngine.TestRunner.NUnitExtensions.Runner;
 using UnityEngine.TestTools.Logging;
-using UnityEngine.TestTools.TestRunner;
 
 namespace UnityEngine.TestTools.NUnitExtensions
 {
@@ -127,9 +125,10 @@ namespace UnityEngine.TestTools.NUnitExtensions
 
         public void DestroyCurrentTestObjectIfExists()
         {
-            if (m_CurrentRunningTest == null)
-                return;
-            Object.DestroyImmediate(m_CurrentRunningTest);
+            if (m_CurrentRunningTest != null)
+            {
+                Object.DestroyImmediate(m_CurrentRunningTest);
+            }
         }
     }
 }

@@ -1,4 +1,4 @@
-
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework.Interfaces;
@@ -11,7 +11,7 @@ namespace UnityEngine.TestTools
     internal class EnumerableApplyChangesToContextCommand : ApplyChangesToContextCommand, IEnumerableTestMethodCommand
     {
         public EnumerableApplyChangesToContextCommand(TestCommand innerCommand, IEnumerable<IApplyToContext> changes)
-            : base(innerCommand, changes) { }
+            : base(innerCommand, changes) {}
 
         public IEnumerable ExecuteEnumerable(ITestExecutionContext context)
         {

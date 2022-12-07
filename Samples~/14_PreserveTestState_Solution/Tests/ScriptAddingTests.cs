@@ -10,7 +10,7 @@ namespace Tests
 {
     internal class ScriptAddingTests
     {
-        private const string k_filePath = @"Assets//Tests";
+        private const string k_filePath = "Assets/Tests";
         
         [SerializeField]
         private string fileName;
@@ -52,13 +52,20 @@ namespace Tests
         private void CreateScript(string fileName)
         {
             var path = Path.Combine(k_filePath, fileName);
-            File.WriteAllText(path, @"
-            public class MyTempScript {
-                public string Verify()
-                {
-                    return ""OK"";
-                }    
-            }");
+            try
+            {
+                File.WriteAllText(path, @"
+                public class MyTempScript {
+                    public string Verify()
+                    {
+                        return ""OK"";
+                    }    
+                }");
+            }
+            catch(DirectoryNotFoundException)
+            {
+                Assert.Inconclusive("The path to file is incorrect. Please make sure that the path to TempScript is valid.");
+            }
         }
 
         private string VerifyScript()

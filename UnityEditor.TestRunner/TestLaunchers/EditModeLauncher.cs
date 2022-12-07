@@ -1,11 +1,7 @@
 using System;
-using System.Collections.Generic;
-using NUnit.Framework.Interfaces;
-using UnityEditor.SceneManagement;
 using UnityEditor.TestTools.TestRunner.Api;
 using UnityEditor.TestTools.TestRunner.GUI;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.TestRunner.Utils;
 using UnityEngine.TestTools;
 using UnityEngine.TestTools.TestRunner;
@@ -23,7 +19,7 @@ namespace UnityEditor.TestTools.TestRunner
             launchedOutsideApi = true;
             var apiFilter = new[]
             {
-                new Filter()
+                new Filter
                 {
                     testMode = TestMode.EditMode,
                     testNames = filter.testNames,
@@ -36,12 +32,14 @@ namespace UnityEditor.TestTools.TestRunner
             ScriptableObject.CreateInstance<TestRunnerApi>().Execute(new ExecutionSettings(apiFilter));
         }
 
-        public EditModeLauncher(Filter[] filters, TestPlatform platform, bool runSynchronously, string[] orderedTestNames)
+        public EditModeLauncher(Filter[] filters, TestPlatform platform, bool runSynchronously,
+            RunStartedEvent runStartedEvent, TestStartedEvent testStartedEvent, TestFinishedEvent testFinishedEvent, RunFinishedEvent runFinishedEvent,
+            string[] orderedTestNames)
         {
             TestEnumerator.Reset();
             m_EditModeRunner = ScriptableObject.CreateInstance<EditModeRunner>();
             m_EditModeRunner.UnityTestAssemblyRunnerFactory = new UnityTestAssemblyRunnerFactory();
-            m_EditModeRunner.Init(filters, platform, runSynchronously, orderedTestNames);
+            m_EditModeRunner.Init(filters, platform, runSynchronously,runStartedEvent, testStartedEvent, testFinishedEvent, runFinishedEvent, orderedTestNames);
         }
 
         public override void Run()
@@ -52,75 +50,14 @@ namespace UnityEditor.TestTools.TestRunner
                 return;
             }
 
-            if (!OpenNewScene())
-                return;
-
             var callback = AddEventHandler<EditModeRunnerCallback>();
             callback.runner = m_EditModeRunner;
             AddEventHandler<CallbacksDelegatorListener>();
 
             m_EditModeRunner.Run();
-            AddEventHandler<TestRunCallbackListener>();
             
             if (m_EditModeRunner.RunningSynchronously)
                 m_EditModeRunner.CompleteSynchronously();
-        }
-
-        private static bool OpenNewScene()
-        {
-            var sceneCount = SceneManager.sceneCount;
-
-            var scene = SceneManager.GetSceneAt(0);
-            var isSceneNotPersisted = string.IsNullOrEmpty(scene.path);
-
-            if (sceneCount == 1 && isSceneNotPersisted)
-            {
-                EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
-                return true;
-            }
-            RemoveUntitledScenes();
-
-            // In case the user chose not to save the dirty scenes we reload them
-            ReloadUnsavedDirtyScene();
-
-            scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Additive);
-            SceneManager.SetActiveScene(scene);
-
-            return true;
-        }
-
-        private static void ReloadUnsavedDirtyScene()
-        {
-            for (var i = 0; i < SceneManager.sceneCount; i++)
-            {
-                var scene = SceneManager.GetSceneAt(i);
-                var isSceneNotPersisted = string.IsNullOrEmpty(scene.path);
-                var isSceneDirty = scene.isDirty;
-                if (isSceneNotPersisted && isSceneDirty)
-                {
-                    EditorSceneManager.ReloadScene(scene);
-                }
-            }
-        }
-
-        private static void RemoveUntitledScenes()
-        {
-            int sceneCount = SceneManager.sceneCount;
-
-            var scenesToClose = new List<Scene>();
-            for (var i = 0; i < sceneCount; i++)
-            {
-                var scene = SceneManager.GetSceneAt(i);
-                var isSceneNotPersisted = string.IsNullOrEmpty(scene.path);
-                if (isSceneNotPersisted)
-                {
-                    scenesToClose.Add(scene);
-                }
-            }
-            foreach (Scene scene in scenesToClose)
-            {
-                EditorSceneManager.CloseScene(scene, true);
-            }
         }
 
         public T AddEventHandler<T>() where T : ScriptableObject, ITestRunnerListener

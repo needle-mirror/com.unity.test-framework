@@ -1,6 +1,8 @@
+using System;
+
 namespace UnityEditor.TestTools.TestRunner.UnityTestProtocol
 {
-    interface IUtpLogger
+    internal interface IUtpLogger
     {
         void Log(Message msg);
     }

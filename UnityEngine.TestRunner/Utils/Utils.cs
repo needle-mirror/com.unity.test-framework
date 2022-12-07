@@ -60,7 +60,7 @@ namespace UnityEngine.TestTools.Utils
         /// class UtilsTests
         /// {
         ///     [Test]
-        ///     public void ChechThat_FloatsAreAbsoluteEqual()
+        ///     public void CheckThat_FloatsAreAbsoluteEqual()
         ///     {
         ///         float expected = 0f;
         ///         float actual = 10e-6f;

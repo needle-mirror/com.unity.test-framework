@@ -25,7 +25,7 @@ namespace UnityEngine.TestTools
         }
 
         internal Func<long> GetUtcNow = () => new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds();
-        
+
         protected T[] BeforeActions = new T[0];
 
         protected T[] AfterActions = new T[0];
@@ -41,8 +41,8 @@ namespace UnityEngine.TestTools
 
             return cacheStorage[fixtureType].ToArray();
         }
-        
-        protected static T[] GetTestActions(IDictionary<MethodInfo,  List<T>> cacheStorage, MethodInfo methodInfo) 
+
+        protected static T[] GetTestActions(IDictionary<MethodInfo,  List<T>> cacheStorage, MethodInfo methodInfo)
         {
             if (cacheStorage.TryGetValue(methodInfo, out var result))
             {
@@ -58,9 +58,9 @@ namespace UnityEngine.TestTools
                     attributesForMethodInfo.Add(attribute1);
                 }
             }
-            
+
             cacheStorage[methodInfo] = attributesForMethodInfo;
-            
+
             return cacheStorage[methodInfo].ToArray();
         }
 
@@ -105,7 +105,10 @@ namespace UnityEngine.TestTools
                 state = ScriptableObject.CreateInstance<BeforeAfterTestCommandState>();
             }
 
-            state.ApplyTestResult(context.CurrentResult);
+            if(state.ShouldRestore)
+            {
+                state.ApplyContext(unityContext);
+            }
 
             while (state.NextBeforeStepIndex < BeforeActions.Length)
             {
@@ -149,20 +152,18 @@ namespace UnityEngine.TestTools
                         {
                             state.TestHasRun = true;
                             context.CurrentResult.RecordPrefixedException(m_BeforeErrorPrefix, ex);
-                            state.StoreTestResult(context.CurrentResult);
+                            state.StoreContext(unityContext);
                             break;
                         }
 
                         state.NextBeforeStepPc = ActivePcHelper.GetEnumeratorPC(enumerator);
-                        state.StoreTestResult(context.CurrentResult);
+                        state.StoreContext(unityContext);
                         if (!AllowFrameSkipAfterAction(action))
                         {
                             break;
                         }
-                        else
-                        {
-                            yield return enumerator.Current;
-                        }
+
+                        yield return enumerator.Current;
 
                         if (GetUtcNow() - state.Timestamp > unityContext.TestCaseTimeout || CoroutineTimedOut(unityContext))
                         {
@@ -184,14 +185,14 @@ namespace UnityEngine.TestTools
                     var executeEnumerable = ((IEnumerableTestMethodCommand)innerCommand).ExecuteEnumerable(context);
                     foreach (var iterator in executeEnumerable)
                     {
-                        state.StoreTestResult(context.CurrentResult);
+                        state.StoreContext(unityContext);
                         yield return iterator;
                     }
                 }
                 else
                 {
                     context.CurrentResult = innerCommand.Execute(context);
-                    state.StoreTestResult(context.CurrentResult);
+                    state.StoreContext(unityContext);
                 }
 
                 state.TestHasRun = true;
@@ -210,7 +211,7 @@ namespace UnityEngine.TestTools
                 catch (Exception ex)
                 {
                     context.CurrentResult.RecordPrefixedException(m_AfterErrorPrefix, ex);
-                    state.StoreTestResult(context.CurrentResult);
+                    state.StoreContext(unityContext);
                     break;
                 }
                 ActivePcHelper.SetEnumeratorPC(enumerator, state.NextAfterStepPc);
@@ -239,12 +240,12 @@ namespace UnityEngine.TestTools
                         catch (Exception ex)
                         {
                             context.CurrentResult.RecordPrefixedException(m_AfterErrorPrefix, ex);
-                            state.StoreTestResult(context.CurrentResult);
+                            state.StoreContext(unityContext);
                             break;
                         }
 
                         state.NextAfterStepPc = ActivePcHelper.GetEnumeratorPC(enumerator);
-                        state.StoreTestResult(context.CurrentResult);
+                        state.StoreContext(unityContext);
                         
 
                         if (GetUtcNow() - state.Timestamp > unityContext.TestCaseTimeout || CoroutineTimedOut(unityContext))
@@ -257,10 +258,8 @@ namespace UnityEngine.TestTools
                         {
                             break;
                         }
-                        else
-                        {
-                            yield return enumerator.Current;
-                        }
+
+                        yield return enumerator.Current;
                     }
                 }
 

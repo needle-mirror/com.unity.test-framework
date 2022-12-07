@@ -17,16 +17,16 @@ namespace UnityEngine.TestTools.TestRunner.GUI
         public string[] groupNames;
         public string[] categoryNames;
         public string[] testNames;
-        public bool synchronousOnly = false;
+        public bool synchronousOnly;
         
         public ITestFilter BuildNUnitFilter()
         {
             var filters = new List<ITestFilter>();
 
-            AddFilters(filters, testNames, (s) => new FullNameFilter(s));
+            AddFilters(filters, testNames, s => new FullNameFilter(s));
             AddFilters(filters, groupNames, OptimizedGroupFilter);
-            AddFilters(filters, assemblyNames, (s) => new AssemblyNameFilter(s));
-            AddFilters(filters, categoryNames, (s) => new CategoryFilterExtended(s) {IsRegex = true});
+            AddFilters(filters, assemblyNames, s => new AssemblyNameFilter(s));
+            AddFilters(filters, categoryNames, s => new CategoryFilterExtended(s) {IsRegex = true});
 
             if (synchronousOnly)
             {
@@ -36,7 +36,7 @@ namespace UnityEngine.TestTools.TestRunner.GUI
             return filters.Count == 0 ? TestFilter.Empty : new AndFilter(filters.ToArray());
         }
 
-        static FullNameFilter OptimizedGroupFilter(string s)
+        private static FullNameFilter OptimizedGroupFilter(string s)
         {
             if (s.Length >= 2)
             {
@@ -57,7 +57,7 @@ namespace UnityEngine.TestTools.TestRunner.GUI
 
             return new FullNameFilter(s) { IsRegex = true };
         }
-        
+
         private static void AddFilters(List<ITestFilter> filters, string[] values, Func<string, TestFilter> builder)
         {
             if (values == null || values.Length == 0)

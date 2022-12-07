@@ -1,12 +1,14 @@
 using System;
-using System.Data;
+using System.Reflection;
+using System.Text;
 using NUnit.Framework.Interfaces;
-using NUnit.Framework.Internal;
+using UnityEngine.TestRunner.NUnitExtensions.Runner;
 
 namespace UnityEngine.TestTools
 {
     internal class BeforeAfterTestCommandState : ScriptableObject
     {
+        private const BindingFlags Flags = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy;
         public int NextBeforeStepIndex;
         public int NextBeforeStepPc;
         public int NextAfterStepIndex;
@@ -19,6 +21,10 @@ namespace UnityEngine.TestTools
         public string CurrentTestStrackTrace;
         public bool TestAfterStarted;
         public long Timestamp;
+        public string Output;
+        public long StartTicks;
+        public double StartTimeOA;
+        public bool ShouldRestore;
 
         public void Reset()
         {
@@ -33,20 +39,36 @@ namespace UnityEngine.TestTools
             CurrentTestMessage = null;
             CurrentTestStrackTrace = null;
             TestAfterStarted = false;
+            Output = null;
+            StartTicks = 0;
+            StartTimeOA = 0;
+            ShouldRestore = false;
         }
 
-        public void StoreTestResult(TestResult result)
+        public void StoreContext(UnityTestExecutionContext context)
         {
+            var result = context.CurrentResult;
             CurrentTestResultStatus = result.ResultState.Status;
             CurrentTestResultLabel = result.ResultState.Label;
             CurrentTestResultSite = result.ResultState.Site;
             CurrentTestMessage = result.Message;
             CurrentTestStrackTrace = result.StackTrace;
+            Output = result.Output;
+            StartTicks = context.StartTicks;
+            StartTimeOA = context.StartTime.ToOADate();
+            ShouldRestore = true;
         }
 
-        public void ApplyTestResult(TestResult result)
+        public void ApplyContext(UnityTestExecutionContext context)
         {
-            result.SetResult(new ResultState(CurrentTestResultStatus, CurrentTestResultLabel, CurrentTestResultSite), CurrentTestMessage, CurrentTestStrackTrace);
+            var outputProp = context.CurrentResult.GetType().BaseType.GetField("_output", Flags);
+            var stringBuilder = (outputProp.GetValue(context.CurrentResult) as StringBuilder);
+            stringBuilder.Clear();
+            stringBuilder.Append(Output);
+            context.StartTicks = StartTicks;
+            context.StartTime = DateTime.FromOADate(StartTimeOA);
+            context.CurrentResult.SetResult(new ResultState(CurrentTestResultStatus, CurrentTestResultLabel, CurrentTestResultSite), CurrentTestMessage, CurrentTestStrackTrace);
+            ShouldRestore = false;
         }
     }
 }

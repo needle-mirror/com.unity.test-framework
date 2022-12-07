@@ -3,7 +3,6 @@ using System.Collections;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
 using NUnit.Framework.Internal.Commands;
-using NUnit.Framework.Internal.Execution;
 using UnityEngine;
 using UnityEngine.TestRunner.NUnitExtensions.Runner;
 using UnityEngine.TestTools;

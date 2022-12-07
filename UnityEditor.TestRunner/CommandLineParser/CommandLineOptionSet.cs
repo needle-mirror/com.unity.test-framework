@@ -4,7 +4,7 @@ namespace UnityEditor.TestRunner.CommandLineParser
 {
     internal class CommandLineOptionSet
     {
-        ICommandLineOption[] m_Options;
+        private ICommandLineOption[] m_Options;
 
         public CommandLineOptionSet(params ICommandLineOption[] options)
         {

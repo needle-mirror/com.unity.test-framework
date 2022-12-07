@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -23,6 +22,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                     .Select(Paths.UnifyDirectorySeparator);
             };
         }
+
         internal Func<string, string, IEnumerable<string>> GetCSFiles;
         protected IMonoCecilHelper MonoCecilHelper { get; private set; }
         public IAssetsDatabaseHelper AssetsDatabaseHelper { get; private set; }
@@ -50,10 +50,9 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                 (Editor ?? CodeEditor.CurrentEditor).OpenProject(fileOpenInfo.FilePath, fileOpenInfo.LineNumber, 1);
             }
             else
-            { 
+            {
                 AssetsDatabaseHelper.OpenAssetInItsDefaultExternalEditor(fileOpenInfo.FilePath, fileOpenInfo.LineNumber);
             }
-            
         }
 
         public IFileOpenInfo GetFileOpenInfo(Type type, MethodInfo method)
@@ -89,15 +88,20 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             }
             return type.Name;
         }
+
         public string FilePathToAssetsRelativeAndUnified(string filePath)
         {
             if (string.IsNullOrEmpty(filePath))
                 return string.Empty;
 
             filePath = Paths.UnifyDirectorySeparator(filePath);
-            var length = Paths.UnifyDirectorySeparator(Application.dataPath).Length - "Assets".Length;
 
-            return filePath.Substring(length);
+            const string assetsFolder = "Assets";
+            var assetsFolderIndex = filePath.IndexOf(assetsFolder);
+            if (assetsFolderIndex < 0)
+                return filePath;
+
+            return filePath.Substring(assetsFolderIndex, filePath.Length - assetsFolderIndex);
         }
 
         public bool OpenScriptInExternalEditor(string stacktrace)

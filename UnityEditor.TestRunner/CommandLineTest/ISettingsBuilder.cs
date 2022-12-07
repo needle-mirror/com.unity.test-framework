@@ -1,8 +1,8 @@
-using UnityEditor.TestTools.TestRunner.Api;
+using System;
 
 namespace UnityEditor.TestTools.TestRunner.CommandLineTest
 {
-    interface ISettingsBuilder
+    internal interface ISettingsBuilder
     {
         Api.ExecutionSettings BuildApiExecutionSettings(string[] commandLineArgs);
         ExecutionSettings BuildExecutionSettings(string[] commandLineArgs);

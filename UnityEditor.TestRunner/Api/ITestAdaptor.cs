@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using NUnit.Framework.Interfaces;
 
@@ -8,23 +9,23 @@ namespace UnityEditor.TestTools.TestRunner.Api
     /// </summary>
     public interface ITestAdaptor
     {
-        /// <summary> 
-        /// The ID of the test tree node. The ID can change if you add new tests to the suite. Use UniqueName, if you want to have a more permanent point of reference. 
+        /// <summary>
+        /// The ID of the test tree node. The ID can change if you add new tests to the suite. Use UniqueName, if you want to have a more permanent point of reference.
         /// </summary>
         string Id { get; }
-        /// <summary> 
-        /// The name of the test. E.g.,```MyTest```. 
+        /// <summary>
+        /// The name of the test. E.g.,```MyTest```.
         /// </summary>
         string Name { get; }
-        /// <summary> 
+        /// <summary>
         /// The full name of the test. E.g., ```MyNamespace.MyTestClass.MyTest```.
         /// </summary>
         string FullName { get; }
-        /// <summary> 
+        /// <summary>
         /// The total number of test cases in the node and all sub-nodes.
         /// </summary>
         int TestCaseCount { get; }
-        /// <summary> 
+        /// <summary>
         /// Whether the node has any children.
         /// </summary>
         bool HasChildren { get; }
@@ -36,7 +37,7 @@ namespace UnityEditor.TestTools.TestRunner.Api
         /// The child nodes.
         /// </summary>
         IEnumerable<ITestAdaptor> Children { get; }
-        /// <summary> 
+        /// <summary>
         /// The parent node, if any.
         /// </summary>
         ITestAdaptor Parent { get; }

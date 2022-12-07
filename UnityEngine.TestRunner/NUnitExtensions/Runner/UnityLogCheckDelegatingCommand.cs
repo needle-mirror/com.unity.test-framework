@@ -7,13 +7,12 @@ using NUnit.Framework.Internal;
 using NUnit.Framework.Internal.Commands;
 using UnityEngine.TestTools;
 using UnityEngine.TestTools.Logging;
-using UnityEngine.TestTools.TestRunner;
 
 namespace UnityEngine.TestRunner.NUnitExtensions.Runner
 {
-    class UnityLogCheckDelegatingCommand : DelegatingTestCommand, IEnumerableTestMethodCommand
+    internal class UnityLogCheckDelegatingCommand : DelegatingTestCommand, IEnumerableTestMethodCommand
     {
-        static Dictionary<object, bool?> s_AttributeCache = new Dictionary<object, bool?>();
+        private static Dictionary<object, bool?> s_AttributeCache = new Dictionary<object, bool?>();
 
         public UnityLogCheckDelegatingCommand(TestCommand innerCommand)
             : base(innerCommand) {}
@@ -57,12 +56,12 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
 
                 if (!CheckLogs(context.CurrentResult, logScope))
                     yield break;
-                
+
                 PostTestValidation(logScope, innerCommand, context.CurrentResult);
             }
         }
 
-        static bool CaptureException(TestResult result, Action action)
+        private static bool CaptureException(TestResult result, Action action)
         {
             try
             {
@@ -75,17 +74,17 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
                 return false;
             }
         }
-        
-        static bool ExecuteAndCheckLog(LogScope logScope, TestResult result, Action action)
+
+        private static bool ExecuteAndCheckLog(LogScope logScope, TestResult result, Action action)
             => CaptureException(result, action) && CheckLogs(result, logScope);
 
-        static void PostTestValidation(LogScope logScope, TestCommand command, TestResult result)
+        private static void PostTestValidation(LogScope logScope, TestCommand command, TestResult result)
         {
             if (MustExpect(command.Test.Method.MethodInfo))
                 CaptureException(result, logScope.NoUnexpectedReceived);
         }
 
-        static bool CheckLogs(TestResult result, LogScope logScope)
+        private static bool CheckLogs(TestResult result, LogScope logScope)
         {
             try
             {
@@ -100,7 +99,7 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
             return true;
         }
 
-        static bool CheckFailingLogs(LogScope logScope, TestResult result)
+        private static bool CheckFailingLogs(LogScope logScope, TestResult result)
         {
             try
             {
@@ -114,29 +113,29 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
 
             return true;
         }
-        
-        static bool MustExpect(MemberInfo method)
+
+        private static bool MustExpect(MemberInfo method)
         {
             // method
-            
+
             var methodAttr = method.GetCustomAttributes<TestMustExpectAllLogsAttribute>(true).FirstOrDefault();
             if (methodAttr != null)
                 return methodAttr.MustExpect;
-            
+
             // fixture
-            
+
             var fixture = method.DeclaringType;
             if (!s_AttributeCache.TryGetValue(fixture, out var mustExpect))
             {
                 var fixtureAttr = fixture.GetCustomAttributes<TestMustExpectAllLogsAttribute>(true).FirstOrDefault();
                 mustExpect = s_AttributeCache[fixture] = fixtureAttr?.MustExpect;
             }
-            
+
             if (mustExpect != null)
                 return mustExpect.Value;
 
             // assembly
-            
+
             var assembly = fixture.Assembly;
             if (!s_AttributeCache.TryGetValue(assembly, out mustExpect))
             {

@@ -1,12 +1,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using NUnit;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
+using NUnit.Framework.Internal.Execution;
 using UnityEngine.TestTools;
 using UnityEngine.TestTools.NUnitExtensions;
 
@@ -53,11 +53,11 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
 
         public bool IsTestRunning
         {
-            get { return TopLevelWorkItem != null && TopLevelWorkItem.State == NUnit.Framework.Internal.Execution.WorkItemState.Running; }
+            get { return TopLevelWorkItem != null && TopLevelWorkItem.State == WorkItemState.Running; }
         }
         public bool IsTestComplete
         {
-            get { return TopLevelWorkItem != null && TopLevelWorkItem.State == NUnit.Framework.Internal.Execution.WorkItemState.Complete; }
+            get { return TopLevelWorkItem != null && TopLevelWorkItem.State == WorkItemState.Complete; }
         }
 
         public UnityTestAssemblyRunner(UnityTestAssemblyBuilder builder, WorkItemFactory factory)

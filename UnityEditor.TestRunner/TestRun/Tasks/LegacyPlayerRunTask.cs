@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Linq;
+using UnityEditor.TestRunner.TestLaunchers;
 using UnityEngine.TestTools.TestRunner;
 
 namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
@@ -12,7 +14,11 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
             var settings = PlaymodeTestsControllerSettings.CreateRunnerSettings(executionSettings.filters.Select(filter => filter.ToRuntimeTestRunnerFilter(executionSettings.runSynchronously)).ToArray(), testJobData.executionSettings.orderedTestNames);
             var launcher = new PlayerLauncher(settings, executionSettings.targetPlatform, executionSettings.overloadTestRunSettings, executionSettings.playerHeartbeatTimeout, executionSettings.playerSavePath);
             launcher.Run();
-            yield return null;
+            
+            while (RemoteTestRunController.instance.isRunning)
+            {
+                yield return null;
+            }
         }
     }
 }

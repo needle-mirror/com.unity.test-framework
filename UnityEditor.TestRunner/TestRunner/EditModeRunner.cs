@@ -5,15 +5,13 @@ using System.Linq;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
 using NUnit.Framework.Internal.Filters;
-using UnityEngine;
-using UnityEngine.TestTools.NUnitExtensions;
-using UnityEngine.TestTools.TestRunner;
-using UnityEngine.TestTools;
-using UnityEngine.TestTools.TestRunner.GUI;
-using UnityEditor.Callbacks;
 using UnityEditor.TestTools.TestRunner.Api;
+using UnityEngine;
 using UnityEngine.TestRunner.NUnitExtensions;
 using UnityEngine.TestRunner.NUnitExtensions.Runner;
+using UnityEngine.TestTools;
+using UnityEngine.TestTools.NUnitExtensions;
+using UnityEngine.TestTools.TestRunner;
 
 namespace UnityEditor.TestTools.TestRunner
 {
@@ -52,17 +50,10 @@ namespace UnityEditor.TestTools.TestRunner
         [SerializeField]
         private List<ScriptableObject> m_CallbackObjects = new List<ScriptableObject>();
 
-        [SerializeField]
-        private TestStartedEvent m_TestStartedEvent = new TestStartedEvent();
-
-        [SerializeField]
-        private TestFinishedEvent m_TestFinishedEvent = new TestFinishedEvent();
-
-        [SerializeField]
-        private RunStartedEvent m_RunStartedEvent = new RunStartedEvent();
-
-        [SerializeField]
-        private RunFinishedEvent m_RunFinishedEvent = new RunFinishedEvent();
+        internal TestStartedEvent m_TestStartedEvent;
+        internal TestFinishedEvent m_TestFinishedEvent;
+        private RunStartedEvent m_RunStartedEvent;
+        private RunFinishedEvent m_RunFinishedEvent;
 
         [SerializeField]
         private TestRunnerStateSerializer m_TestRunnerStateSerializer = new TestRunnerStateSerializer();
@@ -88,7 +79,7 @@ namespace UnityEditor.TestTools.TestRunner
         private string[] m_OrderedTestNames;
 
         [SerializeField] 
-        public bool RunFinished = false;
+        public bool RunFinished;
 
         public bool RunningSynchronously { get; private set; }
 
@@ -100,7 +91,9 @@ namespace UnityEditor.TestTools.TestRunner
 
         public IUnityTestAssemblyRunnerFactory UnityTestAssemblyRunnerFactory { get; set; }
 
-        public void Init(Filter[] filters, TestPlatform platform, bool runningSynchronously, string[] orderedTestNames)
+        public void Init(Filter[] filters, TestPlatform platform, bool runningSynchronously,
+            RunStartedEvent runStartedEvent, TestStartedEvent testStartedEvent, TestFinishedEvent testFinishedEvent, RunFinishedEvent runFinishedEvent, 
+            string[] orderedTestNames)
         {
             m_Filters = filters;
             m_TestPlatform = platform;
@@ -108,6 +101,10 @@ namespace UnityEditor.TestTools.TestRunner
             m_ExecutedTests = new List<TestResultSerializer>();
             m_OrderedTestNames = orderedTestNames;
             RunningSynchronously = runningSynchronously;
+            m_RunStartedEvent = runStartedEvent;
+            m_TestStartedEvent = testStartedEvent;
+            m_TestFinishedEvent = testFinishedEvent;
+            m_RunFinishedEvent = runFinishedEvent;
             InitRunner();
         }
 
@@ -125,6 +122,30 @@ namespace UnityEditor.TestTools.TestRunner
             OuterUnityTestActionCommand.ActivePcHelper = new EditModePcHelper();
         }
 
+        //TODO: Understand if we need to keep OnEnable or we can just have the Resumue method
+        public void Resume(RunStartedEvent runStartedEvent, TestStartedEvent testStartedEvent, TestFinishedEvent testFinishedEvent, RunFinishedEvent runFinishedEvent)
+        {
+            if (m_ExecuteOnEnable)
+            {
+                m_RunStartedEvent = runStartedEvent;
+                m_TestStartedEvent = testStartedEvent;
+                m_TestFinishedEvent = testFinishedEvent;
+                m_RunFinishedEvent = runFinishedEvent;
+                InitRunner();
+                foreach (var callback in m_CallbackObjects)
+                {
+                    AddListeners(callback as ITestRunnerListener);
+                }
+                m_ConstructDelegator = new ConstructDelegator(m_TestRunnerStateSerializer);
+
+                EnumeratorStepHelper.SetEnumeratorPC(m_CurrentPC);
+
+                UnityWorkItemDataHolder.alreadyExecutedTests = m_ExecutedTests.Select(x => x.uniqueName).ToList();
+                UnityWorkItemDataHolder.alreadyStartedTests = m_AlreadyStartedTests;
+                Run();
+            }
+        }
+        
         public void OnEnable()
         {
             if (m_ExecuteOnEnable)
@@ -300,7 +321,7 @@ namespace UnityEditor.TestTools.TestRunner
             if (!RunningSynchronously)
                 EditorApplication.update -= TestConsumer;
    
-            TestLauncherBase.ExecutePostBuildCleanupMethods(this.GetLoadedTests(), this.GetFilter(), Application.platform);
+            TestLauncherBase.ExecutePostBuildCleanupMethods(GetLoadedTests(), GetFilter(), Application.platform);
             
             m_RunFinishedEvent.Invoke(m_Runner.Result);
             RunFinished = true;

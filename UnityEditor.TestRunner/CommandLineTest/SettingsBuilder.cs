@@ -1,8 +1,10 @@
 using System;
 using System.IO;
+using System.Linq;
 using UnityEditor.TestRunner.CommandLineParser;
 using UnityEditor.TestTools.TestRunner.Api;
 using UnityEditor.TestTools.TestRunner.GUI;
+using UnityEngine;
 
 namespace UnityEditor.TestTools.TestRunner.CommandLineTest
 {
@@ -58,33 +60,20 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
 
             CheckForScriptCompilationErrors();
 
-            LogParametersForRun(testPlatform, testFilters, testCategories, testSettingsFilePath);
-
             var testSettings = GetTestSettings(testSettingsFilePath);
-
-            var filter = new Filter()
+            var filter = new Filter
             {
+                testMode = testPlatform.ToLower() == "editmode" ? TestMode.EditMode : TestMode.PlayMode,
                 groupNames = testFilters,
                 categoryNames = testCategories,
                 assemblyNames = testAssemblyNames
             };
 
-            var buildTarget = SetFilterAndGetBuildTarget(testPlatform, filter);
-
-            RerunCallbackData.instance.runFilters = new []{new UITestRunnerFilter()
+            var settings = new Api.ExecutionSettings
             {
-                categoryNames = filter.categoryNames,
-                groupNames = filter.groupNames,
-                testRepetitions = testRepetitions
-            }};
-
-            RerunCallbackData.instance.testMode = filter.testMode;
-
-            var settings = new Api.ExecutionSettings()
-            {
-                filters = new []{filter},
+                filters = new []{ filter },
                 overloadTestRunSettings = new RunSettings(testSettings),
-                targetPlatform = buildTarget,
+                targetPlatform = GetBuildTarget(testPlatform),
                 runSynchronously = runSynchronously,
                 playerSavePath = buildPlayerPath,
                 orderedTestNames = GetOrderedTestList(orderedTestListFilePath)
@@ -92,7 +81,7 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
 
             if (playerHeartbeatTimeout != null)
             {
-                settings.playerHeartbeatTimeout = playerHeartbeatTimeout.Value;    
+                settings.playerHeartbeatTimeout = playerHeartbeatTimeout.Value;
             }
 
             return settings;
@@ -110,14 +99,14 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
             );
             optionSet.Parse(commandLineArgs);
 
-            return new ExecutionSettings()
+            return new ExecutionSettings
             {
                 TestResultsFile = resultFilePath,
                 DeviceLogsDirectory = deviceLogsDirectory
             };
         }
 
-        void DisplayQuitWarningIfQuitIsGiven(bool quitIsGiven)
+        private void DisplayQuitWarningIfQuitIsGiven(bool quitIsGiven)
         {
             if (quitIsGiven)
             {
@@ -125,7 +114,7 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
             }
         }
 
-        void CheckForScriptCompilationErrors()
+        private void CheckForScriptCompilationErrors()
         {
             if (m_ScriptCompilationFailedCheck())
             {
@@ -133,24 +122,7 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
             }
         }
 
-        void LogParametersForRun(string testPlatform, string[] testFilters, string[] testCategories, string testSettingsFilePath)
-        {
-            m_LogAction("Running tests for " + testPlatform);
-            if (testFilters != null && testFilters.Length > 0)
-            {
-                m_LogAction("With test filter: " + string.Join(", ", testFilters));
-            }
-            if (testCategories != null && testCategories.Length > 0)
-            {
-                m_LogAction("With test categories: " + string.Join(", ", testCategories));
-            }
-            if (!string.IsNullOrEmpty(testSettingsFilePath))
-            {
-                m_LogAction("With test settings file: " + testSettingsFilePath);
-            }
-        }
-
-        ITestSettings GetTestSettings(string testSettingsFilePath)
+        private ITestSettings GetTestSettings(string testSettingsFilePath)
         {
             ITestSettings testSettings = null;
             if (!string.IsNullOrEmpty(testSettingsFilePath))
@@ -179,31 +151,23 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
             return null;
         }
 
-        static BuildTarget? SetFilterAndGetBuildTarget(string testPlatform, Filter filter)
+        private static BuildTarget? GetBuildTarget(string testPlatform)
         {
-            BuildTarget? buildTarget = null;
-            if (testPlatform.ToLower() == "editmode")
+            var testPlatformLower = testPlatform.ToLower();
+            if (testPlatformLower == "editmode" || testPlatformLower == "playmode" || testPlatformLower == "editor" ||
+                string.IsNullOrEmpty(testPlatformLower))
             {
-                filter.testMode = TestMode.EditMode;
+                return null;
             }
-            else if (testPlatform.ToLower() == "playmode")
-            {
-                filter.testMode = TestMode.PlayMode;
-            }
-            else
-            {
-                try
-                {
-                    buildTarget = (BuildTarget)Enum.Parse(typeof(BuildTarget), testPlatform, true);
 
-                    filter.testMode = TestMode.PlayMode;
-                }
-                catch (ArgumentException)
-                {
-                    throw new SetupException(SetupException.ExceptionType.PlatformNotFound, testPlatform);
-                }
+            try
+            {
+                return (BuildTarget)Enum.Parse(typeof(BuildTarget), testPlatform, true);
             }
-            return buildTarget;
+            catch (ArgumentException)
+            {
+                throw new SetupException(SetupException.ExceptionType.PlatformNotFound, testPlatform);
+            }
         }
     }
 }

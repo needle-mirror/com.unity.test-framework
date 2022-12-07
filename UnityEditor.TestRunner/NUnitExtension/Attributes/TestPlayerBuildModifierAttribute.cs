@@ -19,7 +19,7 @@ namespace UnityEditor.TestTools
             var interfaceType = typeof(ITestPlayerBuildModifier);
             if (!interfaceType.IsAssignableFrom(type))
             {
-                throw new ArgumentException(string.Format("Type provided to {0} does not implement {1}", this.GetType().Name, interfaceType.Name));
+                throw new ArgumentException(string.Format("Type provided to {0} does not implement {1}", GetType().Name, interfaceType.Name));
             }
             m_Type = type;
         }
@@ -30,4 +30,3 @@ namespace UnityEditor.TestTools
         }
     }
 }
-

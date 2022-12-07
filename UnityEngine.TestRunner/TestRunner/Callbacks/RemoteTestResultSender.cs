@@ -94,16 +94,18 @@ namespace UnityEngine.TestTools.TestRunner.Callbacks
             {
                 lock (m_LockQueue)
                 {
-                    if (PlayerConnection.instance.isConnected && m_SendQueue.Count > 0)
+                    if (m_SendQueue.Count > 0)
                     {
-                        ResetNextPlayerAliveMessageTime();
-                        var queueData = m_SendQueue.Dequeue();
-                        PlayerConnection.instance.Send(queueData.id, queueData.data);
+                        if (PlayerConnection.instance.isConnected)
+                        {
+                            ResetNextPlayerAliveMessageTime();
+                            var queueData = m_SendQueue.Dequeue();
+                            PlayerConnection.instance.Send(queueData.id, queueData.data);
+                        }
+
                         yield return null;
                     }
-
-                    //This is needed so we dont stall the player totally
-                    if (!m_SendQueue.Any())
+                    else //This is needed so we dont stall the player totally
                     {
                         SendAliveMessageIfNeeded();
                         yield return new WaitForSeconds(0.02f);

@@ -1,8 +1,9 @@
+using System;
 using UnityEditor.TestTools.TestRunner.Api;
 
 namespace UnityEditor.TestTools.TestRunner
 {
-    class PlayerLauncherTestRunSettings : ITestRunSettings
+    internal class PlayerLauncherTestRunSettings : ITestRunSettings
     {
         public bool buildOnly { set; get; }
 

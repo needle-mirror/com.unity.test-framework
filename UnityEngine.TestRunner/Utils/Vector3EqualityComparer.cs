@@ -1,5 +1,5 @@
+using System;
 using System.Collections.Generic;
-
 
 namespace UnityEngine.TestTools.Utils
 {
@@ -26,8 +26,9 @@ namespace UnityEngine.TestTools.Utils
         /// <param name="allowedError">This value identifies the calculation error allowed.</param>
         public Vector3EqualityComparer(float allowedError)
         {
-            this.AllowedError = allowedError;
+            AllowedError = allowedError;
         }
+
         ///<summary>
         /// Compares the actual and expected Vector3 objects
         /// for equality using <see cref="Utils.AreFloatsEqual"/> to compare the x, y, and z attributes of Vector3.
@@ -49,7 +50,7 @@ namespace UnityEngine.TestTools.Utils
         ///     var expected = new Vector3(0f, 0f, 0f);
         ///     var comparer = new Vector3EqualityComparer(10e-6f);
         ///
-        /// 
+        ///
         ///     Assert.That(actual, Is.EqualTo(expected).Using(comparer));
         ///
         ///     //Default error 0.0001f

@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
-using NUnit.Framework.Internal;
 using UnityEditor.TestTools.TestRunner.TestRun;
 using UnityEngine;
-using UnityEngine.TestRunner.NUnitExtensions;
 using UnityEngine.TestTools;
 
 namespace UnityEditor.TestTools.TestRunner.Api.Analytics
@@ -51,7 +49,7 @@ namespace UnityEditor.TestTools.TestRunner.Api.Analytics
 
             var executionSettings = activeRuns[0].executionSettings;
             var filter = executionSettings.filters.First();
-            var runFinishedData = new RunFinishedData()
+            var runFinishedData = new RunFinishedData
             {
                 totalTests = testResult.Test.TestCaseCount,
                 numPassedTests = testResult.PassCount,

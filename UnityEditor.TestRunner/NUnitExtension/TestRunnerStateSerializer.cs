@@ -1,11 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.TestRunner.NUnitExtensions.Runner;
-using UnityEngine.TestTools.NUnitExtensions;
 using UnityEngine.TestTools.Logging;
+using UnityEngine.TestTools.NUnitExtensions;
 
 namespace UnityEditor.TestTools.TestRunner
 {

@@ -18,7 +18,7 @@ namespace UnityEngine.TestRunner
     /// {
     ///    public void RunStarted(ITest testsToRun)
     ///    {
-    ///    
+    ///
     ///    }
     ///
     ///    public void RunFinished(ITestResult testResults)
@@ -28,12 +28,12 @@ namespace UnityEngine.TestRunner
     ///
     ///    public void TestStarted(ITest test)
     ///    {
-    ///    
+    ///
     ///    }
     ///
     ///    public void TestFinished(ITestResult result)
     ///    {
-    ///    
+    ///
     ///    }
     ///}
     /// </code>
@@ -55,7 +55,7 @@ namespace UnityEngine.TestRunner
             {
                 throw new ArgumentException(string.Format(
                     "Type {2} provided to {0} does not implement {1}. If the stripping level is set to high, the implementing class should have the {3}.",
-                    this.GetType().Name, interfaceType.Name, type.Name, typeof(PreserveAttribute).Name));
+                    GetType().Name, interfaceType.Name, type.Name, typeof(PreserveAttribute).Name));
             }
             m_Type = type;
         }

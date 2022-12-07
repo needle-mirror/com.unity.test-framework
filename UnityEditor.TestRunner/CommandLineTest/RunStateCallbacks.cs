@@ -4,9 +4,9 @@ using UnityEngine;
 
 namespace UnityEditor.TestTools.TestRunner.CommandLineTest
 {
-    [Serializable]
-    internal class ExitCallbacks : ScriptableObject, IErrorCallbacks
+    internal class RunStateCallbacks : IErrorCallbacks
     {
+        internal IRunData runData = RunData.instance;
         internal static bool preventExit;
 
         public void RunFinished(ITestResultAdaptor testResults)
@@ -16,19 +16,17 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
                 return;
             }
 
-            if (!ExitCallbacksDataHolder.instance.AnyTestsExecuted)
+            if (runData.RunState == TestRunState.NoCallbacksReceived)
             {
-                Debug.LogFormat(LogType.Warning, LogOption.NoStacktrace, null, "No tests were executed");
+                runData.RunState = TestRunState.CompletedJobWithoutAnyTestsExecuted;
             }
-
-            EditorApplication.Exit(ExitCallbacksDataHolder.instance.RunFailed ? (int)Executer.ReturnCodes.Failed : (int)Executer.ReturnCodes.Ok);
         }
 
         public void TestStarted(ITestAdaptor test)
         {
-            if (!test.IsSuite)
+            if (!test.IsSuite && runData.RunState == TestRunState.NoCallbacksReceived)
             {
-                ExitCallbacksDataHolder.instance.AnyTestsExecuted = true;
+                runData.RunState = TestRunState.OneOrMoreTestsExecutedWithNoFailures;
             }
         }
 
@@ -36,7 +34,7 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
         {
             if (!result.Test.IsSuite && (result.TestStatus == TestStatus.Failed || result.TestStatus == TestStatus.Inconclusive))
             {
-                ExitCallbacksDataHolder.instance.RunFailed = true;
+                runData.RunState = TestRunState.OneOrMoreTestsExecutedWithOneOrMoreFailed;
             }
         }
 
@@ -46,7 +44,8 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
 
         public void OnError(string message)
         {
-            EditorApplication.Exit((int)Executer.ReturnCodes.RunError);
+            runData.RunState = TestRunState.RunError;
+            runData.RunErrorMessage = message;
         }
     }
 }

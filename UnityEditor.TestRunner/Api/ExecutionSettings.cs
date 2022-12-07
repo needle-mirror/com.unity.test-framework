@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Text;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal.Filters;
 using UnityEngine;
@@ -53,6 +54,7 @@ namespace UnityEditor.TestTools.TestRunner.Api
 
         [SerializeField]
         internal string[] orderedTestNames;
+
         internal string playerSavePath { get; set; }
 
         internal bool EditModeIncluded()
@@ -101,6 +103,39 @@ namespace UnityEditor.TestTools.TestRunner.Api
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Implementation of ToString() that builds a string composed of the execution settings.
+        /// </summary>
+        /// <returns>The current execution settings as a string.</returns>
+        public override string ToString()
+        {
+            var stringBuilder = new StringBuilder();
+            stringBuilder.AppendLine($"{nameof(ExecutionSettings)} with details:");
+            stringBuilder.AppendLine($"{nameof(targetPlatform)} = {targetPlatform}");
+            stringBuilder.AppendLine($"{nameof(playerHeartbeatTimeout)} = {playerHeartbeatTimeout}");
+
+            if (filters.Length == 0)
+            {
+                stringBuilder.AppendLine($"{nameof(filters)} = {{}}");
+            }
+
+            for (int i = 0; i < filters.Length; i++)
+            {
+                stringBuilder.AppendLine($"{nameof(filters)}[{i}] = ");
+                var filterStrings = filters[i]
+                    .ToString()
+                    .Split(new[] {Environment.NewLine}, StringSplitOptions.None)
+                    .ToArray();
+
+                foreach (var filterString in filterStrings)
+                {
+                    stringBuilder.AppendLine($"   {filterString}");
+                }
+            }
+
+            return stringBuilder.ToString();
         }
     }
 }

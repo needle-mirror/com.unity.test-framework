@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Text.RegularExpressions;
 using NUnit.Framework.Interfaces;
 
 namespace UnityEngine.TestRunner.NUnitExtensions.Filters

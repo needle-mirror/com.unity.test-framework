@@ -1,7 +1,9 @@
+using System;
+
 namespace UnityEditor.TestTools.TestRunner.Api
 {
     /// <summary>
-    /// The RunState enum indicates whether a test can be executed. 
+    /// The RunState enum indicates whether a test can be executed.
     /// </summary>
     public enum RunState
     {
@@ -11,7 +13,7 @@ namespace UnityEditor.TestTools.TestRunner.Api
         NotRunnable,
 
         /// <summary>
-        /// The test is runnable. 
+        /// The test is runnable.
         /// </summary>
         Runnable,
 
@@ -28,6 +30,6 @@ namespace UnityEditor.TestTools.TestRunner.Api
         /// <summary>
         /// The test has been ignored. May appear on a Test, when the IgnoreAttribute is used.
         /// </summary>
-        Ignored,
+        Ignored
     }
 }

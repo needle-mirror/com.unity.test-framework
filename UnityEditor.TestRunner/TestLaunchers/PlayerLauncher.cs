@@ -2,9 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading;
-using NUnit.Framework.Internal.Filters;
-using UnityEditor;
+using UnityEditor.Build.Reporting;
 using UnityEditor.SceneManagement;
 using UnityEditor.TestRunner.TestLaunchers;
 using UnityEditor.TestTools.TestRunner.Api;
@@ -13,6 +11,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.TestRunner.Utils;
 using UnityEngine.TestTools.TestRunner;
 using UnityEngine.TestTools.TestRunner.Callbacks;
+using Object = UnityEngine.Object;
 
 namespace UnityEditor.TestTools.TestRunner
 {
@@ -86,7 +85,7 @@ namespace UnityEditor.TestTools.TestRunner
                 if (!success)
                 {
                     editorConnectionTestCollector.CleanUp();
-                    ScriptableObject.DestroyImmediate(editorConnectionTestCollector);
+                    Object.DestroyImmediate(editorConnectionTestCollector);
                     Debug.LogError("Player build failed");
                     throw new TestLaunchFailedException("Player build failed");
                 }
@@ -141,10 +140,10 @@ namespace UnityEditor.TestTools.TestRunner
             }
 
             var result = BuildPipeline.BuildPlayer(buildOptions.BuildPlayerOptions);
-            if (result.summary.result != Build.Reporting.BuildResult.Succeeded)
+            if (result.summary.result != BuildResult.Succeeded)
                 Debug.LogError(result.SummarizeErrors());
 
-            return result.summary.result == Build.Reporting.BuildResult.Succeeded;
+            return result.summary.result == BuildResult.Succeeded;
         }
 
         internal PlayerLauncherBuildOptions GetBuildOptions(string scenePath)
@@ -158,7 +157,7 @@ namespace UnityEditor.TestTools.TestRunner
 
             var buildOptions = new BuildPlayerOptions();
 
-            var scenes = new List<string>() { scenePath };
+            var scenes = new List<string> { scenePath };
             scenes.AddRange(EditorBuildSettings.scenes.Select(x => x.path));
             buildOptions.scenes = scenes.ToArray();
 

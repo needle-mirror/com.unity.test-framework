@@ -70,8 +70,8 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
 
         public virtual IEnumerable Execute()
         {
-            Context.CurrentTest = this.Test;
-            Context.CurrentResult = this.Result;
+            Context.CurrentTest = Test;
+            Context.CurrentResult = Result;
 
             if (m_ExecuteTestStartEvent)
             {

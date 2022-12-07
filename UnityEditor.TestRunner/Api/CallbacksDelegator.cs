@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using System.Text;
 using NUnit.Framework.Interfaces;
-using NUnit.Framework.Internal;
 using UnityEngine;
 using UnityEngine.TestRunner.TestLaunchers;
 

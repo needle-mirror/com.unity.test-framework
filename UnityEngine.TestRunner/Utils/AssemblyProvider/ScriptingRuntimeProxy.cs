@@ -1,3 +1,5 @@
+using System;
+
 namespace UnityEngine.TestTools.Utils
 {
     internal class ScriptingRuntimeProxy : IScriptingRuntimeProxy

@@ -65,13 +65,10 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                 filter.ClearResults(newResultList.OfType<UITestRunnerFilter.IClearableResult>().ToList());                
             }
 
-            RerunCallbackData.instance.runFilters = filters;
-            RerunCallbackData.instance.testMode = TestMode.EditMode;
-
             var testRunnerApi = ScriptableObject.CreateInstance<TestRunnerApi>();
-            testRunnerApi.Execute(new ExecutionSettings()
+            testRunnerApi.Execute(new ExecutionSettings
             {
-                filters = filters.Select(filter => new Filter()
+                filters = filters.Select(filter => new Filter
                 {
                     assemblyNames = filter.assemblyNames,
                     categoryNames = filter.categoryNames,

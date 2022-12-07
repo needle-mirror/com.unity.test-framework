@@ -9,7 +9,7 @@ namespace Tests
 {
     internal class ScriptAddingTests
     {
-        private const string k_fileName = @"Assets\\Tests\\TempScript.cs"; 
+        private const string pathToFile = "Assets/Tests/TempScript.cs"; 
         
         [UnityTest]
         public IEnumerator CreatedScriptIsVerified()
@@ -25,24 +25,31 @@ namespace Tests
         [UnityTearDown]
         public IEnumerator Teardown()
         {
-            if (!File.Exists(k_fileName))
+            if (!File.Exists(pathToFile))
             {
                 yield break;
             }
             
-            File.Delete(k_fileName);
+            File.Delete(pathToFile);
             yield return new RecompileScripts();
         }
         
         private void CreateScript()
         {
-            File.WriteAllText(k_fileName, @"
-            public class MyTempScript {
-                public string Verify()
-                {
-                    return ""OK"";
-                }    
-            }");
+            try
+            {
+                File.WriteAllText(pathToFile, @"
+                public class MyTempScript {
+                    public string Verify()
+                    {
+                        return ""OK"";
+                    }    
+                }");
+            }
+            catch(DirectoryNotFoundException)
+            {
+                Assert.Inconclusive("The path to file is incorrect. Please make sure that the path to TempScript is valid.");
+            }
         }
 
         private string VerifyScript()

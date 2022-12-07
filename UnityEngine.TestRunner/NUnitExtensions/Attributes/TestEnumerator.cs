@@ -1,9 +1,7 @@
 using System;
 using System.Collections;
-using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
-using UnityEngine.TestRunner.NUnitExtensions;
 
 namespace UnityEngine.TestTools
 {

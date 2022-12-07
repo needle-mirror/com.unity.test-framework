@@ -15,22 +15,21 @@ namespace UnityEditor.TestTools.TestRunner.TestRun
         internal ITestJobDataHolder testJobDataHolder = TestJobDataHolder.instance;
 
         internal Action<EditorApplication.CallbackFunction> SubscribeCallback =
-            (callback) => EditorApplication.update += callback;
+            callback => EditorApplication.update += callback;
 
         // ReSharper disable once DelegateSubtraction
         internal Action<EditorApplication.CallbackFunction> UnsubscribeCallback =
-            (callback) => EditorApplication.update -= callback;
+            callback => EditorApplication.update -= callback;
 
         internal TestCommandPcHelper PcHelper = new EditModePcHelper();
         internal Func<ExecutionSettings, IEnumerable<TestTaskBase>> GetTasks = TaskList.GetTaskList;
         internal Action<Exception> LogException = Debug.LogException;
         internal Action<string> LogError = Debug.LogError;
-
         internal Action<string> ReportRunFailed = CallbacksDelegator.instance.RunFailed;
         internal Func<TestRunnerApi.RunProgressChangedEvent> RunProgressChanged = () => TestRunnerApi.runProgressChanged;
 
         private TestJobData m_JobData;
-        private IEnumerator m_Enumerator = null;
+        private IEnumerator m_Enumerator;
         private string m_CurrentTaskName;
 
         public string RunJob(TestJobData data)
@@ -84,6 +83,10 @@ namespace UnityEditor.TestTools.TestRunner.TestRun
             }
 
             m_JobData.Tasks = GetTasks(data.executionSettings).ToArray();
+            if (m_JobData.Tasks.Length == 0)
+            {
+                throw new Exception($"No tasks founds for {data.executionSettings}");
+            }
 
             if (!data.executionSettings.runSynchronously)
             {
@@ -225,7 +228,7 @@ namespace UnityEditor.TestTools.TestRunner.TestRun
 
             var lastIndex = m_JobData.taskInfoStack.Last().index;
             m_JobData.taskInfoStack.Clear();
-            m_JobData.taskInfoStack.Push(new TaskInfo()
+            m_JobData.taskInfoStack.Push(new TaskInfo
             {
                 index = lastIndex,
                 taskMode = TaskMode.Canceled
@@ -283,9 +286,10 @@ namespace UnityEditor.TestTools.TestRunner.TestRun
                 ReportRunProgress(true);
             }
         }
+
         private void ReportRunProgress(bool runHasFinished)
         {
-            RunProgressChanged().Invoke(new TestRunProgress()
+            RunProgressChanged().Invoke(new TestRunProgress
             {
                 CurrentStageName = m_JobData.runProgress.stageName ?? "",
                 CurrentStepName = m_JobData.runProgress.stepName ?? "",

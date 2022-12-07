@@ -52,7 +52,7 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
             }
         }
 
-        void CreateDirectory(string filePath)
+        private void CreateDirectory(string filePath)
         {
             var driectoryPath = Path.GetDirectoryName(filePath);
             if (!String.IsNullOrEmpty(driectoryPath))
@@ -73,7 +73,7 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
             }
         }
 
-        void WriteResultsToXml(ITestResultAdaptor result, XmlWriter xmlWriter)
+        private void WriteResultsToXml(ITestResultAdaptor result, XmlWriter xmlWriter)
         {
             // XML format as specified at https://github.com/nunit/docs/wiki/Test-Result-XML-Format
 
@@ -81,7 +81,7 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
 
             testRunNode.AddAttribute(k_Id, "2");
             testRunNode.AddAttribute(k_Testcasecount, (result.PassCount + result.FailCount + result.SkipCount + result.InconclusiveCount).ToString());
-            testRunNode.AddAttribute(k_Result, result.ResultState.ToString());
+            testRunNode.AddAttribute(k_Result, result.ResultState);
             testRunNode.AddAttribute(k_Total, (result.PassCount + result.FailCount + result.SkipCount + result.InconclusiveCount).ToString());
             testRunNode.AddAttribute(k_Passed, result.PassCount.ToString());
             testRunNode.AddAttribute(k_Failed, result.FailCount.ToString());

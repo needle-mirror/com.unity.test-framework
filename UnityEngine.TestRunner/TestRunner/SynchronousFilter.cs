@@ -1,12 +1,12 @@
+using System;
 using System.Collections;
 using System.Linq;
-using System.Reflection;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
 
 namespace UnityEngine.TestTools.TestRunner.GUI
 {
-    class SynchronousFilter : ITestFilter
+    internal class SynchronousFilter : ITestFilter
     {
         public TNode ToXml(bool recursive)
         {
@@ -22,7 +22,7 @@ namespace UnityEngine.TestTools.TestRunner.GUI
         {
             if (test.Method == null)
                 return true;
-            
+
             if (test.Method.ReturnType.Type == typeof(IEnumerator))
                 return false;
 
@@ -32,11 +32,11 @@ namespace UnityEngine.TestTools.TestRunner.GUI
             if (test.TypeInfo?.Type != null)
             {
                 if (Reflect.GetMethodsWithAttribute(test.TypeInfo.Type, typeof(UnitySetUpAttribute), true)
-                    .Any(mi => mi.ReturnType == typeof(System.Collections.IEnumerator)))
+                    .Any(mi => mi.ReturnType == typeof(IEnumerator)))
                     return false;
 
                 if (Reflect.GetMethodsWithAttribute(test.TypeInfo.Type, typeof(UnityTearDownAttribute), true)
-                    .Any(mi => mi.ReturnType == typeof(System.Collections.IEnumerator)))
+                    .Any(mi => mi.ReturnType == typeof(IEnumerator)))
                     return false;
             }
 

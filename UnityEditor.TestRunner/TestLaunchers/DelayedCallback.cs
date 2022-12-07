@@ -1,12 +1,14 @@
+using System;
+
 namespace UnityEditor.TestTools.TestRunner
 {
     internal class DelayedCallback
     {
-        private System.Action m_Callback;
+        private Action m_Callback;
         private double m_CallbackTime;
         private double m_Delay;
 
-        public DelayedCallback(System.Action function, double timeFromNow)
+        public DelayedCallback(Action function, double timeFromNow)
         {
             m_Callback = function;
             m_CallbackTime = EditorApplication.timeSinceStartup + timeFromNow;

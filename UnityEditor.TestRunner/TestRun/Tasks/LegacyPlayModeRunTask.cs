@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Linq;
 using UnityEngine.TestTools.TestRunner;
@@ -17,7 +18,7 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
             
             launcher.Run();
 
-            while (PlaymodeLauncher.IsRunning)
+            while (!PlaymodeLauncher.HasFinished)
             {
                 yield return null;
             }

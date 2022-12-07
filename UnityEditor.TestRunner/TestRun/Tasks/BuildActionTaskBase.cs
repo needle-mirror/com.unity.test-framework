@@ -1,11 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using NUnit.Framework.Interfaces;
 using UnityEngine;
 using UnityEngine.TestTools.Logging;
-using UnityEngine.TestTools.TestRunner;
 
 namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
 {
@@ -25,7 +23,7 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
         }
 
         protected abstract void Action(T target);
-        
+
         public override IEnumerator Execute(TestJobData testJobData)
         {
             if (testJobData.testTree == null)
@@ -43,12 +41,12 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
         protected IEnumerator ExecuteMethods(ITest testTree, ITestFilter testRunnerFilter)
         {
             var exceptions = new List<Exception>();
-            
+
             foreach (var targetClassType in attributeFinder.Search(testTree, testRunnerFilter, targetPlatform))
             {
                 try
                 {
-                    var targetClass = (T) createInstance(targetClassType);
+                    var targetClass = (T)createInstance(targetClassType);
 
                     logAction($"Executing {typeName} for: {targetClassType.FullName}.");
 

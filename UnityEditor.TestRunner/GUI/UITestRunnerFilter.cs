@@ -14,8 +14,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
         public string[] groupNames;
         public string[] categoryNames;
         public string[] testNames;
-        public int testRepetitions = 1;
-        public bool synchronousOnly = false;
+        public bool synchronousOnly;
 
         public static string AssemblyNameFromPath(string path)
         {
@@ -159,6 +158,5 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             List<string> Categories { get; }
             void Clear();
         }
-
     }
 }

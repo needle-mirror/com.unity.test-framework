@@ -10,9 +10,9 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
     internal class CleanupVerificationTask : FileCleanupVerifierTaskBase
     {
         private const string k_Indent = "    ";
-        
+
         internal Action<object> logAction = Debug.LogWarning;
-        
+
         public override IEnumerator Execute(TestJobData testJobData)
         {
             var currentFiles = GetAllFilesInAssetsDirectory();
@@ -27,7 +27,7 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
 
             yield return null;
         }
-        
+
         private void LogWarningForFilesIfAny(string[] filePaths)
         {
             if (filePaths.Length == 0)

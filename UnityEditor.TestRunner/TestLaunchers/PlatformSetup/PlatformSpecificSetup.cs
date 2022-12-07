@@ -106,7 +106,7 @@ namespace UnityEditor.TestTools.TestRunner
 
         private IDictionary<BuildTarget, IPlatformSetup> GetSetup()
         {
-            m_SetupTypes = new Dictionary<BuildTarget, IPlatformSetup>()
+            m_SetupTypes = new Dictionary<BuildTarget, IPlatformSetup>
             {
                 {BuildTarget.iOS, m_AppleiOSPlatformSetup},
                 {BuildTarget.tvOS, m_AppleTvOSPlatformSetup},

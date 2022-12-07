@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace UnityEngine.TestTools.Utils
@@ -23,7 +24,7 @@ namespace UnityEngine.TestTools.Utils
         /// <param name="allowedError">This value identifies the calculation error allowed.</param>
         public Vector4EqualityComparer(float allowedError)
         {
-            this.AllowedError = allowedError;
+            AllowedError = allowedError;
         }
 
         /// <summary>

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEditor.Networking.PlayerConnection;
 using UnityEditor.TestTools.TestRunner;
 using UnityEditor.TestTools.TestRunner.Api;
-using UnityEditor.TestTools.TestRunner.UnityTestProtocol;
 using UnityEngine;
 using UnityEngine.Networking.PlayerConnection;
 using UnityEngine.TestRunner.TestLaunchers;
@@ -16,6 +15,9 @@ namespace UnityEditor.TestRunner.TestLaunchers
         internal const int k_HeartbeatTimeout = 60 * 10;
 
         [SerializeField]
+        internal bool isRunning;
+
+        [SerializeField]
         private PlatformSpecificSetup m_PlatformSpecificSetup;
 
         [SerializeField]
@@ -23,21 +25,25 @@ namespace UnityEditor.TestRunner.TestLaunchers
 
         [SerializeField] 
         private int m_HearbeatTimeOut;
-        
-        enum MessageType
+
+        private enum MessageType
         {
-            RunStarted,
-            RunFinished,
             TestStarted,
             TestFinished,
+            RunStarted,
+            RunFinished
         }
-
         [Serializable]
-        struct Message
+        private struct Message
         {
-            public byte[] Bytes;
+            public MessageEventArgs MessageArgs;
             public MessageType Type;
-            public int PlayerId;
+
+            public Message(MessageEventArgs messageArgs, MessageType type)
+            {
+                MessageArgs = messageArgs;
+                Type = type;
+            }
         }
 
         [SerializeField]
@@ -46,10 +52,11 @@ namespace UnityEditor.TestRunner.TestLaunchers
         [SerializeField]
         private bool m_RegisteredMessageCallback;
 
-        private UnityEditor.TestTools.TestRunner.DelayedCallback m_TimeoutCallback;
+        private TestTools.TestRunner.DelayedCallback m_TimeoutCallback;
         
         public void Init(BuildTarget buildTarget, int heartbeatTimeout)
         {
+            isRunning = true;
             m_HearbeatTimeOut = heartbeatTimeout;
             m_PlatformSpecificSetup = new PlatformSpecificSetup(buildTarget);
             m_PlatformSpecificSetup.Setup();
@@ -73,10 +80,10 @@ namespace UnityEditor.TestRunner.TestLaunchers
             // minutes to react to all messages we receive because we only do 1ms of processing, then render all of the
             // editor etc. -- Instead, we use that 1ms time-window to enqueue messages and then react to them later
             // during the frame. This reduces the waiting time from minutes to seconds.
-            EditorConnection.instance.Register(PlayerConnectionMessageIds.runStartedMessageId, args => EnqueueMessage(args, MessageType.RunStarted));
-            EditorConnection.instance.Register(PlayerConnectionMessageIds.runFinishedMessageId, args => EnqueueMessage(args, MessageType.RunFinished));
-            EditorConnection.instance.Register(PlayerConnectionMessageIds.testStartedMessageId, args => EnqueueMessage(args, MessageType.TestStarted));
-            EditorConnection.instance.Register(PlayerConnectionMessageIds.testFinishedMessageId, args => EnqueueMessage(args, MessageType.TestFinished));
+            EditorConnection.instance.Register(PlayerConnectionMessageIds.testStartedMessageId, args => EnqueueMessage(new Message(args, MessageType.TestStarted)));
+            EditorConnection.instance.Register(PlayerConnectionMessageIds.testFinishedMessageId, args => EnqueueMessage(new Message(args, MessageType.TestFinished)));
+            EditorConnection.instance.Register(PlayerConnectionMessageIds.runStartedMessageId, args => EnqueueMessage(new Message(args, MessageType.RunStarted)));
+            EditorConnection.instance.Register(PlayerConnectionMessageIds.runFinishedMessageId, args => EnqueueMessage(new Message(args, MessageType.RunFinished)));
         }
 
         private void FlushMessageQueue()
@@ -89,34 +96,30 @@ namespace UnityEditor.TestRunner.TestLaunchers
                 {
                     case MessageType.TestFinished:
                     {
-                        CallbacksDelegator.instance.TestFinishedRemotely(msg.Bytes);
+                        CallbacksDelegator.instance.TestFinishedRemotely(msg.MessageArgs.data);
                         break;
                     }
                     case MessageType.TestStarted:
                     {
-                        CallbacksDelegator.instance.TestStartedRemotely(msg.Bytes);
+                        CallbacksDelegator.instance.TestStartedRemotely(msg.MessageArgs.data);
                         break;
                     }
                     case MessageType.RunStarted:
-                        m_TimeoutCallback?.Reset();
-                        CallbacksDelegator.instance.RunStartedRemotely(msg.Bytes);
+                    {
+                        RunStarted(msg.MessageArgs);
                         break;
+                    }
                     case MessageType.RunFinished:
-                        m_TimeoutCallback?.Clear();
-                        EditorConnection.instance.Send(PlayerConnectionMessageIds.quitPlayerMessageId, null, msg.PlayerId);
-                        EditorConnection.instance.DisconnectAll();
-                        m_PlatformSpecificSetup.CleanUp();
-
-                        CallbacksDelegator.instance.RunFinishedRemotely(msg.Bytes);
+                    {
+                        RunFinished(msg.MessageArgs);
                         break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
+                    }
                 }
             }
             m_IncomingMessages.Clear();
         }
 
-        private void EnqueueMessage(MessageEventArgs args, MessageType type)
+        private void EnqueueMessage(Message message)
         {
             m_TimeoutCallback?.Reset();
             if (!m_RegisteredMessageCallback)
@@ -124,12 +127,24 @@ namespace UnityEditor.TestRunner.TestLaunchers
                 EditorApplication.update += FlushMessageQueue;
                 m_RegisteredMessageCallback = true;
             }
-            m_IncomingMessages.Add(new Message
-            {
-                Bytes = args.data,
-                Type = type,
-                PlayerId = args.playerId
-            });
+            m_IncomingMessages.Add(message);
+        }
+
+        private void RunStarted(MessageEventArgs messageEventArgs)
+        {
+            m_TimeoutCallback?.Reset();
+            CallbacksDelegator.instance.RunStartedRemotely(messageEventArgs.data);
+        }
+
+        private void RunFinished(MessageEventArgs messageEventArgs)
+        {
+            m_TimeoutCallback?.Clear();
+            EditorConnection.instance.Send(PlayerConnectionMessageIds.quitPlayerMessageId, null, messageEventArgs.playerId);
+            EditorConnection.instance.DisconnectAll();
+            m_PlatformSpecificSetup.CleanUp();
+
+            CallbacksDelegator.instance.RunFinishedRemotely(messageEventArgs.data);
+            isRunning = false;
         }
         
         private void PlayerAliveHeartbeat(MessageEventArgs messageEventArgs)
@@ -150,7 +165,7 @@ namespace UnityEditor.TestRunner.TestLaunchers
         public void PostSuccessfulBuildAction()
         {
             m_PlatformSpecificSetup.PostSuccessfulBuildAction();
-            m_TimeoutCallback = new UnityEditor.TestTools.TestRunner.DelayedCallback(TimeoutCallback, m_HearbeatTimeOut);
+            m_TimeoutCallback = new TestTools.TestRunner.DelayedCallback(TimeoutCallback, m_HearbeatTimeOut);
         }
 
         public void PostSuccessfulLaunchAction()

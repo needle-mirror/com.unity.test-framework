@@ -1,8 +1,6 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using NUnit.Framework.Interfaces;
-using UnityEngine.TestTools.NUnitExtensions;
 
 namespace UnityEngine.TestTools.Utils
 {

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using UnityEditor.TestTools.TestRunner.Api;
 using UnityEditor.TestTools.TestRunner.Api.Analytics;
-using UnityEngine.TestRunner.NUnitExtensions;
 using UnityEngine.TestTools;
 
 namespace UnityEditor.TestTools.TestRunner

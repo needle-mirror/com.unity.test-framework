@@ -78,9 +78,9 @@ namespace UnityEditor.TestTools.TestRunner
                     if (targetSDK != null)
                     {
                         if (targetSDK == "DeviceSDK")
-                            PlayerSettings.iOS.sdkVersion = UnityEditor.iOSSdkVersion.DeviceSDK;
+                            PlayerSettings.iOS.sdkVersion = iOSSdkVersion.DeviceSDK;
                         else if (targetSDK == "SimulatorSDK")
-                            PlayerSettings.iOS.sdkVersion = UnityEditor.iOSSdkVersion.SimulatorSDK;
+                            PlayerSettings.iOS.sdkVersion = iOSSdkVersion.SimulatorSDK;
                     }
                 }),
             new TestSetting<ProvisioningProfileType?>(
@@ -107,9 +107,9 @@ namespace UnityEditor.TestTools.TestRunner
                     if (targetSDK != null)
                     {
                         if (targetSDK == "DeviceSDK" || targetSDK == "Device")
-                            PlayerSettings.tvOS.sdkVersion = UnityEditor.tvOSSdkVersion.Device;
+                            PlayerSettings.tvOS.sdkVersion = tvOSSdkVersion.Device;
                         else if (targetSDK == "SimulatorSDK" || targetSDK == "Simulator")
-                            PlayerSettings.tvOS.sdkVersion = UnityEditor.tvOSSdkVersion.Simulator;
+                            PlayerSettings.tvOS.sdkVersion = tvOSSdkVersion.Simulator;
                     }
                 }),
             new TestSetting<bool>(
@@ -129,7 +129,7 @@ namespace UnityEditor.TestTools.TestRunner
                         var graphicsAPIs = new List<GraphicsDeviceType>();
                         foreach (var graphicsAPI in playerGraphicsAPIs)
                         {
-                            if (GraphicsDeviceType.TryParse(graphicsAPI, true, out GraphicsDeviceType playerGraphicsAPI))
+                            if (Enum.TryParse(graphicsAPI, true, out GraphicsDeviceType playerGraphicsAPI))
                                 graphicsAPIs.Add(playerGraphicsAPI);
                         }
 

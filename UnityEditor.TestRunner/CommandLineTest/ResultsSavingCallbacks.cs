@@ -14,7 +14,7 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
 
         public ResultsSavingCallbacks()
         {
-            this.m_ResultFilePath = GetDefaultResultFilePath();
+            m_ResultFilePath = GetDefaultResultFilePath();
         }
 
         public void RunStarted(ITestAdaptor testsToRun)

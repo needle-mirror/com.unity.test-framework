@@ -2,13 +2,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Threading;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
 using NUnit.Framework.Internal.Commands;
 using NUnit.Framework.Internal.Execution;
 using UnityEngine.TestTools.Logging;
-using CountdownEvent = System.Threading.CountdownEvent;
 
 namespace UnityEngine.TestRunner.NUnitExtensions.Runner
 {
@@ -351,7 +351,7 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
                 foreach (var childResult in _suiteResult.Children)
                     if (childResult.ResultState == ResultState.Cancelled)
                     {
-                        this.Result.SetResult(ResultState.Cancelled, "Cancelled by user");
+                        Result.SetResult(ResultState.Cancelled, "Cancelled by user");
                         break;
                     }
 

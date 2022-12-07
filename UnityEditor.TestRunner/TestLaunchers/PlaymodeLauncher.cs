@@ -1,10 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using NUnit.Framework.Interfaces;
-using NUnit.Framework.Internal.Filters;
 using UnityEditor.TestTools.TestRunner.Api;
-using UnityEditor.TestTools.TestRunner.TestRun;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestRunner.Utils;
@@ -15,7 +12,8 @@ namespace UnityEditor.TestTools.TestRunner
 {
     internal class PlaymodeLauncher : RuntimeTestLauncherBase
     {
-        public static bool IsRunning;
+        public static bool IsRunning; // This flag is being used by the graphics test framework to detect EditMode/PlayMode.
+        public static bool HasFinished;
         private Scene m_Scene;
         private bool m_IsTestSetupPerformed;
         private ITestFilter testFilter;
@@ -29,6 +27,7 @@ namespace UnityEditor.TestTools.TestRunner
 
         public override void Run()
         {
+            HasFinished = false;
             IsRunning = true;
             m_Settings.consoleErrorPaused = ConsoleWindow.GetConsoleErrorPause();
             m_Settings.runInBackgroundValue = Application.runInBackground;
@@ -83,11 +82,12 @@ namespace UnityEditor.TestTools.TestRunner
                     if (exceptionThrown)
                     {
                         EditorApplication.update -= UpdateCallback;
-                        IsRunning = false;
                         var controller = PlaymodeTestsController.GetController();
                         ReopenOriginalScene(controller);
                         AssetDatabase.DeleteAsset(controller.settings.bootstrapScene);
                         CallbacksDelegator.instance.RunFailed("Run Failed: One or more errors in a prebuild setup. See the editor log for details.");
+                        HasFinished = true;
+                        IsRunning = false;
                         return;
                     }
                     m_IsTestSetupPerformed = true;
@@ -96,8 +96,9 @@ namespace UnityEditor.TestTools.TestRunner
             catch (Exception ex)
             {
                 EditorApplication.update -= UpdateCallback;
-                IsRunning = false;
                 CallbacksDelegator.instance.RunFailed(ex.Message);
+                HasFinished = true;
+                IsRunning = false;
                 throw;
             }
         }
@@ -121,7 +122,7 @@ namespace UnityEditor.TestTools.TestRunner
                 {
                     AssetDatabase.DeleteAsset(runner.settings.bootstrapScene);
                     ExecutePostBuildCleanupMethods(runner.m_Runner.LoadedTest, runner.settings.BuildNUnitFilter(), Application.platform);
-                    IsRunning = false;
+                    HasFinished = true;
                 }
                 else if (state == PlayModeStateChange.EnteredEditMode)
                 {

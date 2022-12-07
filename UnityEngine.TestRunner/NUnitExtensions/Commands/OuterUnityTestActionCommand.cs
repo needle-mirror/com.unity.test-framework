@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
@@ -9,7 +10,7 @@ namespace UnityEngine.TestTools
 {
     internal class OuterUnityTestActionCommand : BeforeAfterTestCommandBase<IOuterUnityTestAction>
     {
-        static readonly Dictionary<MethodInfo, List<IOuterUnityTestAction>> m_TestActionsCache = new Dictionary<MethodInfo, List<IOuterUnityTestAction>>();
+        private static readonly Dictionary<MethodInfo, List<IOuterUnityTestAction>> m_TestActionsCache = new Dictionary<MethodInfo, List<IOuterUnityTestAction>>();
         public OuterUnityTestActionCommand(TestCommand innerCommand)
             : base(innerCommand, "BeforeTest", "AfterTest")
         {

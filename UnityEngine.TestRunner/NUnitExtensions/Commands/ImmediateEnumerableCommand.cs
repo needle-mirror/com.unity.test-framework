@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+using System;
 using NUnit.Framework.Internal;
 using NUnit.Framework.Internal.Commands;
 using UnityEngine.TestRunner.NUnitExtensions.Runner;
@@ -9,7 +8,7 @@ namespace UnityEngine.TestTools
     internal class ImmediateEnumerableCommand : DelegatingTestCommand
     {
         public ImmediateEnumerableCommand(TestCommand innerCommand)
-            : base(innerCommand) { }
+            : base(innerCommand) {}
 
         public override TestResult Execute(ITestExecutionContext context)
         {

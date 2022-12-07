@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using NUnit.Framework;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -9,10 +10,16 @@ namespace Tests
 {
     public class SceneTests
     {
+        private const string pathToScene = "Assets/MyGameScene.unity";
+        
         [SetUp]
         public void Setup()
         {
-            EditorSceneManager.OpenScene("Assets/MyGameScene.unity");
+            if (!File.Exists(pathToScene))
+            {
+                Assert.Inconclusive("The path to the Scene is not correct. Set the correct path for the pathToScene variable.");
+            }
+            EditorSceneManager.OpenScene(pathToScene);
         }
         
         [Test]

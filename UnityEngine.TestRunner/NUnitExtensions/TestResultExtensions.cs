@@ -1,4 +1,5 @@
 using System;
+using NUnit;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
@@ -23,10 +24,10 @@ namespace UnityEngine.TestRunner.NUnitExtensions
             }
 
             var exceptionMessage = ExceptionHelper.BuildMessage(ex);
-            string stackTrace = "--" + prefix + NUnit.Env.NewLine + ExceptionHelper.BuildStackTrace(ex);
+            string stackTrace = "--" + prefix + Env.NewLine + ExceptionHelper.BuildStackTrace(ex);
             if (testResult.StackTrace != null)
             {
-                stackTrace = testResult.StackTrace + NUnit.Env.NewLine + stackTrace;
+                stackTrace = testResult.StackTrace + Env.NewLine + stackTrace;
             }
 
             if (testResult.Test.IsSuite)
@@ -44,7 +45,7 @@ namespace UnityEngine.TestRunner.NUnitExtensions
             string message = (string.IsNullOrEmpty(prefix) ? "" : (prefix + " : ")) + exceptionMessage;
             if (testResult.Message != null)
             {
-                message = testResult.Message + NUnit.Env.NewLine + message;
+                message = testResult.Message + Env.NewLine + message;
             }
 
             testResult.SetResult(resultState, message, stackTrace);
@@ -59,7 +60,7 @@ namespace UnityEngine.TestRunner.NUnitExtensions
                     ? ResultState.Cancelled
                     : ResultState.Error;
             }
-            
+
             if (testResult.Test.IsSuite)
             {
                 resultState = resultState.WithSite(FailureSite.TearDown);
@@ -68,7 +69,7 @@ namespace UnityEngine.TestRunner.NUnitExtensions
             string message = (string.IsNullOrEmpty(prefix) ? "" : (prefix + " : ")) + error;
             if (testResult.Message != null)
             {
-                message = testResult.Message + NUnit.Env.NewLine + message;
+                message = testResult.Message + Env.NewLine + message;
             }
 
             testResult.SetResult(resultState, message);

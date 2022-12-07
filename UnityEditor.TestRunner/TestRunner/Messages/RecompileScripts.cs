@@ -36,6 +36,7 @@ namespace UnityEngine.TestTools
         public RecompileScripts(bool expectScriptCompilation) : this(expectScriptCompilation, true)
         {
         }
+
         /// <summary>
         /// Creates a new instance of the `RecompileScripts` yield instruction.
         /// </summary>

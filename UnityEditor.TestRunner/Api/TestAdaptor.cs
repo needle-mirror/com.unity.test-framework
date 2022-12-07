@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
+using UnityEngine;
 using UnityEngine.TestRunner.NUnitExtensions;
 using UnityEngine.TestRunner.NUnitExtensions.Runner;
 using UnityEngine.TestRunner.TestLaunchers;
+using UnityEngine.TestTools;
 using UnityEngine.TestTools.Utils;
 
 namespace UnityEditor.TestTools.TestRunner.Api
@@ -49,12 +50,10 @@ namespace UnityEditor.TestTools.TestRunner.Api
             ParentUniqueName = test.GetParentUniqueName();
             ChildIndex = childIndex;
             
-            if (test.Parent != null)
+            var testPlatform = test.Properties.Get("platform");
+            if (testPlatform is TestPlatform platform)
             {
-                if (test.Parent.Parent == null) // Assembly level
-                {
-                    TestMode = (TestMode)Enum.Parse(typeof(TestMode),test.Properties.Get("platform").ToString());        
-                }
+                TestMode = PlatformToTestMode(platform);
             }
 
             Children = children;
@@ -98,6 +97,21 @@ namespace UnityEditor.TestTools.TestRunner.Api
             if (!string.IsNullOrEmpty(ParentId))
             {
                 Parent = allTests.FirstOrDefault(t => t.Id == ParentId);
+            }
+        }
+
+        private static TestMode PlatformToTestMode(TestPlatform testPlatform)
+        {
+            switch (testPlatform)
+            {
+                case TestPlatform.All:
+                    return TestMode.EditMode | TestMode.PlayMode;
+                case TestPlatform.EditMode:
+                    return TestMode.EditMode;
+                case TestPlatform.PlayMode:
+                    return TestMode.PlayMode;
+                default:
+                    return default;
             }
         }
 

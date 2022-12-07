@@ -35,7 +35,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
         [SerializeField]
         private List<TestRunnerResult> m_NewResultList = new List<TestRunnerResult>();
 
-        Dictionary<string, TestRunnerResult> m_ResultByKey;
+        private Dictionary<string, TestRunnerResult> m_ResultByKey;
         internal Dictionary<string, TestRunnerResult> ResultsByKey
         {
             get
@@ -109,7 +109,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                             result.resultStatus == TestRunnerResult.ResultStatus.Inconclusive)
                             failedTestnames.Add(result.fullName);
                     }
-                    RunTests(new UITestRunnerFilter() {testNames = failedTestnames.ToArray(), categoryNames = m_TestRunnerUIFilter.CategoryFilter});
+                    RunTests(new UITestRunnerFilter {testNames = failedTestnames.ToArray(), categoryNames = m_TestRunnerUIFilter.CategoryFilter});
                     GUIUtility.ExitGUI();
                 }
             }
@@ -382,35 +382,6 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                     false,
                     data => RunTests(testFilters),
                     "");
-
-                if (EditorPrefs.GetBool("DeveloperMode", false))
-                {
-                    m.AddItem(multilineSelection ? s_GUIRunSelectedTests : s_GUIRunUntilFailed,
-                        false,
-                        data =>
-                        {
-                            foreach (var filter in testFilters)
-                            {
-                                filter.testRepetitions = int.MaxValue;
-                            }
-                            
-                            RunTests(testFilters);
-                        },
-                        "");
-
-                    m.AddItem(multilineSelection ? s_GUIRunSelectedTests : s_GUIRun100Times,
-                        false,
-                        data =>
-                        {
-                            foreach (var filter in testFilters)
-                            {
-                                filter.testRepetitions = 100;
-                            }
-                            
-                            RunTests(testFilters);
-                        },
-                        "");
-                }
             }
             else
                 m.AddDisabledItem(multilineSelection ? s_GUIRunSelectedTests : s_GUIRun, false);
@@ -463,7 +434,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
 
             if (assembliesToRun.Count > 0)
             {
-                filters.Add(new UITestRunnerFilter()
+                filters.Add(new UITestRunnerFilter
                 {
                     assemblyNames = assembliesToRun.ToArray()
                 });
@@ -471,7 +442,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             
             if (namesToRun.Count > 0)
             {
-                filters.Add(new UITestRunnerFilter()
+                filters.Add(new UITestRunnerFilter
                 {
                     groupNames = namesToRun.ToArray(),
                     assemblyNames = assembliesForNamesToRun.ToArray()
@@ -480,7 +451,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             
             if (exactNamesToRun.Count > 0)
             {
-                filters.Add(new UITestRunnerFilter()
+                filters.Add(new UITestRunnerFilter
                 {
                     testNames = exactNamesToRun.ToArray()
                 });
@@ -520,7 +491,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
         {
             if (m_TestListTree.HasSelection())
             {
-                var firstClickedID = m_TestListState.selectedIDs.First<int>() == m_TestListState.lastClickedID ? m_TestListState.selectedIDs.Last<int>() : m_TestListState.selectedIDs.First<int>();
+                var firstClickedID = m_TestListState.selectedIDs.First() == m_TestListState.lastClickedID ? m_TestListState.selectedIDs.Last() : m_TestListState.selectedIDs.First();
                 m_TestListTree.Frame(firstClickedID, true, false);
             }
         }

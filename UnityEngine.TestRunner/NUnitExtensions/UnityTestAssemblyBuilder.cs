@@ -44,14 +44,15 @@ namespace UnityEngine.TestTools.NUnitExtensions
                 var assemblySuite = Build(assembly, options) as TestSuite;
                 if (assemblySuite != null && assemblySuite.HasChildren)
                 {
-                    assemblySuite.Properties.Set("platform", platform);
                     suite.Add(assemblySuite);
+                    suite.ApplyPlatformToPropertyBag(platform);
                 }
 
                 yield return null;
             }
             
             suite.ParseForNameDuplicates();
+            suite.Properties.Set("platform", testPlatforms.MergeFlags());
 
             foreach (var testSuiteModifier in m_TestSuiteModifiers)
             {

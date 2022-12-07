@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Linq;
 using UnityEditor.TestTools.TestRunner.Api;
-using UnityEngine.TestRunner.NUnitExtensions;
 using UnityEngine.TestTools;
 using UnityEngine.TestTools.NUnitExtensions;
 

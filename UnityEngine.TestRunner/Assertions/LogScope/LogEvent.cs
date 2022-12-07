@@ -1,3 +1,5 @@
+using System;
+
 namespace UnityEngine.TestTools.Logging
 {
     internal class LogEvent

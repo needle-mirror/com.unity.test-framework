@@ -4,7 +4,6 @@ using System.Linq;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
-using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.TestTools.TestRunner;
 
