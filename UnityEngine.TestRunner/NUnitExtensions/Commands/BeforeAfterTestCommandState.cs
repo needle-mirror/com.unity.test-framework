@@ -6,7 +6,8 @@ using UnityEngine.TestRunner.NUnitExtensions.Runner;
 
 namespace UnityEngine.TestTools
 {
-    internal class BeforeAfterTestCommandState : ScriptableObject
+    [Serializable]
+    internal class BeforeAfterTestCommandState
     {
         private const BindingFlags Flags = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy;
         public int NextBeforeStepIndex;

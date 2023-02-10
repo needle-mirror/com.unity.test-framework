@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
-using NUnit.Framework.Internal.Filters;
-using UnityEditor.TestTools.TestRunner.Api;
 using UnityEngine;
 using UnityEngine.TestRunner.NUnitExtensions;
 using UnityEngine.TestRunner.NUnitExtensions.Runner;
@@ -17,23 +15,20 @@ namespace UnityEditor.TestTools.TestRunner
 {
     internal interface IUnityTestAssemblyRunnerFactory
     {
-        IUnityTestAssemblyRunner Create(TestPlatform testPlatform, string[] orderedTestNames, WorkItemFactory factory);
+        IUnityTestAssemblyRunner Create(TestPlatform testPlatform, string[] orderedTestNames, WorkItemFactory factory, UnityTestExecutionContext context);
     }
 
     internal class UnityTestAssemblyRunnerFactory : IUnityTestAssemblyRunnerFactory
     {
-        public IUnityTestAssemblyRunner Create(TestPlatform testPlatform, string[] orderedTestNames, WorkItemFactory factory)
+        public IUnityTestAssemblyRunner Create(TestPlatform testPlatform, string[] orderedTestNames, WorkItemFactory factory, UnityTestExecutionContext context)
         {
-            return new UnityTestAssemblyRunner(new UnityTestAssemblyBuilder(orderedTestNames), factory);
+            return new UnityTestAssemblyRunner(new UnityTestAssemblyBuilder(orderedTestNames), factory, context);
         }
     }
 
     [Serializable]
     internal class EditModeRunner : ScriptableObject, IDisposable
     {
-        [SerializeField]
-        private Filter[] m_Filters;
-
         //The counter from the IEnumerator object
         [SerializeField]
         private int m_CurrentPC;
@@ -47,33 +42,11 @@ namespace UnityEditor.TestTools.TestRunner
         [SerializeField]
         private List<TestResultSerializer> m_ExecutedTests;
 
-        [SerializeField]
-        private List<ScriptableObject> m_CallbackObjects = new List<ScriptableObject>();
-
-        internal TestStartedEvent m_TestStartedEvent;
-        internal TestFinishedEvent m_TestFinishedEvent;
-        private RunStartedEvent m_RunStartedEvent;
-        private RunFinishedEvent m_RunFinishedEvent;
-
-        [SerializeField]
-        private TestRunnerStateSerializer m_TestRunnerStateSerializer = new TestRunnerStateSerializer();
-
-        [SerializeField]
-        private bool m_RunningTests;
-
-        [SerializeField]
-        private TestPlatform m_TestPlatform;
+        private TestStartedEvent m_TestStartedEvent;
+        private TestFinishedEvent m_TestFinishedEvent;
 
         [SerializeField]
         private object m_CurrentYieldObject;
-
-        [SerializeField]
-        private BeforeAfterTestCommandState m_SetUpTearDownState;
-        [SerializeField]
-        private BeforeAfterTestCommandState m_OuterUnityTestActionState;
-
-        [SerializeField] 
-        private EnumerableTestState m_EnumerableTestState;
 
         [SerializeField]
         private string[] m_OrderedTestNames;
@@ -85,84 +58,35 @@ namespace UnityEditor.TestTools.TestRunner
 
         internal IUnityTestAssemblyRunner m_Runner;
 
-        private ConstructDelegator m_ConstructDelegator;
-
         private IEnumerator m_RunStep;
 
         public IUnityTestAssemblyRunnerFactory UnityTestAssemblyRunnerFactory { get; set; }
 
-        public void Init(Filter[] filters, TestPlatform platform, bool runningSynchronously,
-            RunStartedEvent runStartedEvent, TestStartedEvent testStartedEvent, TestFinishedEvent testFinishedEvent, RunFinishedEvent runFinishedEvent, 
+        public void Init(ITestFilter filter, bool runningSynchronously, ITest testTree, TestStartedEvent testStartedEvent, TestFinishedEvent testFinishedEvent, UnityTestExecutionContext context, 
             string[] orderedTestNames)
         {
-            m_Filters = filters;
-            m_TestPlatform = platform;
+            TestEnumerator.Reset();
             m_AlreadyStartedTests = new List<string>();
             m_ExecutedTests = new List<TestResultSerializer>();
             m_OrderedTestNames = orderedTestNames;
             RunningSynchronously = runningSynchronously;
-            m_RunStartedEvent = runStartedEvent;
-            m_TestStartedEvent = testStartedEvent;
-            m_TestFinishedEvent = testFinishedEvent;
-            m_RunFinishedEvent = runFinishedEvent;
-            InitRunner();
+            Run(testTree, filter, context, testStartedEvent, testFinishedEvent);
         }
 
-        private void InitRunner()
-        {
-            //We give the EditMode platform here so we dont suddenly create Playmode work items in the test Runner.
-            m_Runner = (UnityTestAssemblyRunnerFactory ?? new UnityTestAssemblyRunnerFactory()).Create(TestPlatform.EditMode, m_OrderedTestNames, new EditmodeWorkItemFactory());
-            var testAssemblyProvider = new EditorLoadedTestAssemblyProvider(new EditorCompilationInterfaceProxy(), new EditorAssembliesProxy());
-            var assemblies = testAssemblyProvider.GetAssembliesGroupedByType(m_TestPlatform).Select(x => x.Assembly).ToArray();
-            var loadedTests = m_Runner.Load(assemblies, TestPlatform.EditMode,
-                UnityTestAssemblyBuilder.GetNUnitTestBuilderSettings(m_TestPlatform));
-            CallbacksDelegator.instance.TestTreeRebuild(loadedTests);
-            hideFlags |= HideFlags.DontSave;
-            EnumerableSetUpTearDownCommand.ActivePcHelper = new EditModePcHelper();
-            OuterUnityTestActionCommand.ActivePcHelper = new EditModePcHelper();
-        }
-
-        //TODO: Understand if we need to keep OnEnable or we can just have the Resumue method
-        public void Resume(RunStartedEvent runStartedEvent, TestStartedEvent testStartedEvent, TestFinishedEvent testFinishedEvent, RunFinishedEvent runFinishedEvent)
+        public void Resume(ITestFilter filter, ITest testTree, TestStartedEvent testStartedEvent, TestFinishedEvent testFinishedEvent, UnityTestExecutionContext context)
         {
             if (m_ExecuteOnEnable)
             {
-                m_RunStartedEvent = runStartedEvent;
-                m_TestStartedEvent = testStartedEvent;
-                m_TestFinishedEvent = testFinishedEvent;
-                m_RunFinishedEvent = runFinishedEvent;
-                InitRunner();
-                foreach (var callback in m_CallbackObjects)
-                {
-                    AddListeners(callback as ITestRunnerListener);
-                }
-                m_ConstructDelegator = new ConstructDelegator(m_TestRunnerStateSerializer);
-
-                EnumeratorStepHelper.SetEnumeratorPC(m_CurrentPC);
-
-                UnityWorkItemDataHolder.alreadyExecutedTests = m_ExecutedTests.Select(x => x.uniqueName).ToList();
-                UnityWorkItemDataHolder.alreadyStartedTests = m_AlreadyStartedTests;
-                Run();
-            }
-        }
-        
-        public void OnEnable()
-        {
-            if (m_ExecuteOnEnable)
-            {
-                InitRunner();
                 m_ExecuteOnEnable = false;
-                foreach (var callback in m_CallbackObjects)
-                {
-                    AddListeners(callback as ITestRunnerListener);
-                }
-                m_ConstructDelegator = new ConstructDelegator(m_TestRunnerStateSerializer);
 
-                EnumeratorStepHelper.SetEnumeratorPC(m_CurrentPC);
+                if (m_CurrentPC >= 0)
+                {
+                    EnumeratorStepHelper.SetEnumeratorPC(m_CurrentPC);
+                }
 
                 UnityWorkItemDataHolder.alreadyExecutedTests = m_ExecutedTests.Select(x => x.uniqueName).ToList();
                 UnityWorkItemDataHolder.alreadyStartedTests = m_AlreadyStartedTests;
-                Run();
+                Run(testTree, filter, context, testStartedEvent, testFinishedEvent);
             }
         }
 
@@ -177,37 +101,19 @@ namespace UnityEditor.TestTools.TestRunner
             m_ExecutedTests.Add(TestResultSerializer.MakeFromTestResult(testResult));
         }
 
-        public void Run()
+        private void Run(ITest testTree, ITestFilter filter, UnityTestExecutionContext context, TestStartedEvent testStartedEvent, TestFinishedEvent testFinishedEvent)
         {
+            m_TestStartedEvent = testStartedEvent;
+            m_TestFinishedEvent = testFinishedEvent;
+            
+            m_Runner = (UnityTestAssemblyRunnerFactory ?? new UnityTestAssemblyRunnerFactory()).Create(TestPlatform.EditMode, m_OrderedTestNames, new EditmodeWorkItemFactory(), context);
+            m_Runner.LoadTestTree(testTree);
+            hideFlags |= HideFlags.DontSave;
+            EnumerableSetUpTearDownCommand.ActivePcHelper = new EditModePcHelper();
+            OuterUnityTestActionCommand.ActivePcHelper = new EditModePcHelper();
+            
             EditModeTestCallbacks.RestoringTestContext += OnRestoringTest;
-            var context = m_Runner.GetCurrentContext();
-            if (m_SetUpTearDownState == null)
-            {
-                m_SetUpTearDownState = CreateInstance<BeforeAfterTestCommandState>();
-            }
-            context.SetUpTearDownState = m_SetUpTearDownState;
 
-            if (m_OuterUnityTestActionState == null)
-            {
-                m_OuterUnityTestActionState = CreateInstance<BeforeAfterTestCommandState>();
-            }
-            context.OuterUnityTestActionState = m_OuterUnityTestActionState;
-
-            if (m_EnumerableTestState == null)
-            {
-                m_EnumerableTestState = new EnumerableTestState();
-            }
-            context.EnumerableTestState = m_EnumerableTestState;
-
-            if (!m_RunningTests)
-            {
-                m_RunStartedEvent.Invoke(m_Runner.LoadedTest);
-            }
-
-            if (m_ConstructDelegator == null)
-                m_ConstructDelegator = new ConstructDelegator(m_TestRunnerStateSerializer);
-
-            Reflect.ConstructorCallWrapper = m_ConstructDelegator.Delegate;
             m_TestStartedEvent.AddListener(TestStartedEvent);
             m_TestFinishedEvent.AddListener(TestFinishedEvent);
 
@@ -218,23 +124,11 @@ namespace UnityEditor.TestTools.TestRunner
             EditorApplication.LockReloadAssemblies();
 
             var testListenerWrapper = new TestListenerWrapper(m_TestStartedEvent, m_TestFinishedEvent);
-            m_RunStep = m_Runner.Run(testListenerWrapper, GetFilter()).GetEnumerator();
-            m_RunningTests = true;
-
-            if (!RunningSynchronously) 
-                EditorApplication.update += TestConsumer;
-        }
-
-        public void CompleteSynchronously()
-        {
-            while (!m_Runner.IsTestComplete)
-                TestConsumer();
+            m_RunStep = m_Runner.Run(testListenerWrapper, filter).GetEnumerator();
         }
 
         private void OnBeforeAssemblyReload()
         {
-            EditorApplication.update -= TestConsumer;
-
             if (m_ExecuteOnEnable)
             {
                 AssemblyReloadEvents.beforeAssemblyReload -= OnBeforeAssemblyReload;
@@ -295,13 +189,13 @@ namespace UnityEditor.TestTools.TestRunner
             return MoveNextAndUpdateYieldObject();
         }
 
-        private void TestConsumer()
+        public void TestConsumer(TestRunnerStateSerializer testRunnerStateSerializer)
         {
             var moveNext = MoveNextAndUpdateYieldObject();
 
             if (m_CurrentYieldObject != null)
             {
-                InvokeDelegator();
+                InvokeDelegator(testRunnerStateSerializer);
             }
 
             if (!moveNext && !m_Runner.IsTestComplete)
@@ -318,17 +212,7 @@ namespace UnityEditor.TestTools.TestRunner
 
         private void CompleteTestRun()
         {
-            if (!RunningSynchronously)
-                EditorApplication.update -= TestConsumer;
-   
-            TestLauncherBase.ExecutePostBuildCleanupMethods(GetLoadedTests(), GetFilter(), Application.platform);
-            
-            m_RunFinishedEvent.Invoke(m_Runner.Result);
             RunFinished = true;
-
-            if (m_ConstructDelegator != null)
-                m_ConstructDelegator.DestroyCurrentTestObjectIfExists();
-            Dispose();
             UnityWorkItemDataHolder.alreadyExecutedTests = null;
         }
 
@@ -346,7 +230,7 @@ namespace UnityEditor.TestTools.TestRunner
             return UnityTestExecutionContext.CurrentContext.ExecutionStatus == TestExecutionStatus.AbortRequested || UnityTestExecutionContext.CurrentContext.ExecutionStatus == TestExecutionStatus.StopRequested;
         }
 
-        private void InvokeDelegator()
+        private void InvokeDelegator(TestRunnerStateSerializer testRunnerStateSerializer)
         {
             if (m_CurrentYieldObject == null)
             {
@@ -360,9 +244,9 @@ namespace UnityEditor.TestTools.TestRunner
 
             if (m_CurrentYieldObject is RestoreTestContextAfterDomainReload)
             {
-                if (m_TestRunnerStateSerializer.ShouldRestore())
+                if (testRunnerStateSerializer.ShouldRestore())
                 {
-                    m_TestRunnerStateSerializer.RestoreContext();
+                    testRunnerStateSerializer.RestoreContext();
                 }
 
                 return;
@@ -375,7 +259,7 @@ namespace UnityEditor.TestTools.TestRunner
                     var editModeTestYieldInstruction = (IEditModeTestYieldInstruction)m_CurrentYieldObject;
                     if (editModeTestYieldInstruction.ExpectDomainReload)
                     {
-                        PrepareForDomainReload();
+                        PrepareForDomainReload(testRunnerStateSerializer);
                     }
                     return;
                 }
@@ -403,49 +287,21 @@ namespace UnityEditor.TestTools.TestRunner
             }
         }
 
-        private void PrepareForDomainReload()
+        private void PrepareForDomainReload(TestRunnerStateSerializer testRunnerStateSerializer)
         {
-            m_TestRunnerStateSerializer.SaveContext();
+            testRunnerStateSerializer.SaveContext();
             m_CurrentPC = EnumeratorStepHelper.GetEnumeratorPC(TestEnumerator.Enumerator);
             m_ExecuteOnEnable = true;
 
             RunningTests = false;
         }
 
-        public T AddEventHandler<T>() where T : ScriptableObject, ITestRunnerListener
-        {
-            var eventHandler = CreateInstance<T>();
-            eventHandler.hideFlags |= HideFlags.DontSave;
-            m_CallbackObjects.Add(eventHandler);
-
-            AddListeners(eventHandler);
-
-            return eventHandler;
-        }
-
-        private void AddListeners(ITestRunnerListener eventHandler)
-        {
-            m_TestStartedEvent.AddListener(eventHandler.TestStarted);
-            m_TestFinishedEvent.AddListener(eventHandler.TestFinished);
-            m_RunStartedEvent.AddListener(eventHandler.RunStarted);
-            m_RunFinishedEvent.AddListener(eventHandler.RunFinished);
-        }
-
         public void Dispose()
         {
             Reflect.MethodCallWrapper = null;
-            EditorApplication.update -= TestConsumer;
 
             DestroyImmediate(this);
 
-            if (m_CallbackObjects != null)
-            {
-                foreach (var obj in m_CallbackObjects)
-                {
-                    DestroyImmediate(obj);
-                }
-                m_CallbackObjects.Clear();
-            }
             RunningTests = false;
             EditorApplication.UnlockReloadAssemblies();
         }
@@ -456,16 +312,6 @@ namespace UnityEditor.TestTools.TestRunner
             m_ExecuteOnEnable = false;
             m_Runner.StopRun();
             RunFinished = true;
-        }
-
-        public ITest GetLoadedTests()
-        {
-            return m_Runner.LoadedTest;
-        }
-
-        public ITestFilter GetFilter()
-        {
-            return new OrFilter(m_Filters.Select(filter => filter.ToRuntimeTestRunnerFilter(RunningSynchronously).BuildNUnitFilter()).ToArray());
         }
     }
 }

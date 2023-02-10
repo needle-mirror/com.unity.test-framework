@@ -1,4 +1,9 @@
 # Changelog
+## [1.3.3] - 2023-02-10
+- Fixes an issue where a test body would be skipped under certain conditions regarding domain reload.
+- Fixed an issue where the "uncategorized" category filter would not apply correctly to parameterized tests with a category in the fixture (DSTR-700).
+- Ensured that all samples can be loaded at once without assembly name collisions.
+
 ## [1.3.2] - 2022-12-07
 - Fixed context not being restored after a domain reload outside tests (DSTR-678)
 - Fixed TestMode being set only in on the aseembly level (DSTP-674)

@@ -100,7 +100,8 @@ namespace UnityEngine.TestTools
 
         protected override BeforeAfterTestCommandState GetState(UnityTestExecutionContext context)
         {
-            return null;
+            // Normal Setup/Teardown does not support domain reloads and will not need a persisted state.
+            return new BeforeAfterTestCommandState();
         }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using UnityEditor.TestTools.TestRunner.Api;
 
 namespace UnityEditor.TestTools.TestRunner
 {
@@ -21,6 +22,8 @@ namespace UnityEditor.TestTools.TestRunner
         string[] playerGraphicsAPIs { get; set; }
         bool autoGraphicsAPIs { get; set; }
         bool? androidBuildAppBundle { get; set; }
+        IgnoreTest[] ignoreTests { get; set; }
+
 
         void SetupProjectParameters();
     }

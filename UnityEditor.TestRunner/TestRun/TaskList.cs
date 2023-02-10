@@ -31,7 +31,16 @@ namespace UnityEditor.TestTools.TestRunner.TestRun
                 yield return new RegisterTestRunCallbackEventsTask();
                 yield return new InitializeTestProgressTask();
                 yield return new UpdateTestProgressTask();
-                yield return new LegacyEditModeRunTask();
+                yield return new GenerateContextTask();
+                yield return new EnableTestOutLoggerTask();
+                yield return new SetupConstructDelegatorTask();
+                yield return new RegisterCallbackDelegatorEventsTask();
+                yield return new RunStartedInvocationEvent();
+                yield return new EditModeRunTask();
+                yield return new RunFinishedInvocationEvent();
+                yield return new CleanupConstructDelegatorTask();
+                yield return new PostbuildCleanupTask();
+                yield return new CleanUpContext();
                 yield return new RestoreSceneSetupTask();
                 yield return new PerformUndoTask();
                 yield return new CleanupVerificationTask();

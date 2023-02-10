@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using UnityEditor.TestTools.TestRunner.Api;
 using UnityEngine;
 
 namespace UnityEditor.TestTools.TestRunner
@@ -32,6 +33,23 @@ namespace UnityEditor.TestTools.TestRunner
             new SettingsMap<bool>("androidBuildAppBundle", (settings, value) =>
             {
                 settings.androidBuildAppBundle = value;
+            }),
+            new SettingsMap<List<object>>("ignoreTests", (settings, list) =>
+            {
+                settings.ignoreTests = list.Select(item =>
+                {
+                    var dictionary = (Dictionary<string, object>)item;
+                    if (dictionary.ContainsKey("test") && dictionary.ContainsKey("ignoreComment"))
+                    {
+                        return new IgnoreTest()
+                        {
+                            test = dictionary["test"] as string,
+                            ignoreComment = dictionary["ignoreComment"] as string
+                        };
+                    }
+
+                    throw new Exception("Wrong format for ignore test. Expected \"test\" and \"ignoreComment\".");
+                }).ToArray();
             })
         };
 

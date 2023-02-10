@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor.TestTools.TestRunner.Api;
 using UnityEngine.Rendering;
 
 namespace UnityEditor.TestTools.TestRunner
@@ -166,6 +167,8 @@ namespace UnityEditor.TestTools.TestRunner
         public string[] playerGraphicsAPIs { get; set; }
         public bool autoGraphicsAPIs { get; set; }
         public bool? androidBuildAppBundle { get; set; }
+
+        public IgnoreTest[] ignoreTests { get; set; }
 
         public void Dispose()
         {

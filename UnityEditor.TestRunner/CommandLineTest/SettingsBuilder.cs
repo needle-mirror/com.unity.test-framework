@@ -73,6 +73,7 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
             {
                 filters = new []{ filter },
                 overloadTestRunSettings = new RunSettings(testSettings),
+                ignoreTests = testSettings?.ignoreTests,
                 targetPlatform = GetBuildTarget(testPlatform),
                 runSynchronously = runSynchronously,
                 playerSavePath = buildPlayerPath,

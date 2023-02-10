@@ -14,7 +14,7 @@ namespace UnityEngine.TestTools.NUnitExtensions
         private Type m_RequestedType;
         private object[] m_Arguments;
 
-        private ScriptableObject m_CurrentRunningTest;
+        protected ScriptableObject m_CurrentRunningTest;
         private readonly IStateSerializer m_StateSerializer;
 
         protected Exception m_Exception;

@@ -114,6 +114,8 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
                 command = new EnumerableApplyChangesToContextCommand(command, changes);
             }
 
+            command = new IgnoreTestCommand(command, test);
+
             return command;
         }
 

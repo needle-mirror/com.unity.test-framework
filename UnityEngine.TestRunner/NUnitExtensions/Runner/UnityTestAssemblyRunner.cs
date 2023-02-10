@@ -22,6 +22,7 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
         UnityWorkItem TopLevelWorkItem { get; set; }
         UnityTestExecutionContext GetCurrentContext();
         ITest Load(Assembly[] assemblies, TestPlatform testPlatform, IDictionary<string, object> settings);
+        void LoadTestTree(ITest testTree);
         IEnumerable Run(ITestListener listener, ITestFilter filter);
         void StopRun();
     }
@@ -60,11 +61,11 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
             get { return TopLevelWorkItem != null && TopLevelWorkItem.State == WorkItemState.Complete; }
         }
 
-        public UnityTestAssemblyRunner(UnityTestAssemblyBuilder builder, WorkItemFactory factory)
+        public UnityTestAssemblyRunner(UnityTestAssemblyBuilder builder, WorkItemFactory factory, UnityTestExecutionContext context)
         {
             unityBuilder = builder;
             m_Factory = factory;
-            Context = new UnityTestExecutionContext();
+            Context = context;
         }
 
         public ITest Load(Assembly[] assemblies, TestPlatform testPlatform, IDictionary<string, object> settings)
@@ -80,11 +81,15 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
             return LoadedTest = tree;
         }
 
+        public void LoadTestTree(ITest testTree)
+        {
+            LoadedTest = testTree;
+        }
+
         public IEnumerable Run(ITestListener listener, ITestFilter filter)
         {
             TopLevelWorkItem = m_Factory.Create(LoadedTest, filter);
             TopLevelWorkItem.InitializeContext(Context);
-            UnityTestExecutionContext.CurrentContext = Context;
             Context.Listener = listener;
 
             return TopLevelWorkItem.Execute();

@@ -14,6 +14,7 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
         public BuildTestTreeTask(TestPlatform testPlatform)
         {
             m_TestPlatform = testPlatform;
+            RerunAfterResume = true;
         }
 
         internal IEditorLoadedTestAssemblyProvider m_testAssemblyProvider = new EditorLoadedTestAssemblyProvider(new EditorCompilationInterfaceProxy(), new EditorAssembliesProxy());

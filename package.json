@@ -1,7 +1,7 @@
 {
   "name": "com.unity.test-framework",
   "displayName": "Test Framework",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "unity": "2019.4",
   "unityRelease": "0a10",
   "description": "Test framework for running Edit mode and Play mode tests in Unity.",
@@ -13,7 +13,7 @@
   "repository": {
     "url": "https://github.com/Unity-Technologies/com.unity.test-framework.git",
     "type": "git",
-    "revision": "d5e1b3738bc1e7eaac122eb417f2ede116408a56"
+    "revision": "d9af9941435342be1b52a29352c9cf4853936bba"
   },
   "dependencies": {
     "com.unity.ext.nunit": "2.0.3",
@@ -221,10 +221,13 @@
     }
   ],
   "relatedPackages": {
-    "com.unity.test-framework.tests": "1.3.2"
+    "com.unity.test-framework.tests": "1.3.3"
+  },
+  "_upm": {
+    "changelog": "- Fixes an issue where a test body would be skipped under certain conditions regarding domain reload.\n- Fixed an issue where the \"uncategorized\" category filter would not apply correctly to parameterized tests with a category in the fixture (DSTR-700).\n- Ensured that all samples can be loaded at once without assembly name collisions."
   },
   "upmCi": {
-    "footprint": "b9c9e756fd9bdbd0a54b5dcd168c46c6316f7aaf"
+    "footprint": "81e82331d351f4a2202e6290f9aa0322c50c0229"
   },
   "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.test-framework@1.3/manual/index.html"
 }

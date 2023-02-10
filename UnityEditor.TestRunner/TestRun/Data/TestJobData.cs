@@ -5,6 +5,9 @@ using UnityEditor.SceneManagement;
 using UnityEditor.TestTools.TestRunner.Api;
 using UnityEditor.TestTools.TestRunner.TestRun.Tasks;
 using UnityEngine;
+using UnityEngine.TestRunner.NUnitExtensions.Runner;
+using UnityEngine.TestTools;
+using UnityEngine.TestTools.NUnitExtensions;
 using UnityEngine.TestTools.TestRunner;
 
 namespace UnityEditor.TestTools.TestRunner.TestRun
@@ -43,6 +46,18 @@ namespace UnityEditor.TestTools.TestRunner.TestRun
         public EditModeRunner editModeRunner;
 
         [SerializeField]
+        public BeforeAfterTestCommandState setUpTearDownState;
+
+        [SerializeField]
+        public BeforeAfterTestCommandState outerUnityTestActionState;
+        
+        [SerializeField]
+        public TestRunnerStateSerializer testRunnerStateSerializer;
+        
+        [SerializeField]
+        public EnumerableTestState enumerableTestState;
+        
+        [SerializeField]
         private TaskInfo[] savedTaskInfoStack;
 
         [NonSerialized]
@@ -66,6 +81,15 @@ namespace UnityEditor.TestTools.TestRunner.TestRun
         public RunStartedEvent RunStartedEvent;
         [NonSerialized]
         public RunFinishedEvent RunFinishedEvent;
+
+        [NonSerialized]
+        public UnityTestExecutionContext Context;
+
+        [NonSerialized]
+        public ConstructDelegator ConstructDelegator;
+        
+        [NonSerialized]
+        public ITestResult TestResults;
 
         public TestJobData(ExecutionSettings settings)
         {

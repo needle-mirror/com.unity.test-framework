@@ -55,6 +55,9 @@ namespace UnityEditor.TestTools.TestRunner.Api
         [SerializeField]
         internal string[] orderedTestNames;
 
+        [SerializeField]
+        internal IgnoreTest[] ignoreTests;
+
         internal string playerSavePath { get; set; }
 
         internal bool EditModeIncluded()
@@ -126,7 +129,7 @@ namespace UnityEditor.TestTools.TestRunner.Api
                 stringBuilder.AppendLine($"{nameof(filters)}[{i}] = ");
                 var filterStrings = filters[i]
                     .ToString()
-                    .Split(new[] {Environment.NewLine}, StringSplitOptions.None)
+                    .Split(new[] {Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries)
                     .ToArray();
 
                 foreach (var filterString in filterStrings)
@@ -134,7 +137,21 @@ namespace UnityEditor.TestTools.TestRunner.Api
                     stringBuilder.AppendLine($"   {filterString}");
                 }
             }
+            
+            if (ignoreTests == null || ignoreTests.Length == 0)
+            {
+                stringBuilder.AppendLine($"{nameof(ignoreTests)} = {{}}");
+            }
+            else
+            {
+                for (int i = 0; i < ignoreTests.Length; i++)
+                {
+                    stringBuilder.AppendLine($"{nameof(ignoreTests)}[{i}] = {ignoreTests[i]}");
+                }
+            }
 
+            stringBuilder.AppendLine();
+            
             return stringBuilder.ToString();
         }
     }
