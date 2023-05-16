@@ -17,16 +17,12 @@ namespace UnityEngine.TestTools
     {
         private string m_BeforeErrorPrefix;
         private string m_AfterErrorPrefix;
-        private bool m_SkipYieldAfterActions;
-        protected BeforeAfterTestCommandBase(TestCommand innerCommand, string beforeErrorPrefix, string afterErrorPrefix, bool skipYieldAfterActions = false)
+        protected BeforeAfterTestCommandBase(TestCommand innerCommand, string beforeErrorPrefix, string afterErrorPrefix)
             : base(innerCommand)
         {
             m_BeforeErrorPrefix = beforeErrorPrefix;
             m_AfterErrorPrefix = afterErrorPrefix;
-            m_SkipYieldAfterActions = skipYieldAfterActions;
         }
-
-        internal Func<long> GetUtcNow = () => new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds();
 
         protected T[] BeforeActions = new T[0];
 
@@ -90,23 +86,27 @@ namespace UnityEngine.TestTools
 
         protected abstract BeforeAfterTestCommandState GetState(UnityTestExecutionContext context);
 
+        protected virtual bool AllowFrameSkipAfterAction(T action)
+        {
+            return true;
+        }
+
         public IEnumerable ExecuteEnumerable(ITestExecutionContext context)
         {
             var unityContext = (UnityTestExecutionContext)context;
             var state = GetState(unityContext);
-
-            // When entering PlayMode state will incorrectly be seen as null. Looking at the hashcode to be certain that it is null.
-            if (state?.GetHashCode() == null)
+            if (state == null)
             {
-                // We do not expect a state to exist in playmode
-                state = new BeforeAfterTestCommandState();
+                throw new Exception($"No state in context for {GetType().Name}.");
             }
 
-            state.ApplyTestResult(context.CurrentResult);
+            if(state.ShouldRestore)
+            {
+                state.ApplyContext(unityContext);
+            }
 
             while (state.NextBeforeStepIndex < BeforeActions.Length)
             {
-                state.Timestamp = GetUtcNow();
                 var action = BeforeActions[state.NextBeforeStepIndex];
                 IEnumerator enumerator;
                 try
@@ -116,7 +116,7 @@ namespace UnityEngine.TestTools
                 catch (Exception ex)
                 {
                     state.TestHasRun = true;
-                    context.CurrentResult.RecordPrefixedExceptionWithHint(m_BeforeErrorPrefix, ex);
+                    context.CurrentResult.RecordPrefixedException(m_BeforeErrorPrefix, ex);
                     break;
                 }
                 ActivePcHelper.SetEnumeratorPC(enumerator, state.NextBeforeStepPc);
@@ -129,47 +129,35 @@ namespace UnityEngine.TestTools
                         {
                             if (!enumerator.MoveNext())
                             {
+                                logScope.EvaluateLogScope(true);
                                 break;
+                            }
+
+                            if (!AllowFrameSkipAfterAction(action)) // Evaluate the log scope right away for the commands where we do not yield
+                            {
+                                logScope.EvaluateLogScope(true);
+                            }
+                            if (unityContext.TestMode == TestPlatform.PlayMode && enumerator.Current is IEditModeTestYieldInstruction)
+                            {
+                                throw new Exception($"PlayMode test are not allowed to yield {enumerator.Current.GetType().Name}");
                             }
                         }
                         catch (Exception ex)
                         {
                             state.TestHasRun = true;
-                            context.CurrentResult.RecordPrefixedExceptionWithHint(m_BeforeErrorPrefix, ex);
-                            state.StoreTestResult(context.CurrentResult);
+                            context.CurrentResult.RecordPrefixedException(m_BeforeErrorPrefix, ex);
+                            state.StoreContext(unityContext);
                             break;
                         }
 
                         state.NextBeforeStepPc = ActivePcHelper.GetEnumeratorPC(enumerator);
-                        state.StoreTestResult(context.CurrentResult);
-                        if (m_SkipYieldAfterActions)
+                        state.StoreContext(unityContext);
+                        if (!AllowFrameSkipAfterAction(action))
                         {
                             break;
-                        }
-                        else
-                        {
-                            yield return enumerator.Current;
                         }
 
-                        if (GetUtcNow() - state.Timestamp > unityContext.TestCaseTimeout)
-                        {
-                            context.CurrentResult.RecordPrefixedExceptionWithHint(m_BeforeErrorPrefix, new UnityTestTimeoutException(unityContext.TestCaseTimeout));
-                            state.TestHasRun = true;
-                            break;
-                        }
-                        if (context.CurrentResult.ResultState.Status == TestStatus.Failed)
-                        {
-                            // In case the coroutine runner or any top level item has failed
-                            state.TestHasRun = true;
-                            break;
-                        }
-                    }
-
-                    if (logScope.AnyFailingLogs())
-                    {
-                        state.TestHasRun = true;
-                        context.CurrentResult.RecordPrefixedExceptionWithHint(m_BeforeErrorPrefix, new UnhandledLogMessageException(logScope.FailingLogs.First()));
-                        state.StoreTestResult(context.CurrentResult);
+                        yield return enumerator.Current;
                     }
                 }
 
@@ -184,14 +172,14 @@ namespace UnityEngine.TestTools
                     var executeEnumerable = ((IEnumerableTestMethodCommand)innerCommand).ExecuteEnumerable(context);
                     foreach (var iterator in executeEnumerable)
                     {
-                        state.StoreTestResult(context.CurrentResult);
+                        state.StoreContext(unityContext);
                         yield return iterator;
                     }
                 }
                 else
                 {
                     context.CurrentResult = innerCommand.Execute(context);
-                    state.StoreTestResult(context.CurrentResult);
+                    state.StoreContext(unityContext);
                 }
 
                 state.TestHasRun = true;
@@ -199,7 +187,6 @@ namespace UnityEngine.TestTools
 
             while (state.NextAfterStepIndex < AfterActions.Length)
             {
-                state.Timestamp = GetUtcNow();
                 state.TestAfterStarted = true;
                 var action = AfterActions[state.NextAfterStepIndex];
                 IEnumerator enumerator;
@@ -209,8 +196,8 @@ namespace UnityEngine.TestTools
                 }
                 catch (Exception ex)
                 {
-                    context.CurrentResult.RecordPrefixedExceptionWithHint(m_AfterErrorPrefix, ex);
-                    state.StoreTestResult(context.CurrentResult);
+                    context.CurrentResult.RecordPrefixedException(m_AfterErrorPrefix, ex);
+                    state.StoreContext(unityContext);
                     break;
                 }
                 ActivePcHelper.SetEnumeratorPC(enumerator, state.NextAfterStepPc);
@@ -223,39 +210,35 @@ namespace UnityEngine.TestTools
                         {
                             if (!enumerator.MoveNext())
                             {
+                                logScope.EvaluateLogScope(true);
                                 break;
+                            }
+                            
+                            if (!AllowFrameSkipAfterAction(action)) // Evaluate the log scope right away for the commands where we do not yield
+                            {
+                                logScope.EvaluateLogScope(true);
+                            }
+                            if (unityContext.TestMode == TestPlatform.PlayMode && enumerator.Current is IEditModeTestYieldInstruction)
+                            {
+                                throw new Exception($"PlayMode test are not allowed to yield {enumerator.Current.GetType().Name}");
                             }
                         }
                         catch (Exception ex)
                         {
-                            context.CurrentResult.RecordPrefixedExceptionWithHint(m_AfterErrorPrefix, ex);
-                            state.StoreTestResult(context.CurrentResult);
+                            context.CurrentResult.RecordPrefixedException(m_AfterErrorPrefix, ex);
+                            state.StoreContext(unityContext);
                             break;
                         }
 
                         state.NextAfterStepPc = ActivePcHelper.GetEnumeratorPC(enumerator);
-                        state.StoreTestResult(context.CurrentResult);
-                        if (GetUtcNow() - state.Timestamp > unityContext.TestCaseTimeout)
-                        {
-                            context.CurrentResult.RecordPrefixedExceptionWithHint(m_AfterErrorPrefix, new UnityTestTimeoutException(unityContext.TestCaseTimeout));
-                            yield break;
-                        }
-
-                        if (m_SkipYieldAfterActions)
+                        state.StoreContext(unityContext);
+                        
+                        if (!AllowFrameSkipAfterAction(action))
                         {
                             break;
                         }
-                        else
-                        {
-                            yield return enumerator.Current;
-                        }
-                    }
 
-                    if (logScope.AnyFailingLogs())
-                    {
-                        state.TestHasRun = true;
-                        context.CurrentResult.RecordPrefixedExceptionWithHint(m_AfterErrorPrefix, new UnhandledLogMessageException(logScope.FailingLogs.First()));
-                        state.StoreTestResult(context.CurrentResult);
+                        yield return enumerator.Current;
                     }
                 }
 
@@ -272,6 +255,7 @@ namespace UnityEngine.TestTools
         }
 
         private static TestCommandPcHelper pcHelper;
+
 
         internal static TestCommandPcHelper ActivePcHelper
         {

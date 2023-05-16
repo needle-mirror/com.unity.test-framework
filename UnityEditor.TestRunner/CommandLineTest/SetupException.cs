@@ -18,7 +18,7 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
             ScriptCompilationFailed,
             PlatformNotFound,
             TestSettingsFileNotFound,
-            CustomRunnerNotFound
+            OrderedTestListFileNotFound,
         }
     }
 }

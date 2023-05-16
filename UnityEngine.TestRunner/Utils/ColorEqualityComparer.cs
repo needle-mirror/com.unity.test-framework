@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace UnityEngine.TestTools.Utils
@@ -7,8 +8,8 @@ namespace UnityEngine.TestTools.Utils
     /// </summary>
     public class ColorEqualityComparer : IEqualityComparer<Color>
     {
-        internal const float k_DefaultError = 0.01f;
-        internal readonly float AllowedError;
+        private const float k_DefaultError = 0.01f;
+        private readonly float AllowedError;
 
 
         private static readonly ColorEqualityComparer m_Instance = new ColorEqualityComparer();
@@ -26,7 +27,7 @@ namespace UnityEngine.TestTools.Utils
         /// <param name="error">The custom error value.</param>
         public ColorEqualityComparer(float error)
         {
-            this.AllowedError = error;
+            AllowedError = error;
         }
 
         /// <summary>

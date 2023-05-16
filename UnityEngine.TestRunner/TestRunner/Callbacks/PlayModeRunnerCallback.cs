@@ -1,3 +1,4 @@
+using System;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 
@@ -8,21 +9,19 @@ namespace UnityEngine.TestTools.TestRunner.Callbacks
     {
         private TestResultRenderer m_ResultRenderer;
 
-        public void TestFinished(ITestResult result)
+        public void RunFinished(ITestResult testResults)
         {
-            if (result.Test.Parent != null)
-            {
-                return;
-            }
-
-            Application.logMessageReceivedThreaded -= LogRecieved;
+            Application.logMessageReceived -= LogRecieved;
             if (Camera.main == null)
             {
                 gameObject.AddComponent<Camera>();
             }
-
-            m_ResultRenderer = new TestResultRenderer(result);
+            m_ResultRenderer = new TestResultRenderer(testResults);
             m_ResultRenderer.ShowResults();
+        }
+
+        public void TestFinished(ITestResult result)
+        {
         }
 
         public void OnGUI()
@@ -31,12 +30,13 @@ namespace UnityEngine.TestTools.TestRunner.Callbacks
                 m_ResultRenderer.Draw();
         }
 
+        public void RunStarted(ITest testsToRun)
+        {
+            Application.logMessageReceived += LogRecieved;
+        }
+
         public void TestStarted(ITest test)
         {
-            if (test.Parent == null)
-            {
-                Application.logMessageReceivedThreaded += LogRecieved;
-            }
         }
 
         private void LogRecieved(string message, string stacktrace, LogType type)

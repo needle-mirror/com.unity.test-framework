@@ -1,32 +1,30 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
+using System.Reflection;
 using NUnit;
 using NUnit.Framework.Api;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
-using Unity.Profiling;
-using UnityEngine.TestRunner.NUnitExtensions.Filters;
+using UnityEngine.TestRunner.NUnitExtensions;
 
 namespace UnityEngine.TestTools.NUnitExtensions
 {
     internal class UnityTestAssemblyBuilder : DefaultTestAssemblyBuilder, IAsyncTestAssemblyBuilder
     {
         private readonly string m_ProductName;
-        public UnityTestAssemblyBuilder()
+        private readonly ITestSuiteModifier[] m_TestSuiteModifiers;
+        public UnityTestAssemblyBuilder(string[] orderedTestNames)
         {
+            m_TestSuiteModifiers = orderedTestNames != null && orderedTestNames.Length > 0
+                ? new ITestSuiteModifier[] {new OrderedTestSuiteModifier(orderedTestNames)}
+                : new ITestSuiteModifier[0];
             m_ProductName = Application.productName;
         }
 
-        public UnityTestAssemblyBuilder(string productName)
+        public ITest Build(Assembly[] assemblies, TestPlatform[] testPlatforms, IDictionary<string, object> options)
         {
-            m_ProductName = productName;
-        }
-
-        public ITest Build(AssemblyWithPlatform[] assemblies)
-        {
-            var test = BuildAsync(assemblies);
+            var test = BuildAsync(assemblies, testPlatforms, options);
             while (test.MoveNext())
             {
             }
@@ -34,68 +32,31 @@ namespace UnityEngine.TestTools.NUnitExtensions
             return test.Current;
         }
 
-        struct PlatformAssembly : IEquatable<PlatformAssembly>
-        {
-            public System.Reflection.Assembly Assembly;
-            public TestPlatform Platform;
-
-            public bool Equals(PlatformAssembly other)
-            {
-                return Equals(Assembly, other.Assembly) && Platform == other.Platform;
-            }
-
-            public override bool Equals(object obj)
-            {
-                return obj is PlatformAssembly other && Equals(other);
-            }
-
-            public override int GetHashCode()
-            {
-                unchecked
-                {
-                    return ((Assembly != null ? Assembly.GetHashCode() : 0) * 397) ^ (int)Platform;
-                }
-            }
-        }
-
-        private static Dictionary<PlatformAssembly, TestSuite> CachedAssemblies = new Dictionary<PlatformAssembly, TestSuite>();
-        public IEnumerator<ITest> BuildAsync(AssemblyWithPlatform[] assemblies)
+        public IEnumerator<ITest> BuildAsync(Assembly[] assemblies, TestPlatform[] testPlatforms, IDictionary<string, object> options)
         {
             var productName = string.Join("_", m_ProductName.Split(Path.GetInvalidFileNameChars()));
             var suite = new TestSuite(productName);
-            suite.Properties.Set("isRoot", true);
             for (var index = 0; index < assemblies.Length; index++)
             {
-                var assembly = assemblies[index].AssemblyWrapper.Assembly;
-                var platform = assemblies[index].TestPlatform;
-
-                using (new ProfilerMarker(nameof(UnityTestAssemblyBuilder) + "." + assembly.GetName().Name).Auto())
+                var assembly = assemblies[index];
+                var platform = testPlatforms[index];
+                
+                var assemblySuite = Build(assembly, options) as TestSuite;
+                if (assemblySuite != null && assemblySuite.HasChildren)
                 {
-                    var key = new PlatformAssembly {Assembly = assembly, Platform = platform};
-                    if (!CachedAssemblies.TryGetValue(key, out var assemblySuite))
-                    {
-                        assemblySuite = Build(assembly, GetNUnitTestBuilderSettings(platform)) as TestSuite;
-                        if (assemblySuite != null)
-                        {
-                            assemblySuite.Properties.Set("platform", platform);
-                            assemblySuite.Properties.Set("isAssembly", true);
-                            EditorOnlyFilter.ApplyPropertyToTest(assemblySuite, platform == TestPlatform.EditMode);
-
-                            if (RequiresPlayModeAttribute.GetValueForTest(assemblySuite) == null)
-                            {
-                                new RequiresPlayModeAttribute(platform == TestPlatform.PlayMode).ApplyToTest(assemblySuite);
-                            }
-                        }
-                        CachedAssemblies.Add(key, assemblySuite);
-                    }
-
-                    if (assemblySuite != null && assemblySuite.HasChildren)
-                    {
-                        suite.Add(assemblySuite);
-                    }
+                    suite.Add(assemblySuite);
+                    suite.ApplyPlatformToPropertyBag(platform);
                 }
 
                 yield return null;
+            }
+            
+            suite.ParseForNameDuplicates();
+            suite.Properties.Set("platform", testPlatforms.MergeFlags());
+
+            foreach (var testSuiteModifier in m_TestSuiteModifiers)
+            {
+                suite = testSuiteModifier.ModifySuite(suite);
             }
 
             yield return suite;

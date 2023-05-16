@@ -38,20 +38,20 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
             Result = test.MakeTestResult();
             State = WorkItemState.Ready;
             m_ExecuteTestStartEvent = ShouldExecuteStartEvent();
-            m_DontRunRestoringResult = TestHasAlreadyExecuted(test);
+            m_DontRunRestoringResult = ShouldRestore(test);
         }
 
-        protected static bool TestHasAlreadyExecuted(ITest loadedTest)
+        protected static bool ShouldRestore(ITest loadedTest)
         {
             return UnityWorkItemDataHolder.alreadyExecutedTests != null &&
-                UnityWorkItemDataHolder.alreadyExecutedTests.Contains(loadedTest.GetUniqueName());
+                   UnityWorkItemDataHolder.alreadyExecutedTests.Contains(loadedTest.GetUniqueName());
         }
 
         protected bool ShouldExecuteStartEvent()
         {
             return UnityWorkItemDataHolder.alreadyStartedTests != null &&
-                UnityWorkItemDataHolder.alreadyStartedTests.All(x => x != Test.GetUniqueName()) &&
-                !TestHasAlreadyExecuted(Test);
+                   UnityWorkItemDataHolder.alreadyStartedTests.All(x => x != Test.GetUniqueName()) &&
+                   !ShouldRestore(Test);
         }
 
         protected abstract IEnumerable PerformWork();
@@ -70,8 +70,8 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
 
         public virtual IEnumerable Execute()
         {
-            Context.CurrentTest = this.Test;
-            Context.CurrentResult = this.Result;
+            Context.CurrentTest = Test;
+            Context.CurrentResult = Result;
 
             if (m_ExecuteTestStartEvent)
             {
@@ -99,16 +99,20 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
 
             //Result.AssertCount += Context.AssertCount;
 
-            if (!TestHasAlreadyExecuted(Test))
-            {
-                Context.Listener.TestFinished(Result);
-            }
+            Context.Listener.TestFinished(Result);
 
             if (Completed != null)
                 Completed(this, EventArgs.Empty);
 
             Context.TestObject = null;
             Test.Fixture = null;
+
+            // Reset the states, in case of errors in the middle of their execution. E.g. Timeout.
+            if (!Test.IsSuite)
+            {
+                Context.SetUpTearDownState.Reset();
+                Context.OuterUnityTestActionState.Reset();
+            }
         }
 
         public virtual void Cancel(bool force)

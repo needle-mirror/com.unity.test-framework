@@ -1,64 +1,71 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
 using UnityEngine.TestRunner.NUnitExtensions.Filters;
+using UnityEngine.TestTools;
 
 namespace UnityEngine.TestRunner.NUnitExtensions
 {
     internal static class TestExtensions
     {
-        private static List<string> ExtractFixtureCategories(ITest test)
+        private static IEnumerable<string> GetCategoriesInTestAndAncestors(ITest test)
         {
-            var fixtureCategories = test.Properties[PropertyNames.Category].Cast<string>().ToList();
+            var categories = test.Properties[PropertyNames.Category].Cast<string>().ToList();
             if (test.Parent != null)
             {
-                fixtureCategories.AddRange(ExtractFixtureCategories(test.Parent));
+                categories.AddRange(GetCategoriesInTestAndAncestors(test.Parent));
             }
 
-            return fixtureCategories;
+            return categories;
+        }
+
+        public static bool HasCategory(this ITest test, string[] categoryFilter)
+        {
+            var categories = test.GetAllCategoriesFromTest().Distinct();
+            return categoryFilter.Any(c => categories.Any(r => r == c));
         }
 
         public static List<string> GetAllCategoriesFromTest(this ITest test)
         {
-            // Only mark tests as Uncategorized if the test fixture doesn't have a category,
-            // otherwise the test inherits the Fixture category.
-            // Recursively try checking until Parent is null - cause category can be set on higher level.
-            var categories = ExtractFixtureCategories(test);
+            var categories = GetCategoriesInTestAndAncestors(test).ToList();
             if (categories.Count == 0 && test is TestMethod)
             {
+                // only mark tests as Uncategorized if the test fixture doesn't have a category,
+                // otherwise the test inherits the Fixture category
                 categories.Add(CategoryFilterExtended.k_DefaultCategory);
             }
             return categories;
         }
 
-        public static void ParseForNameDuplicates(this ITest test, Dictionary<string, int> duplicates = null)
+        public static void ParseForNameDuplicates(this ITest test)
         {
-            if (duplicates == null)
-            {
-                duplicates = new Dictionary<string, int>();
-            }
-
+            var duplicates = new Dictionary<string, int>();
             for (var i = 0; i < test.Tests.Count; i++)
             {
                 var child = test.Tests[i];
-                var uniqueName = GetUniqueName(child);
                 int count;
-                if (duplicates.TryGetValue(uniqueName, out count))
+                if (duplicates.TryGetValue(child.FullName, out count))
                 {
                     count++;
                     child.Properties.Add("childIndex", count);
-                    duplicates[uniqueName] = count;
+                    duplicates[child.FullName] = count;
                 }
                 else
                 {
-                    duplicates.Add(uniqueName, 1);
+                    duplicates.Add(child.FullName, 1);
                 }
+                ParseForNameDuplicates(child);
+            }
+        }
 
-
-                // Use the duplicates dictionary across all levels to ensure that identical tests with different parents still are unique.
-                // E.g. a test inside a parameterized fixture where the fixture has a non unique name.
-                ParseForNameDuplicates(child, duplicates);
+        public static void ApplyPlatformToPropertyBag(this ITest test, TestPlatform testPlatform)
+        {
+            test.Properties.Set("platform", testPlatform);
+            foreach (var child in test.Tests)
+            {
+                child.ApplyPlatformToPropertyBag(testPlatform);
             }
         }
 
@@ -70,7 +77,8 @@ namespace UnityEngine.TestRunner.NUnitExtensions
 
         public static bool HasChildIndex(this ITest test)
         {
-            return test.Properties.ContainsKey("childIndex") && test.Properties["childIndex"].Count > 0;
+            var index = test.Properties["childIndex"];
+            return index.Count > 0;
         }
 
         private static string GetAncestorPath(ITest test)
@@ -89,18 +97,7 @@ namespace UnityEngine.TestRunner.NUnitExtensions
 
         public static string GetUniqueName(this ITest test)
         {
-            var id = string.Empty;
-            if (test.GetType() == typeof(TestSuite))
-            {
-                // This ensures that suites on the namespace level includes the dll name.
-                id += GetAncestorPath(test);
-            }
-            else if (test.IsSuite && test.TypeInfo != null) // Test class / fixture
-            {
-                id += GetAssemblyName(test) + "/";
-            }
-
-            id += GetFullNameWithoutDllPath(test);
+            var id = GetAncestorPath(test) + GetFullName(test);
             if (test.HasChildIndex())
             {
                 var index = test.GetChildIndex();
@@ -114,40 +111,61 @@ namespace UnityEngine.TestRunner.NUnitExtensions
             return id;
         }
 
+        public static int GetRetryIteration(this ITest test)
+        {
+            if (test.Properties.ContainsKey("retryIteration"))
+            {
+                return test.Properties["retryIteration"].OfType<int>().First();
+            }
+
+            return 0;
+        }
+        
+        public static int GetRepeatIteration(this ITest test)
+        {
+            if (test.Properties.ContainsKey("repeatIteration"))
+            {
+                return test.Properties["repeatIteration"].OfType<int>().First();
+            }
+
+            return 0;
+        }
+
+        public static string GetFullName(this ITest test)
+        {
+            var typeInfo = test.TypeInfo ?? test.Parent?.TypeInfo ?? test.Tests.FirstOrDefault()?.TypeInfo;
+            if (typeInfo == null)
+            {
+                return "[" + test.Name + "]";
+            }
+
+            var assemblyId = typeInfo.Assembly.GetName().Name;
+            if (assemblyId == test.Name)
+            {
+                return $"[{test.Name}]";
+            }
+
+            return string.Format("[{0}][{1}]", assemblyId, test.FullName);
+        }
+
         public static string GetFullNameWithoutDllPath(this ITest test)
         {
-            if (test.Properties != null)
+            if (test.Parent == null)
             {
-                if (test.Properties.ContainsKey("isRoot"))
-                {
-                    return test.Name;
-                }
-
-                if (test.Properties.ContainsKey("isAssembly"))
-                {
-                    return test.Name;
-                }
+                return string.Empty;
+            }
+            var typeInfo = test.TypeInfo ?? test.Parent?.TypeInfo;
+            if (typeInfo == null && IsAssembly(test))
+            {
+                return test.Name;
             }
 
             return test.FullName;
         }
 
-        private static string GetAssemblyName(ITest test)
+        private static bool IsAssembly(this ITest test)
         {
-            while (true)
-            {
-                if (test.Properties.ContainsKey("isAssembly"))
-                {
-                    return test.Name;
-                }
-
-                if (test.Parent == null)
-                {
-                    return string.Empty;
-                }
-
-                test = test.Parent;
-            }
+            return test.Parent.Parent == null;
         }
 
         public static string GetSkipReason(this ITest test)
@@ -180,6 +198,25 @@ namespace UnityEngine.TestRunner.NUnitExtensions
                 return GetUniqueName(test.Parent);
 
             return null;
+        }
+
+        internal static string GetFullName(string testFullName, int childIndex)
+        {
+            return childIndex != -1 ? GetIndexedTestCaseName(testFullName, childIndex) : testFullName;
+        }
+        private static string GetIndexedTestCaseName(string fullName, int index)
+        {
+            var generatedTestSuffix = " GeneratedTestCase" + index;
+            if (fullName.EndsWith(")"))
+            {
+                // Test names from generated TestCaseSource look like Test(TestCaseSourceType)
+                // This inserts a unique test case index in the name, so that it becomes Test(TestCaseSourceType GeneratedTestCase0)
+                return fullName.Substring(0, fullName.Length - 1) + generatedTestSuffix + fullName[fullName.Length - 1];
+            }
+
+            // In some cases there can be tests with duplicate names generated in other ways and they won't have () in their name
+            // We just append a suffix at the end of the name in that case
+            return fullName + generatedTestSuffix;
         }
     }
 }

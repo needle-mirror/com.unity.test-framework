@@ -35,13 +35,13 @@ namespace UnityEditor.TestTools
         [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Method)]
         internal class AssetPipelineIgnoreAttribute : NUnitAttribute, IApplyToTest
         {
-            readonly string m_IgnoreReason;
-            readonly AssetPipelineBackend m_IgnoredBackend;
-            static readonly AssetPipelineBackend k_ActiveBackend = AssetDatabase.IsV2Enabled()
+            private readonly string m_IgnoreReason;
+            private readonly AssetPipelineBackend m_IgnoredBackend;
+            private static readonly AssetPipelineBackend k_ActiveBackend = AssetDatabase.IsV2Enabled()
                 ? AssetPipelineBackend.V2
                 : AssetPipelineBackend.V1;
 
-            static string ActiveBackendName = Enum.GetName(typeof(AssetPipelineBackend), k_ActiveBackend);
+            private static string ActiveBackendName = Enum.GetName(typeof(AssetPipelineBackend), k_ActiveBackend);
 
             public AssetPipelineIgnoreAttribute(AssetPipelineBackend backend, string ignoreReason)
             {

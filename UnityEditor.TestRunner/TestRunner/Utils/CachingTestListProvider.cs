@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
-using NUnit.Framework.Interfaces;
 using UnityEditor.TestTools.TestRunner.Api;
 using UnityEditor.TestTools.TestRunner.Api.Analytics;
-using UnityEngine.TestRunner.NUnitExtensions;
 using UnityEngine.TestTools;
 
 namespace UnityEditor.TestTools.TestRunner
@@ -20,22 +18,31 @@ namespace UnityEditor.TestTools.TestRunner
             m_TestAdaptorFactory = testAdaptorFactory;
         }
 
-        public IEnumerator<ITestAdaptor> GetTestListAsync(ITestFilter filter)
+        public IEnumerator<ITestAdaptor> GetTestListAsync(TestPlatform platform)
         {
-            if (m_TestListCache.CachedTree == null)
+            var testFromCache = m_TestListCache.GetTestFromCacheAsync(platform);
+            while (testFromCache.MoveNext())
             {
-                var test = m_InnerTestListProvider.GetTestListAsync();
+                yield return null;
+            }
+
+
+            if (testFromCache.Current != null)
+            {
+                yield return testFromCache.Current;
+            }
+            else
+            {
+                var test = m_InnerTestListProvider.GetTestListAsync(platform);
                 while (test.MoveNext())
                 {
                     yield return null;
                 }
-
-                test.Current.ParseForNameDuplicates();
-                m_TestListCache.CachedTree = test.Current;
+                
+                m_TestListCache.CacheTest(platform, test.Current);
                 AnalyticsReporter.AnalyzeTestTreeAndReport(test.Current);
+                yield return m_TestAdaptorFactory.Create(test.Current);
             }
-
-            yield return m_TestAdaptorFactory.Create(m_TestListCache.CachedTree, filter);
         }
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Text;
 
 namespace UnityEditor.TestTools.TestRunner
@@ -6,20 +7,6 @@ namespace UnityEditor.TestTools.TestRunner
     {
         public BuildPlayerOptions BuildPlayerOptions;
         public string PlayerDirectory;
-
-        // Used by Playmode BuildConfiguration extension
-        internal static BuildOptions GetCompressionBuildOptions(BuildTargetGroup buildTargetGroup, BuildTarget buildTarget)
-        {
-            if (PostprocessBuildPlayer.SupportsLz4Compression(buildTargetGroup, buildTarget))
-            {
-                if (EditorUserBuildSettings.GetCompressionType(buildTargetGroup) == Compression.Lz4)
-                    return BuildOptions.CompressWithLz4;
-                else if (EditorUserBuildSettings.GetCompressionType(buildTargetGroup) == Compression.Lz4HC)
-                    return BuildOptions.CompressWithLz4HC;
-            }
-
-            return BuildOptions.None;
-        }
 
         public override string ToString()
         {

@@ -8,6 +8,7 @@ namespace UnityEngine.TestTools.Logging
         Queue<LogMatch> ExpectedLogs { get; set; }
         List<LogEvent> AllLogs { get; }
         List<LogEvent> FailingLogs { get; }
+        void EvaluateLogScope(bool endOfScopeCheck);
         bool IgnoreFailingMessages { get; set; }
         bool IsNUnitException { get; }
         bool IsNUnitSuccessException { get; }

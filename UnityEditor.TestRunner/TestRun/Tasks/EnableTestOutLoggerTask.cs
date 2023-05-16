@@ -9,31 +9,37 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
 {
     internal class EnableTestOutLoggerTask : TestTaskBase, IDisposable
     {
+        internal Action<Action<PlayModeStateChange>> SubscribePlayModeStateChanged = callback => 
+            EditorApplication.playModeStateChanged += callback;
+        internal Action<Action<PlayModeStateChange>> UnsubscribePlayModeStateChanged = callback => 
+            EditorApplication.playModeStateChanged -= callback;
         internal Action<Application.LogCallback> SubscribeLogMessageReceivedThreaded =
-            (callback) => Application.logMessageReceivedThreaded += callback;
+            callback => Application.logMessageReceived += callback;
         internal Action<Application.LogCallback> UnsubscribeLogMessageReceivedThreaded =
-            (callback) => Application.logMessageReceivedThreaded -= callback;
+            callback => Application.logMessageReceived -= callback;
 
         internal Func<TextWriter> GetCurrentContextWriter = () => TestContext.Out;
-
-        private bool StateChangeCallbackRegistered;
 
         public EnableTestOutLoggerTask()
         {
             RerunAfterResume = true;
-            RerunAfterEnteredEditMode = true;
         }
 
         public override IEnumerator Execute(TestJobData testJobData)
         {
-            if (StateChangeCallbackRegistered)
-            {
-                UnsubscribeLogMessageReceivedThreaded(LogReceived);
-            }
-
+            SubscribePlayModeStateChanged(WaitForExitPlaymode);
             SubscribeLogMessageReceivedThreaded(LogReceived);
-            StateChangeCallbackRegistered = true;
             yield break;
+        }
+        
+        private void WaitForExitPlaymode(PlayModeStateChange state)
+        {
+            if (state == PlayModeStateChange.EnteredEditMode)
+            {
+                UnsubscribePlayModeStateChanged(WaitForExitPlaymode);
+                UnsubscribeLogMessageReceivedThreaded(LogReceived);
+                SubscribeLogMessageReceivedThreaded(LogReceived);
+            }
         }
 
         private void LogReceived(string message, string stacktrace, LogType type)

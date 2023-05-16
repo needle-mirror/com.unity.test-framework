@@ -1,26 +1,23 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using NUnit.Framework.Interfaces;
 using UnityEngine;
 using UnityEngine.TestTools.Logging;
-using UnityEngine.TestTools.TestRunner;
 
 namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
 {
     internal abstract class BuildActionTaskBase<T> : TestTaskBase
     {
         private string typeName;
-        private Func<TestJobData, ITestFilter> filterSelector;
         internal IAttributeFinder attributeFinder;
+        internal RuntimePlatform targetPlatform = Application.platform;
         internal Action<string> logAction = Debug.Log;
         internal Func<ILogScope> logScopeProvider = () => new LogScope();
         internal Func<Type, object> createInstance = Activator.CreateInstance;
 
-        protected BuildActionTaskBase(Func<TestJobData, ITestFilter> filterSelector, IAttributeFinder attributeFinder)
+        protected BuildActionTaskBase(IAttributeFinder attributeFinder)
         {
-            this.filterSelector = filterSelector;
             this.attributeFinder = attributeFinder;
             typeName = typeof(T).Name;
         }
@@ -34,17 +31,14 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
                 throw new Exception($"Test tree is not available for {GetType().Name}.");
             }
 
-            // This flag is used by older versions of the graphics test framework in order to determine if the pre-build setup is for a player (false) or for the editor (true).
-            PlaymodeLauncher.IsRunning = !testJobData.executionSettings.PlayerIncluded();
-            var enumerator = ExecuteMethods(testJobData.testTree, filterSelector(testJobData), testJobData.TargetRuntimePlatform ?? Application.platform);
-
+            var enumerator = ExecuteMethods(testJobData.testTree, testJobData.executionSettings.BuildNUnitFilter());
             while (enumerator.MoveNext())
             {
                 yield return null;
             }
         }
-
-        private IEnumerator ExecuteMethods(ITest testTree, ITestFilter testRunnerFilter, RuntimePlatform targetPlatform)
+        
+        protected IEnumerator ExecuteMethods(ITest testTree, ITestFilter testRunnerFilter)
         {
             var exceptions = new List<Exception>();
 
@@ -59,18 +53,7 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
                     using (var logScope = logScopeProvider())
                     {
                         Action(targetClass);
-
-                        if (logScope.AnyFailingLogs())
-                        {
-                            var failingLog = logScope.FailingLogs.First();
-                            throw new UnhandledLogMessageException(failingLog);
-                        }
-
-                        if (logScope.ExpectedLogs.Any())
-                        {
-                            var expectedLogs = logScope.ExpectedLogs.First();
-                            throw new UnexpectedLogMessageException(expectedLogs);
-                        }
+                        logScope.EvaluateLogScope(true);
                     }
                 }
                 catch (Exception ex)

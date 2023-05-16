@@ -4,6 +4,7 @@ using System.Text;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal.Filters;
 using UnityEngine;
+using UnityEngine.TestRunner.NUnitExtensions.Runner;
 
 namespace UnityEditor.TestTools.TestRunner.Api
 {
@@ -11,7 +12,7 @@ namespace UnityEditor.TestTools.TestRunner.Api
     /// A set of execution settings defining how to run tests, using the <see cref="TestRunnerApi"/>.
     /// </summary>
     [Serializable]
-    public class ExecutionSettings : ISerializationCallbackReceiver
+    public class ExecutionSettings
     {
         /// <summary>
         /// Creates an instance with a given set of filters, if any.
@@ -51,17 +52,49 @@ namespace UnityEditor.TestTools.TestRunner.Api
         /// </summary>
         [SerializeField]
         public int playerHeartbeatTimeout = 60 * 10;
-        [SerializeField]
-        internal string playerBuilderName;
-        [SerializeField]
-        public string customRunnerName;
-        [SerializeField]
-        public bool IsBuildOnly { get; set; }
 
-        /// <summary>
+        [SerializeField]
+        internal string[] orderedTestNames;
+
+        [SerializeField]
+        internal IgnoreTest[] ignoreTests;
+
+        [SerializeField]
+        internal FeatureFlags featureFlags;
+
+        internal string playerSavePath { get; set; }
+        internal int retryCount { get; set; }
+        internal int repeatCount { get; set; }
+
+        internal bool EditModeIncluded()
+        {
+            return filters.Any(f => IncludesTestMode(f.testMode, TestMode.EditMode));
+        }
+
+        internal bool PlayModeInEditorIncluded()
+        {
+            return filters.Any(f => IncludesTestMode(f.testMode, TestMode.PlayMode) && targetPlatform == null);
+        }
+
+        internal bool PlayerIncluded()
+        {
+            return filters.Any(f => IncludesTestMode(f.testMode, TestMode.PlayMode) && targetPlatform != null);
+        }
+
+        private static bool IncludesTestMode(TestMode testMode, TestMode modeToCheckFor)
+        {
+            return (testMode & modeToCheckFor) == modeToCheckFor;
+        }
+
+        internal ITestFilter BuildNUnitFilter()
+        {
+            return new OrFilter(filters.Select(f => f.ToRuntimeTestRunnerFilter(runSynchronously).BuildNUnitFilter()).ToArray());
+        }
+
+        /// <returns>
         /// The <see cref="BuildTarget"/> platform to run the test on. If set to null, then the Editor is the target for the tests.
-        /// </summary>
-        public BuildTarget? targetPlatform
+        /// </returns>
+        internal BuildTarget? targetPlatform
         {
             get { return m_HasTargetPlatform ? (BuildTarget?)m_TargetPlatform : null; }
             set
@@ -80,6 +113,7 @@ namespace UnityEditor.TestTools.TestRunner.Api
                 }
             }
         }
+
         /// <summary>
         /// Implementation of ToString() that builds a string composed of the execution settings.
         /// </summary>
@@ -89,7 +123,6 @@ namespace UnityEditor.TestTools.TestRunner.Api
             var stringBuilder = new StringBuilder();
             stringBuilder.AppendLine($"{nameof(ExecutionSettings)} with details:");
             stringBuilder.AppendLine($"{nameof(targetPlatform)} = {targetPlatform}");
-            stringBuilder.AppendLine($"{nameof(playerBuilderName)} = {playerBuilderName}");
             stringBuilder.AppendLine($"{nameof(playerHeartbeatTimeout)} = {playerHeartbeatTimeout}");
 
             if (filters.Length == 0)
@@ -97,17 +130,12 @@ namespace UnityEditor.TestTools.TestRunner.Api
                 stringBuilder.AppendLine($"{nameof(filters)} = {{}}");
             }
 
-            if (!string.IsNullOrEmpty(customRunnerName))
-            {
-                stringBuilder.AppendLine($"{nameof(customRunnerName)} = {customRunnerName}");
-            }
-
             for (int i = 0; i < filters.Length; i++)
             {
                 stringBuilder.AppendLine($"{nameof(filters)}[{i}] = ");
                 var filterStrings = filters[i]
                     .ToString()
-                    .Split(new[] {Environment.NewLine}, StringSplitOptions.None)
+                    .Split(new[] {Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries)
                     .ToArray();
 
                 foreach (var filterString in filterStrings)
@@ -116,32 +144,34 @@ namespace UnityEditor.TestTools.TestRunner.Api
                 }
             }
 
+            if (ignoreTests == null || ignoreTests.Length == 0)
+            {
+                stringBuilder.AppendLine($"{nameof(ignoreTests)} = {{}}");
+            }
+            else
+            {
+                for (int i = 0; i < ignoreTests.Length; i++)
+                {
+                    stringBuilder.AppendLine($"{nameof(ignoreTests)}[{i}] = {ignoreTests[i]}");
+                }
+            }
+
+            if (featureFlags == null)
+            {
+                stringBuilder.AppendLine($"{nameof(featureFlags)} = null");
+            }
+            else
+            {
+                stringBuilder.AppendLine("Feature Flags:");
+                stringBuilder.AppendLine($"  {nameof(featureFlags.fileCleanUpCheck)} = {featureFlags.fileCleanUpCheck}");
+				stringBuilder.AppendLine($"  {nameof(featureFlags.requiresSplashScreen)} = {featureFlags.requiresSplashScreen}");
+				stringBuilder.AppendLine($"  {nameof(featureFlags.strictDomainReload)} = {featureFlags.strictDomainReload}");
+            }
+
+
+            stringBuilder.AppendLine();
+
             return stringBuilder.ToString();
-        }
-
-        public void OnBeforeSerialize()
-        {
-            m_TargetPlatform = targetPlatform ?? BuildTarget.NoTarget;
-        }
-
-        public void OnAfterDeserialize()
-        {
-            targetPlatform = m_TargetPlatform == BuildTarget.NoTarget ? null : (BuildTarget?)m_TargetPlatform;
-        }
-
-        internal bool PlayerIncluded()
-        {
-            return targetPlatform != null;
-        }
-
-        private static bool IncludesTestMode(TestMode testMode, TestMode modeToCheckFor)
-        {
-            return (testMode & modeToCheckFor) == modeToCheckFor;
-        }
-
-        internal bool CustomRunnerIncluded()
-        {
-            return !string.IsNullOrEmpty(customRunnerName);
         }
     }
 }

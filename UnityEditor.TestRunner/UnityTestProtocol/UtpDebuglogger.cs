@@ -1,8 +1,9 @@
+using System;
 using UnityEngine;
 
 namespace UnityEditor.TestTools.TestRunner.UnityTestProtocol
 {
-    class UtpDebugLogger : IUtpLogger
+    internal class UtpDebugLogger : IUtpLogger
     {
         internal const string UtpPrefix = "\n##utp:";
 

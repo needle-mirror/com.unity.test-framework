@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using NUnit.Framework.Interfaces;
 using UnityEngine.Networking.PlayerConnection;
-using UnityEngine.TestRunner.NUnitExtensions;
 using UnityEngine.TestRunner.TestLaunchers;
 
 namespace UnityEngine.TestTools.TestRunner.Callbacks
@@ -13,7 +12,6 @@ namespace UnityEngine.TestTools.TestRunner.Callbacks
     [AddComponentMenu("")]
     internal class RemoteTestResultSender : MonoBehaviour, ITestRunnerListener
     {
-        public bool ReportBackToEditor = true;
         private class QueueData
         {
             public Guid id { get; set; }
@@ -22,10 +20,13 @@ namespace UnityEngine.TestTools.TestRunner.Callbacks
 
         private const int k_aliveMessageFrequency = 120;
         private float m_NextliveMessage = k_aliveMessageFrequency;
+        private readonly Queue<QueueData> m_SendQueue = new Queue<QueueData>();
+        private readonly object m_LockQueue = new object();
+        private readonly IRemoteTestResultDataFactory m_TestResultDataFactory = new RemoteTestResultDataFactory();
 
         public void Start()
         {
-            PlayerConnection.instance.Register(PlayerConnectionMessageIds.quitPlayerMessageId, ProcessPlayerQuitMessage);
+            StartCoroutine(SendDataRoutine());
         }
 
         private byte[] SerializeObject(object objectToSerialize)
@@ -33,30 +34,53 @@ namespace UnityEngine.TestTools.TestRunner.Callbacks
             return Encoding.UTF8.GetBytes(JsonUtility.ToJson(objectToSerialize));
         }
 
+        public void RunStarted(ITest testsToRun)
+        {
+            var data = SerializeObject(m_TestResultDataFactory.CreateFromTest(testsToRun));
+            lock (m_LockQueue)
+            {
+                m_SendQueue.Enqueue(new QueueData
+                {
+                    id = PlayerConnectionMessageIds.runStartedMessageId,
+                    data = data
+                });
+            }
+        }
+
+        public void RunFinished(ITestResult testResults)
+        {
+            var data = SerializeObject(m_TestResultDataFactory.CreateFromTestResult(testResults));
+            lock (m_LockQueue)
+            {
+                m_SendQueue.Enqueue(new QueueData { id = PlayerConnectionMessageIds.runFinishedMessageId, data = data, });
+            }
+        }
+
         public void TestStarted(ITest test)
         {
-            if (!ReportBackToEditor)
+            var data = SerializeObject(m_TestResultDataFactory.CreateFromTest(test));
+            lock (m_LockQueue)
             {
-                return;
+                m_SendQueue.Enqueue(new QueueData
+                {
+                    id = PlayerConnectionMessageIds.testStartedMessageId,
+                    data = data
+                });
             }
-            Send(PlayerConnectionMessageIds.testStartedMessageId, Encoding.UTF8.GetBytes(test.GetUniqueName()));
         }
 
         public void TestFinished(ITestResult result)
         {
-            if (!ReportBackToEditor)
+            var testRunnerResultForApi = m_TestResultDataFactory.CreateFromTestResult(result);
+            var resultData = SerializeObject(testRunnerResultForApi);
+            lock (m_LockQueue)
             {
-                return;
+                m_SendQueue.Enqueue(new QueueData
+                {
+                    id = PlayerConnectionMessageIds.testFinishedMessageId,
+                    data = resultData,
+                });
             }
-
-            var resultData = SerializeObject(TestResultSerializer.MakeFromTestResult(result));
-            Send(PlayerConnectionMessageIds.testFinishedMessageId, resultData);
-        }
-
-        private void Send(Guid messageId, byte[] data)
-        {
-            PlayerConnection.instance.Send(messageId, data);
-            ResetNextPlayerAliveMessageTime();
         }
 
         public IEnumerator SendDataRoutine()
@@ -68,22 +92,26 @@ namespace UnityEngine.TestTools.TestRunner.Callbacks
 
             while (true)
             {
-                SendAliveMessageIfNeeded();
-                yield return new WaitForSeconds(k_aliveMessageFrequency);
-            }
-        }
+                lock (m_LockQueue)
+                {
+                    if (m_SendQueue.Count > 0)
+                    {
+                        if (PlayerConnection.instance.isConnected)
+                        {
+                            ResetNextPlayerAliveMessageTime();
+                            var queueData = m_SendQueue.Dequeue();
+                            PlayerConnection.instance.Send(queueData.id, queueData.data);
+                        }
 
-        private void ProcessPlayerQuitMessage(MessageEventArgs arg0)
-        {
-            //Some platforms don't quit, so we need to disconnect to make sure they will not connect to another editor instance automatically.
-            PlayerConnection.instance.DisconnectAll();
-
-            //XBOX has an error when quitting
-            if (Application.platform == RuntimePlatform.XboxOne)
-            {
-                return;
+                        yield return null;
+                    }
+                    else //This is needed so we dont stall the player totally
+                    {
+                        SendAliveMessageIfNeeded();
+                        yield return new WaitForSeconds(0.02f);
+                    }
+                }
             }
-            Application.Quit();
         }
 
         private void SendAliveMessageIfNeeded()
@@ -92,8 +120,10 @@ namespace UnityEngine.TestTools.TestRunner.Callbacks
             {
                 return;
             }
+
             Debug.Log("Sending player alive message back to editor.");
-            Send(PlayerConnectionMessageIds.playerAliveHeartbeat, new byte[0]);
+            ResetNextPlayerAliveMessageTime();
+            PlayerConnection.instance.Send(PlayerConnectionMessageIds.playerAliveHeartbeat, new byte[0]);
         }
 
         private void ResetNextPlayerAliveMessageTime()

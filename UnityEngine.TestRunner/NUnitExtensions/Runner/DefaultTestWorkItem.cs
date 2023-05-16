@@ -1,13 +1,9 @@
 using System;
 using System.Collections;
-using System.Linq;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
 using NUnit.Framework.Internal.Commands;
-using NUnit.Framework.Internal.Execution;
 using UnityEngine.TestTools;
-using SetUpTearDownCommand = NUnit.Framework.Internal.Commands.SetUpTearDownCommand;
-using TestActionCommand = NUnit.Framework.Internal.Commands.TestActionCommand;
 
 namespace UnityEngine.TestRunner.NUnitExtensions.Runner
 {
@@ -69,7 +65,7 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
                             }
                             catch (Exception e)
                             {
-                                Context.CurrentResult.RecordExceptionWithHint(e);
+                                Context.CurrentResult.RecordException(e);
                                 break;
                             }
 

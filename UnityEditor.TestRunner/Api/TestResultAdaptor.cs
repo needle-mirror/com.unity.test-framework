@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework.Interfaces;
+using UnityEngine.TestRunner.NUnitExtensions;
 using UnityEngine.TestRunner.TestLaunchers;
 
 namespace UnityEditor.TestTools.TestRunner.Api
@@ -32,6 +33,35 @@ namespace UnityEditor.TestTools.TestRunner.Api
             Output = result.Output;
             Children = children;
             m_Result = result;
+            RetryIteration = result.Test.GetRetryIteration();
+            RepeatIteration = result.Test.GetRepeatIteration();
+        }
+
+        internal TestResultAdaptor(RemoteTestResultData result, RemoteTestResultDataWithTestData allData)
+        {
+            Test = new TestAdaptor(allData.tests.First(t => t.id == result.testId));
+            Name = result.name;
+            FullName = result.fullName;
+            ResultState = result.resultState;
+            TestStatus = ParseTestStatus(result.testStatus);
+            Duration = result.duration;
+            StartTime = result.startTime;
+            EndTime = result.endTime;
+            Message = result.message;
+            StackTrace = result.stackTrace;
+            AssertCount = result.assertCount;
+            FailCount = result.failCount;
+            PassCount = result.passCount;
+            SkipCount = result.skipCount;
+            InconclusiveCount = result.inconclusiveCount;
+            HasChildren = result.hasChildren;
+            Output = result.output;
+            Children = result.childrenIds.Select(childId =>
+                new TestResultAdaptor(allData.results.First(r => r.testId == childId), allData)).ToArray();
+            if (!string.IsNullOrEmpty(result.xml))
+            {
+                m_Node = TNode.FromXml(result.xml);
+            }
         }
 
         public ITestAdaptor Test { get; private set; }
@@ -52,14 +82,19 @@ namespace UnityEditor.TestTools.TestRunner.Api
         public bool HasChildren { get; private set; }
         public IEnumerable<ITestResultAdaptor> Children { get; private set; }
         public string Output { get; private set; }
+
         public TNode ToXml()
         {
             if (m_Node == null)
             {
                 m_Node = m_Result.ToXml(true);
             }
+
             return m_Node;
         }
+
+        internal int RetryIteration { get; set; }
+        internal int RepeatIteration { get; set; }
 
         private static TestStatus ParseTestStatus(NUnit.Framework.Interfaces.TestStatus testStatus)
         {

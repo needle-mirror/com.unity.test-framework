@@ -86,18 +86,15 @@ namespace UnityEngine.TestTools.Logging
             {
                 return MessageRegex.IsMatch(log.Message);
             }
-            else
-            {
-                return Message.Equals(log.Message);
-            }
+
+            return Message.Equals(log.Message);
         }
 
         public override string ToString()
         {
             if (m_UseRegex)
                 return string.Format("[{0}] Regex: {1}", LogType, MessageRegex);
-            else
-                return string.Format("[{0}] {1}", LogType, Message);
+            return string.Format("[{0}] {1}", LogType, Message);
         }
     }
 }

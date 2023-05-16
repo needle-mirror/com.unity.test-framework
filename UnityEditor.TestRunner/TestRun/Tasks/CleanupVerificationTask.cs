@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.TestRunner.NUnitExtensions.Runner;
 
 namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
 {
@@ -11,7 +12,8 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
     {
         private const string k_Indent = "    ";
 
-        internal Action<object> logAction = Debug.LogWarning;
+        internal Action<object> logWarning = Debug.LogWarning;
+        internal Action<object> logError = Debug.LogError;
 
         public override IEnumerator Execute(TestJobData testJobData)
         {
@@ -22,13 +24,13 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
             {
                 var existingFilesHashSet = new HashSet<string>(existingFiles);
                 var newFiles = currentFiles.Where(file => !existingFilesHashSet.Contains(file)).ToArray();
-                LogWarningForFilesIfAny(newFiles);
+                LogWarningForFilesIfAny(newFiles, testJobData.executionSettings.featureFlags.fileCleanUpCheck);
             }
 
             yield return null;
         }
 
-        private void LogWarningForFilesIfAny(string[] filePaths)
+        private void LogWarningForFilesIfAny(string[] filePaths, bool fileCleanUpCheck)
         {
             if (filePaths.Length == 0)
             {
@@ -44,7 +46,14 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
                 stringWriter.WriteLine(k_Indent + filePath);
             }
 
-            logAction(stringWriter.ToString());
+            if (fileCleanUpCheck)
+            {
+                logError(stringWriter.ToString());
+            }
+            else
+            {
+                logWarning(stringWriter.ToString());
+            }
         }
     }
 }

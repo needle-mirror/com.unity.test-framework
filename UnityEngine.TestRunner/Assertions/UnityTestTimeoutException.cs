@@ -1,3 +1,4 @@
+using System;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 
@@ -12,7 +13,7 @@ namespace UnityEngine.TestTools.TestRunner
 
         private static string BuildMessage(int timeout)
         {
-            return string.Format("Timeout value of {0}ms was exceeded", timeout);
+            return string.Format("Timeout value of {0} ms was exceeded. If this is intended, increase the timeout value using a TimeoutAttribute.", timeout);
         }
 
         public override ResultState ResultState

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace UnityEngine.TestTools.Utils
@@ -11,8 +12,8 @@ namespace UnityEngine.TestTools.Utils
     /// </summary>
     public class QuaternionEqualityComparer : IEqualityComparer<Quaternion>
     {
-        internal const float k_DefaultError = 0.00001f;
-        internal readonly float AllowedError;
+        private const float k_DefaultError = 0.00001f;
+        private readonly float AllowedError;
 
         private static readonly QuaternionEqualityComparer m_Instance = new QuaternionEqualityComparer();
         /// <summary>

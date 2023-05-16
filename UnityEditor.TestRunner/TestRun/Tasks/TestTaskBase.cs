@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using UnityEngine;
+using System.Linq;
 
 namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
 {
@@ -67,6 +69,12 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
                 default:
                     return RunOnError != ErrorRunMode.RunOnlyOnError;
             }
+        }
+        
+        protected static bool IsAutomated()
+        {
+            var commandLineArgs = Environment.GetCommandLineArgs();
+            return commandLineArgs.Contains("-automated");
         }
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace UnityEngine.TestTools.Utils
@@ -7,8 +8,8 @@ namespace UnityEngine.TestTools.Utils
     /// </summary>
     public class Vector4EqualityComparer : IEqualityComparer<Vector4>
     {
-        internal const float k_DefaultError = 0.0001f;
-        internal readonly float AllowedError;
+        private const float k_DefaultError = 0.0001f;
+        private readonly float AllowedError;
 
         private static readonly Vector4EqualityComparer m_Instance = new Vector4EqualityComparer();
         /// <summary>
@@ -23,7 +24,7 @@ namespace UnityEngine.TestTools.Utils
         /// <param name="allowedError">This value identifies the calculation error allowed.</param>
         public Vector4EqualityComparer(float allowedError)
         {
-            this.AllowedError = allowedError;
+            AllowedError = allowedError;
         }
 
         /// <summary>

@@ -1,9 +1,7 @@
 using System;
 using System.Collections;
-using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
-using UnityEngine.TestRunner.NUnitExtensions;
 
 namespace UnityEngine.TestTools
 {
@@ -54,10 +52,9 @@ namespace UnityEngine.TestTools
                     break;
                 }
 
-                if (enumerator.Current is IEnumerator)
+                if (enumerator.Current is IEnumerator nestedEnumerator)
                 {
-                    var current = (IEnumerator)enumerator.Current;
-                    yield return Execute(current, context);
+                    yield return Execute(nestedEnumerator, context);
                 }
                 else
                 {
@@ -87,7 +84,7 @@ namespace UnityEngine.TestTools
                 {
                     return;
                 }
-                m_Context.CurrentResult.RecordExceptionWithHint(ex);
+                m_Context.CurrentResult.RecordException(ex);
                 ExceptionWasRecorded = true;
             }
         }

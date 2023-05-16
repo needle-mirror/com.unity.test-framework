@@ -1,19 +1,20 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
+using UnityEngine;
 using UnityEngine.TestRunner.NUnitExtensions;
 using UnityEngine.TestRunner.NUnitExtensions.Runner;
 using UnityEngine.TestRunner.TestLaunchers;
+using UnityEngine.TestTools;
 using UnityEngine.TestTools.Utils;
 
 namespace UnityEditor.TestTools.TestRunner.Api
 {
     internal class TestAdaptor : ITestAdaptor
     {
-        internal TestAdaptor(ITest test, string uniqueName = null, ITestAdaptor[] children = null)
+        internal TestAdaptor(ITest test, ITestAdaptor[] children = null)
         {
             Id = test.Id;
             Name = test.Name;
@@ -22,7 +23,7 @@ namespace UnityEditor.TestTools.TestRunner.Api
             {
                 childIndex = (int)test.Properties["childIndex"][0];
             }
-            FullName = childIndex != -1 ? GetIndexedTestCaseName(test.FullName, childIndex) : test.FullName;
+            FullName = TestExtensions.GetFullName(test.FullName, childIndex);
             TestCaseCount = test.TestCaseCount;
             HasChildren = test.HasChildren;
             IsSuite = test.IsSuite;
@@ -32,7 +33,7 @@ namespace UnityEditor.TestTools.TestRunner.Api
             }
             else
             {
-                TestCaseTimeout = CoroutineRunner.k_DefaultTimeout;
+                TestCaseTimeout = TimeoutCommand.k_DefaultTimeout;
             }
 
             TypeInfo = test.TypeInfo;
@@ -45,20 +46,14 @@ namespace UnityEditor.TestTools.TestRunner.Api
             SkipReason = test.GetSkipReason();
             ParentId = test.GetParentId();
             ParentFullName = test.GetParentFullName();
+            UniqueName = test.GetUniqueName();
             ParentUniqueName = test.GetParentUniqueName();
-            UniqueName = uniqueName ?? test.GetUniqueName();
             ChildIndex = childIndex;
-
-            if (test.Parent != null)
+            
+            var testPlatform = test.Properties.Get("platform");
+            if (testPlatform is TestPlatform platform)
             {
-                if (test.Parent.Parent == null) // Assembly level
-                {
-                    if (test.Properties.Get("platform").ToString() == "PlayMode")
-                    {
-                        RequiresPlayMode = true;
-                    }
-                    TestMode = (TestMode)Enum.Parse(typeof(TestMode), test.Properties.Get("platform").ToString());
-                }
+                TestMode = PlatformToTestMode(platform);
             }
 
             Children = children;
@@ -69,8 +64,54 @@ namespace UnityEditor.TestTools.TestRunner.Api
             Parent = parent;
             if (parent != null)
             {
-                RequiresPlayMode = parent.RequiresPlayMode;
                 TestMode = parent.TestMode;
+            }
+        }
+
+        internal TestAdaptor(RemoteTestData test)
+        {
+            Id = test.id;
+            Name = test.name;
+            FullName = TestExtensions.GetFullName(test.fullName, test.ChildIndex);
+            TestCaseCount = test.testCaseCount;
+            HasChildren = test.hasChildren;
+            IsSuite = test.isSuite;
+            m_ChildrenIds = test.childrenIds;
+            TestCaseTimeout = test.testCaseTimeout;
+            Categories = test.Categories;
+            IsTestAssembly = test.IsTestAssembly;
+            RunState = (RunState)Enum.Parse(typeof(RunState), test.RunState.ToString());
+            Description = test.Description;
+            SkipReason = test.SkipReason;
+            ParentId = test.ParentId;
+            UniqueName = test.UniqueName;
+            ParentUniqueName = test.ParentUniqueName;
+            ParentFullName = test.ParentFullName;
+            ChildIndex = test.ChildIndex;
+            TestMode = TestMode.PlayMode;
+        }
+
+        internal void ApplyChildren(IEnumerable<TestAdaptor> allTests)
+        {
+            Children = m_ChildrenIds.Select(id => allTests.First(t => t.Id == id)).ToArray();
+            if (!string.IsNullOrEmpty(ParentId))
+            {
+                Parent = allTests.FirstOrDefault(t => t.Id == ParentId);
+            }
+        }
+
+        private static TestMode PlatformToTestMode(TestPlatform testPlatform)
+        {
+            switch (testPlatform)
+            {
+                case TestPlatform.All:
+                    return TestMode.EditMode | TestMode.PlayMode;
+                case TestPlatform.EditMode:
+                    return TestMode.EditMode;
+                case TestPlatform.PlayMode:
+                    return TestMode.PlayMode;
+                default:
+                    return default;
             }
         }
 
@@ -86,6 +127,7 @@ namespace UnityEditor.TestTools.TestRunner.Api
         public ITypeInfo TypeInfo { get; private set; }
         public IMethodInfo Method { get; private set; }
         public object[] Arguments { get; }
+        private string[] m_ChildrenIds;
         public string[] Categories { get; private set; }
         public bool IsTestAssembly { get; private set; }
         public RunState RunState { get; }
@@ -96,23 +138,6 @@ namespace UnityEditor.TestTools.TestRunner.Api
         public string UniqueName { get; }
         public string ParentUniqueName { get; }
         public int ChildIndex { get; }
-        public TestMode TestMode { get; set; }
-        public AssemblyType AssemblyType { get; private set; }
-        public bool? RequiresPlayMode { get; private set; }
-
-        private static string GetIndexedTestCaseName(string fullName, int index)
-        {
-            var generatedTestSuffix = " GeneratedTestCase" + index;
-            if (fullName.EndsWith(")"))
-            {
-                // Test names from generated TestCaseSource look like Test(TestCaseSourceType)
-                // This inserts a unique test case index in the name, so that it becomes Test(TestCaseSourceType GeneratedTestCase0)
-                return fullName.Substring(0, fullName.Length - 1) + generatedTestSuffix + fullName[fullName.Length - 1];
-            }
-
-            // In some cases there can be tests with duplicate names generated in other ways and they won't have () in their name
-            // We just append a suffix at the end of the name in that case
-            return fullName + generatedTestSuffix;
-        }
+        public TestMode TestMode { get; private set; }
     }
 }

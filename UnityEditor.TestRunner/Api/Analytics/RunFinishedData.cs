@@ -1,3 +1,5 @@
+using System;
+
 namespace UnityEditor.TestTools.TestRunner.Api.Analytics
 {
     internal class RunFinishedData

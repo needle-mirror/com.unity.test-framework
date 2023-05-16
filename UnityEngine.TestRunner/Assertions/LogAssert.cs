@@ -1,19 +1,21 @@
+using System;
 using System.Text.RegularExpressions;
 using UnityEngine.TestTools.Logging;
 
 namespace UnityEngine.TestTools
 {
     /// <summary>
-    /// `LogAssert` lets you expect Unity log messages that would otherwise cause the test to fail. A test fails if Unity logs a message other than a regular log or warning message. Use `LogAssert` to check for an expected message in the log so that the test does not fail when Unity logs the message.
-    ///
+    /// A test fails if Unity logs a message other than a regular log or warning message. Use `LogAssert` to check for an expected message in the log so that the test does not fail when Unity logs the message.
     /// Use `LogAssert.Expect` before running the code under test, as the check for expected logs runs at the end of each frame.
-    ///
     /// A test also reports a failure, if an expected message does not appear, or if Unity does not log any regular log or warning messages.
+    /// 
+    /// `LogAssert` lets you expect Unity log messages that would otherwise cause the test to fail.
     /// </summary>
     public static class LogAssert
     {
         /// <summary>
         /// Verifies that a log message of a specified type appears in the log. A test won't fail from an expected error, assertion, or exception log message. It does fail if an expected message does not appear in the log.
+        /// If multiple LogAssert.Expect are used to expect multiple messages, they are expected to be logged in that order.
         /// </summary>
         /// <param name="type">A type of log to expect. It can take one of the [LogType enum](https://docs.unity3d.com/ScriptReference/LogType.html) values.</param>
         /// <param name="message">A string value that should equate to the expected message.</param>
@@ -39,7 +41,7 @@ namespace UnityEngine.TestTools
         /// </example>
         public static void Expect(LogType type, string message)
         {
-            LogScope.Current.ExpectedLogs.Enqueue(new LogMatch() { LogType = type, Message = message });
+            LogScope.Current.ExpectedLogs.Enqueue(new LogMatch { LogType = type, Message = message });
         }
 
         /// <summary>
@@ -49,7 +51,7 @@ namespace UnityEngine.TestTools
         /// <param name="message">A regular expression pattern to match the expected message.</param>
         public static void Expect(LogType type, Regex message)
         {
-            LogScope.Current.ExpectedLogs.Enqueue(new LogMatch() { LogType = type, MessageRegex = message });
+            LogScope.Current.ExpectedLogs.Enqueue(new LogMatch { LogType = type, MessageRegex = message });
         }
 
         /// <summary>

@@ -1,5 +1,10 @@
+using System;
+
 namespace UnityEditor.TestTools.TestRunner
 {
+
+    #if !UNITY_2021_1_OR_NEWER
+
     internal class XboxOnePlatformSetup : IPlatformSetup
     {
         private XboxOneDeployMethod oldXboxOneDeployMethod;
@@ -44,4 +49,5 @@ namespace UnityEditor.TestTools.TestRunner
             EditorUserBuildSettings.xboxOneAdditionalDebugPorts = oldXboxOneAdditionalDebugPorts;
         }
     }
+    #endif
 }

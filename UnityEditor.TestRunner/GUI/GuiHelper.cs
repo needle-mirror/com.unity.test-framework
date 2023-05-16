@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -82,10 +81,10 @@ namespace UnityEditor.TestTools.TestRunner.GUI
         internal static string GetTestFileName(Type type)
         {
             //This handles the case of a test in a nested class, getting the name of the base class
-            if (type.FullName != null && type.Namespace != null && type.FullName.Contains("+"))
+            if (type.FullName != null && type.Namespace!=null && type.FullName.Contains("+"))
             {
-                var removedNamespace = type.FullName.Substring(type.Namespace.Length + 1);
-                return removedNamespace.Substring(0, removedNamespace.IndexOf("+", StringComparison.Ordinal));
+                var removedNamespace = type.FullName.Substring(type.Namespace.Length+1);
+                return removedNamespace.Substring(0,removedNamespace.IndexOf("+", StringComparison.Ordinal));
             }
             return type.Name;
         }
@@ -96,9 +95,13 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                 return string.Empty;
 
             filePath = Paths.UnifyDirectorySeparator(filePath);
-            var length = Paths.UnifyDirectorySeparator(Application.dataPath).Length - "Assets".Length;
 
-            return filePath.Substring(length);
+            const string assetsFolder = "Assets";
+            var assetsFolderIndex = filePath.IndexOf(assetsFolder);
+            if (assetsFolderIndex < 0)
+                return filePath;
+
+            return filePath.Substring(assetsFolderIndex, filePath.Length - assetsFolderIndex);
         }
 
         public bool OpenScriptInExternalEditor(string stacktrace)

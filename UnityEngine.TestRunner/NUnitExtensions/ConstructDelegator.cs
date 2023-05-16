@@ -1,9 +1,7 @@
 using System;
-using System.Linq;
 using NUnit.Framework.Internal;
 using UnityEngine.TestRunner.NUnitExtensions.Runner;
 using UnityEngine.TestTools.Logging;
-using UnityEngine.TestTools.TestRunner;
 
 namespace UnityEngine.TestTools.NUnitExtensions
 {
@@ -112,13 +110,7 @@ namespace UnityEngine.TestTools.NUnitExtensions
                         m_StateSerializer.RestoreClassFromJson(ref m_Result);
                     }
                 }
-                if (logScope.AnyFailingLogs())
-                {
-                    var failingLog = logScope.FailingLogs.First();
-                    throw new UnhandledLogMessageException(failingLog);
-                }
-                if (logScope.ExpectedLogs.Any())
-                    throw new UnexpectedLogMessageException(LogScope.Current.ExpectedLogs.Peek());
+                logScope.EvaluateLogScope(true);
             }
             catch (Exception e)
             {

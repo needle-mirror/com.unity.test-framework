@@ -1,7 +1,5 @@
-using System.Collections.Generic;
-using System.Linq;
-using UnityEditor.Compilation;
 using UnityEditor.TestTools.TestRunner.Api;
+
 
 namespace UnityEditor.TestTools.TestRunner.UnityTestProtocol
 {
@@ -10,9 +8,9 @@ namespace UnityEditor.TestTools.TestRunner.UnityTestProtocol
         public ITestRunnerApiMapper TestRunnerApiMapper;
         public IUtpLogger Logger;
 
-        public UtpMessageReporter(IUtpLogger utpLogger)
+        public UtpMessageReporter(IUtpLogger utpLogger, string projectRepoPath)
         {
-            TestRunnerApiMapper = new TestRunnerApiMapper();
+            TestRunnerApiMapper = new TestRunnerApiMapper(projectRepoPath);
             Logger = utpLogger;
         }
 

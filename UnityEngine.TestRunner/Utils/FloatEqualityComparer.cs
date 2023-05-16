@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace UnityEngine.TestTools.Utils
@@ -7,8 +8,8 @@ namespace UnityEngine.TestTools.Utils
     /// </summary>
     public class FloatEqualityComparer : IEqualityComparer<float>
     {
-        internal const float k_DefaultError = 0.0001f;
-        internal readonly float AllowedError;
+        private const float k_DefaultError = 0.0001f;
+        private readonly float AllowedError;
 
         private static readonly  FloatEqualityComparer m_Instance = new FloatEqualityComparer();
         /// <summary>
@@ -24,7 +25,7 @@ namespace UnityEngine.TestTools.Utils
         /// <param name="allowedError">The custom error value</param>
         public FloatEqualityComparer(float allowedError)
         {
-            this.AllowedError = allowedError;
+            AllowedError = allowedError;
         }
 
         /// <summary>

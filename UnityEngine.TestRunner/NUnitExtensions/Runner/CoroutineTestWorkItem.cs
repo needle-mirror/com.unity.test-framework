@@ -3,8 +3,7 @@ using System.Collections;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
 using NUnit.Framework.Internal.Commands;
-using NUnit.Framework.Internal.Execution;
-using UnityEngine.TestRunner.Utils;
+using UnityEngine.TestTools.TestRunner;
 using UnityEngine.TestTools.Utils;
 
 namespace UnityEngine.TestRunner.NUnitExtensions.Runner
@@ -43,25 +42,13 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
                 yield break;
             }
 
-            if (m_Command is ApplyChangesToContextCommand)
-            {
-                var applyChangesToContextCommand = (ApplyChangesToContextCommand)m_Command;
-                applyChangesToContextCommand.ApplyChanges(Context);
-                m_Command = applyChangesToContextCommand.GetInnerCommand();
-            }
-
             var enumerableTestMethodCommand = (IEnumerableTestMethodCommand)m_Command;
             try
             {
                 var executeEnumerable = enumerableTestMethodCommand.ExecuteEnumerable(Context).GetEnumerator();
 
-                var coroutineRunner = new CoroutineRunner(new MonoBehaviourCoroutineHost(monoBehaviourCoroutineRunner), Context);
+                var coroutineRunner = new CoroutineRunner(monoBehaviourCoroutineRunner, Context);
                 yield return coroutineRunner.HandleEnumerableTest(executeEnumerable);
-
-                if (coroutineRunner.HasFailedWithTimeout())
-                {
-                    Context.CurrentResult.SetResult(ResultState.Failure, string.Format("Test exceeded Timeout value of {0}ms", Context.TestCaseTimeout));
-                }
 
                 while (executeEnumerable.MoveNext()) {}
 

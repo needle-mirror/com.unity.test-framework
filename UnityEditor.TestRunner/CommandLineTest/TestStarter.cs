@@ -1,11 +1,7 @@
 using System;
-using System.IO;
 using UnityEditor.TestRunner.CommandLineParser;
 using UnityEditor.TestTools.TestRunner.Api;
 using UnityEngine;
-using UnityEditor.Compilation;
-using System.Linq;
-using UnityEngine.TestTools;
 
 namespace UnityEditor.TestTools.TestRunner.CommandLineTest
 {
@@ -88,10 +84,9 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
                 if (m_Executer == null)
                 {
                     Func<bool> compilationCheck = () => EditorUtility.scriptCompilationFailed;
-                    Action<string> actionLogger = (string msg) => { Debug.LogFormat(LogType.Log, LogOption.NoStacktrace, null, msg); };
-                    var apiSettingsBuilder = new SettingsBuilder(new TestSettingsDeserializer(() => new TestSettings()), actionLogger, Debug.LogWarning, File.Exists, compilationCheck);
-                    bool IsRunActive() => TestRunnerApi.IsRunActive(runData.RunId);
-                    m_Executer = new Executer(apiSettingsBuilder, Debug.LogErrorFormat, Debug.LogException, Debug.Log, EditorApplication.Exit, compilationCheck, IsRunActive);
+                    Action<string> actionLogger = msg => { Debug.LogFormat(LogType.Log, LogOption.NoStacktrace, null, msg); };
+                    var apiSettingsBuilder = new SettingsBuilder(new TestSettingsDeserializer(() => new TestSettings()), actionLogger, Debug.LogWarning, compilationCheck);
+                    m_Executer = new Executer(ScriptableObject.CreateInstance<TestRunnerApi>(), apiSettingsBuilder, Debug.LogErrorFormat, Debug.LogException, Debug.Log, EditorApplication.Exit, compilationCheck, TestRunnerApi.IsRunActive);
                 }
 
                 return m_Executer;

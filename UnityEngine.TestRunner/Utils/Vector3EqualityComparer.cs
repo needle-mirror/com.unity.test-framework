@@ -1,5 +1,5 @@
+using System;
 using System.Collections.Generic;
-
 
 namespace UnityEngine.TestTools.Utils
 {
@@ -8,8 +8,8 @@ namespace UnityEngine.TestTools.Utils
     /// </summary>
     public class Vector3EqualityComparer : IEqualityComparer<Vector3>
     {
-        internal const float k_DefaultError = 0.0001f;
-        internal readonly float AllowedError;
+        private const float k_DefaultError = 0.0001f;
+        private readonly float AllowedError;
 
         private static readonly Vector3EqualityComparer m_Instance = new Vector3EqualityComparer();
 
@@ -21,12 +21,12 @@ namespace UnityEngine.TestTools.Utils
         private Vector3EqualityComparer() : this(k_DefaultError) {}
 
         /// <summary>
-        /// A comparer instance with the default calculation error value equal to 0.0001f.
-        ///</summary>
+        /// Initializes an instance of Vector3Equality comparer with custom allowed calculation error.
+        /// </summary>
         /// <param name="allowedError">This value identifies the calculation error allowed.</param>
         public Vector3EqualityComparer(float allowedError)
         {
-            this.AllowedError = allowedError;
+            AllowedError = allowedError;
         }
 
         ///<summary>

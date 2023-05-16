@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace UnityEngine.TestTools.Utils
@@ -12,8 +13,8 @@ namespace UnityEngine.TestTools.Utils
     /// </summary>
     public class Vector2EqualityComparer : IEqualityComparer<Vector2>
     {
-        internal const float k_DefaultError = 0.0001f;
-        internal readonly float AllowedError;
+        private const float k_DefaultError = 0.0001f;
+        private readonly float AllowedError;
 
         private static readonly Vector2EqualityComparer m_Instance = new Vector2EqualityComparer();
 
@@ -31,7 +32,7 @@ namespace UnityEngine.TestTools.Utils
         /// <param name="error">This value identifies the calculation error allowed.</param>
         public Vector2EqualityComparer(float error)
         {
-            this.AllowedError = error;
+            AllowedError = error;
         }
 
         /// <summary>

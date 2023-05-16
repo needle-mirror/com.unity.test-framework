@@ -10,17 +10,11 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks.Scene
         internal Func<int> GetSceneCount = () => SceneManager.sceneCount;
         internal Func<int, ISceneWrapper> GetSceneAt = i => new SceneWrapper(SceneManager.GetSceneAt(i));
         internal Func<NewSceneSetup, NewSceneMode, ISceneWrapper> NewScene = (setup, mode) => new SceneWrapper(EditorSceneManager.NewScene(setup, mode));
-        internal Action<ISceneWrapper> SetActiveScene = (scene) => SceneManager.SetActiveScene(scene.WrappedScene);
-
-        private bool m_SigleScene;
-        public CreateNewSceneTask(bool control)
-        {
-            m_SigleScene = control;
-        }
-
+        internal Action<ISceneWrapper> SetActiveScene = scene => SceneManager.SetActiveScene(scene.WrappedScene);
+        
         public override IEnumerator Execute(TestJobData testJobData)
         {
-            if ((GetSceneCount() == 1 && string.IsNullOrEmpty(GetSceneAt(0).path)) || m_SigleScene)
+            if (GetSceneCount() == 1 && string.IsNullOrEmpty(GetSceneAt(0).path))
             {
                 NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
                 yield break;

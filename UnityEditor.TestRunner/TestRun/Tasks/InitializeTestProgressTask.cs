@@ -16,8 +16,8 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
 
         public override IEnumerator Execute(TestJobData testJobData)
         {
-            testJobData.TestStartedEvent.AddListener((test) => OnTestStarted(test, testJobData));
-            testJobData.TestFinishedEvent.AddListener((test) => OnTestFinished(test, testJobData));
+            testJobData.TestStartedEvent.AddListener(test => OnTestStarted(test, testJobData));
+            testJobData.TestFinishedEvent.AddListener(test => OnTestFinished(test, testJobData));
 
             if (testJobData.taskInfoStack.Peek().taskMode == TaskMode.Resume)
             {
@@ -30,10 +30,10 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
             }
 
             var allTests =
-                GetTestsExpectedToRun(testJobData.testTree, testJobData.testFilter);
+                GetTestsExpectedToRun(testJobData.testTree, testJobData.executionSettings.BuildNUnitFilter());
             testJobData.testProgress = new TestProgress(allTests.ToArray());
 
-            var numTasks = testJobData.Tasks.Count(task => !(task is ConditionalTask) || ((ConditionalTask)task).ConditionFulfilled(testJobData));
+            var numTasks = testJobData.Tasks.Count();
             var numTests = testJobData.testProgress.AllTestsToRun.Length;
             var progressAvailableToTests = 1.0f - numTasks * RunProgress.progressPrTask;
 

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
@@ -10,16 +11,21 @@ namespace UnityEngine.TestTools
 {
     internal class TestActionCommand : BeforeAfterTestCommandBase<ITestAction>
     {
-        static readonly Dictionary<MethodInfo, List<ITestAction>> m_TestActionsCache = new Dictionary<MethodInfo, List<ITestAction>>();
+        private static readonly Dictionary<MethodInfo, List<ITestAction>> m_TestActionsCache = new Dictionary<MethodInfo, List<ITestAction>>();
 
         public TestActionCommand(TestCommand innerCommand)
-            : base(innerCommand, "BeforeTest", "AfterTest", true)
+            : base(innerCommand, "BeforeTest", "AfterTest")
         {
             if (Test.TypeInfo.Type != null)
             {
                 BeforeActions = GetTestActions(m_TestActionsCache, Test.Method.MethodInfo);
                 AfterActions = BeforeActions;
             }
+        }
+
+        protected override bool AllowFrameSkipAfterAction(ITestAction action)
+        {
+            return false;
         }
 
         protected override IEnumerator InvokeBefore(ITestAction action, Test test, UnityTestExecutionContext context)
@@ -36,7 +42,8 @@ namespace UnityEngine.TestTools
 
         protected override BeforeAfterTestCommandState GetState(UnityTestExecutionContext context)
         {
-            return null;
+            // TestActionCommand does not support domain reloads and will not need a persisted state.
+            return new BeforeAfterTestCommandState();
         }
     }
 }

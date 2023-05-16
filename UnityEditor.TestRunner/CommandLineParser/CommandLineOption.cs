@@ -1,11 +1,10 @@
 using System;
-using System.Linq;
 
 namespace UnityEditor.TestRunner.CommandLineParser
 {
     internal class CommandLineOption : ICommandLineOption
     {
-        Action<string> m_ArgAction;
+        private Action<string> m_ArgAction;
 
         public CommandLineOption(string argName, Action action)
         {
@@ -32,7 +31,7 @@ namespace UnityEditor.TestRunner.CommandLineParser
             m_ArgAction(value);
         }
 
-        static string[] SplitStringToArray(string value)
+        private static string[] SplitStringToArray(string value)
         {
             if (string.IsNullOrEmpty(value))
             {

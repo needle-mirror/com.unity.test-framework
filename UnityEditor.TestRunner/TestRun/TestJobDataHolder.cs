@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditor.TestTools.TestRunner.TestRun.Tasks;
 using UnityEngine;
 
 namespace UnityEditor.TestTools.TestRunner.TestRun
@@ -9,7 +8,7 @@ namespace UnityEditor.TestTools.TestRunner.TestRun
     internal class TestJobDataHolder : ScriptableSingleton<TestJobDataHolder>, ITestJobDataHolder
     {
         [SerializeField]
-        private List<TestJobData> TestRuns = new List<TestJobData>();
+        public List<TestJobData> TestRuns = new List<TestJobData>();
 
         [NonSerialized]
         private readonly Dictionary<string, ITestJobRunner> m_Runners = new Dictionary<string, ITestJobRunner>();

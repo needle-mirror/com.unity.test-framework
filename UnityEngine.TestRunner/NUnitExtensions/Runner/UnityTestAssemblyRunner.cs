@@ -1,8 +1,13 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using NUnit;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
+using NUnit.Framework.Internal.Execution;
+using UnityEngine.TestTools;
 using UnityEngine.TestTools.NUnitExtensions;
 
 namespace UnityEngine.TestRunner.NUnitExtensions.Runner
@@ -16,7 +21,7 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
         bool IsTestComplete { get; }
         UnityWorkItem TopLevelWorkItem { get; set; }
         UnityTestExecutionContext GetCurrentContext();
-        ITest Load(AssemblyWithPlatform[] assemblies);
+        ITest Load(Assembly[] assemblies, TestPlatform testPlatform, IDictionary<string, object> settings);
         void LoadTestTree(ITest testTree);
         IEnumerable Run(ITestListener listener, ITestFilter filter);
         void StopRun();
@@ -49,11 +54,11 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
 
         public bool IsTestRunning
         {
-            get { return TopLevelWorkItem != null && TopLevelWorkItem.State == NUnit.Framework.Internal.Execution.WorkItemState.Running; }
+            get { return TopLevelWorkItem != null && TopLevelWorkItem.State == WorkItemState.Running; }
         }
         public bool IsTestComplete
         {
-            get { return TopLevelWorkItem != null && TopLevelWorkItem.State == NUnit.Framework.Internal.Execution.WorkItemState.Complete; }
+            get { return TopLevelWorkItem != null && TopLevelWorkItem.State == WorkItemState.Complete; }
         }
 
         public UnityTestAssemblyRunner(UnityTestAssemblyBuilder builder, WorkItemFactory factory, UnityTestExecutionContext context)
@@ -63,9 +68,21 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
             Context = context;
         }
 
-        public ITest Load(AssemblyWithPlatform[] assemblies)
+        public ITest Load(Assembly[] assemblies, TestPlatform testPlatform, IDictionary<string, object> settings)
         {
-            return LoadedTest = unityBuilder.Build(assemblies);
+            // The setting of the TestMode should happen when running tests.
+            if (Context != null)
+            {
+                Context.TestMode = testPlatform;
+            }
+            Settings = settings;
+
+            if (settings.ContainsKey(FrameworkPackageSettings.RandomSeed))
+                Randomizer.InitialSeed = (int)settings[FrameworkPackageSettings.RandomSeed];
+
+            var tree = unityBuilder.Build(assemblies, Enumerable.Repeat(testPlatform, assemblies.Length).ToArray(), settings);
+
+            return LoadedTest = tree;
         }
 
         public void LoadTestTree(ITest testTree)
@@ -77,7 +94,6 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
         {
             TopLevelWorkItem = m_Factory.Create(LoadedTest, filter);
             TopLevelWorkItem.InitializeContext(Context);
-            UnityTestExecutionContext.CurrentContext = Context;
             Context.Listener = listener;
 
             return TopLevelWorkItem.Execute();

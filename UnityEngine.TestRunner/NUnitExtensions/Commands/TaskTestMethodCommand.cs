@@ -1,12 +1,8 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
 using NUnit.Framework.Internal.Commands;
-using NUnit.Framework.Internal.Execution;
-using UnityEngine.TestRunner.NUnitExtensions;
 using Unity.Profiling;
 using UnityEngine.TestRunner.NUnitExtensions.Runner;
 using UnityEngine.TestTools.TestRunner;
@@ -34,7 +30,7 @@ namespace UnityEngine.TestTools
             }
             catch (Exception ex)
             {
-                context.CurrentResult.RecordExceptionWithHint(ex);
+                context.CurrentResult.RecordException(ex);
                 yield break;
             }
 
@@ -80,7 +76,7 @@ namespace UnityEngine.TestTools
                 }
                 catch (Exception ex)
                 {
-                    context.CurrentResult.RecordExceptionWithHint(ex);
+                    context.CurrentResult.RecordException(ex);
                     break;
                 }
 

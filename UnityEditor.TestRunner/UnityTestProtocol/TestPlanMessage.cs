@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace UnityEditor.TestTools.TestRunner.UnityTestProtocol

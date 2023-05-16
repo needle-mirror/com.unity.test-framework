@@ -1,18 +1,17 @@
-using UnityEngine.SceneManagement;
+using System;
+
 namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks.Scene
 {
-    using Scene = UnityEngine.SceneManagement.Scene;
-
     internal class SceneWrapper : ISceneWrapper
     {
-        private Scene m_WrappedScene;
+        private UnityEngine.SceneManagement.Scene m_WrappedScene;
 
-        public SceneWrapper(Scene wrappedScene)
+        public SceneWrapper(UnityEngine.SceneManagement.Scene wrappedScene)
         {
             m_WrappedScene = wrappedScene;
         }
 
-        public Scene WrappedScene
+        public UnityEngine.SceneManagement.Scene WrappedScene
         {
             get { return m_WrappedScene; }
         }

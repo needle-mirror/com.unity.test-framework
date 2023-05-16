@@ -29,5 +29,16 @@ namespace UnityEngine.TestTools
         {
             return (flags & flag) == flag;
         }
+
+        public static TestPlatform MergeFlags(this TestPlatform[] flags)
+        {
+            TestPlatform mergedFlag = default;
+            foreach (var flag in flags)
+            {
+                mergedFlag |= flag;
+            }
+
+            return mergedFlag;
+        }
     }
 }

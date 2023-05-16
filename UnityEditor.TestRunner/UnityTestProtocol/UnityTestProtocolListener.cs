@@ -1,15 +1,16 @@
+using System;
 using UnityEditor.TestTools.TestRunner.Api;
 using UnityEngine;
 
 namespace UnityEditor.TestTools.TestRunner.UnityTestProtocol
 {
-    internal class UnityTestProtocolListener : ScriptableObject, ICallbacks
+    internal class UnityTestProtocolListener : ICallbacks
     {
         private IUtpMessageReporter m_UtpMessageReporter;
 
-        public UnityTestProtocolListener()
+        public UnityTestProtocolListener(string projectPath)
         {
-            m_UtpMessageReporter = new UtpMessageReporter(new UtpDebugLogger());
+            m_UtpMessageReporter = new UtpMessageReporter(new UtpDebugLogger(), projectPath);
         }
 
         public void RunStarted(ITestAdaptor testsToRun)

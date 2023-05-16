@@ -1,15 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using UnityEditor.IMGUI.Controls;
 using UnityEditor.TestTools.TestRunner.Api;
-using UnityEditor.TestTools.TestRunner.GUI.TestAssets;
 using UnityEngine;
+using UnityEngine.TestTools;
 
 namespace UnityEditor.TestTools.TestRunner.GUI
 {
-    [Serializable]
-    class TestListGUI
+    internal abstract class TestListGUI
     {
         private static readonly GUIContent s_GUIRunSelectedTests = EditorGUIUtility.TrTextContent("Run Selected", "Run selected test(s)");
         private static readonly GUIContent s_GUIRunAllTests = EditorGUIUtility.TrTextContent("Run All", "Run all tests");
@@ -20,47 +20,32 @@ namespace UnityEditor.TestTools.TestRunner.GUI
         private static readonly GUIContent s_GUIOpenTest = EditorGUIUtility.TrTextContent("Open source code");
         private static readonly GUIContent s_GUIOpenErrorLine = EditorGUIUtility.TrTextContent("Open error line");
         private static readonly GUIContent s_GUIClearResults = EditorGUIUtility.TrTextContent("Clear Results", "Clear all test results");
-        private static readonly GUIContent s_SaveResults = EditorGUIUtility.TrTextContent("Export Results", "Save the latest test results to a file");
 
         [SerializeField]
-        TestRunnerWindow m_Window;
+        protected TestRunnerWindow m_Window;
 
-        public Dictionary<string, TestTreeViewItem> filteredTree { get; set; }
         public List<TestRunnerResult> newResultList
         {
             get { return m_NewResultList; }
-            set
-            {
+            set { 
+                m_ResultByKey = null;
                 m_NewResultList = value;
             }
         }
-
         [SerializeField]
         private List<TestRunnerResult> m_NewResultList = new List<TestRunnerResult>();
 
-        Dictionary<string, TestRunnerResult> m_ResultByKey;
+        private Dictionary<string, TestRunnerResult> m_ResultByKey;
         internal Dictionary<string, TestRunnerResult> ResultsByKey
         {
             get
             {
                 if (m_ResultByKey == null)
-                {
-                    try
-                    {
-                        m_ResultByKey = newResultList.ToDictionary(k => k.uniqueId);
-                    }
-                    catch (Exception ex)
-                    {
-                        // Reset the results, so we do not lock the editor in giving errors on this on every frame.
-                        newResultList = new List<TestRunnerResult>();
-                        throw ex;
-                    }
-                }
-
+                    m_ResultByKey = newResultList.ToDictionary(k => k.uniqueId);
                 return m_ResultByKey;
             }
         }
-
+        
         [SerializeField]
         private string m_ResultText;
         [SerializeField]
@@ -73,10 +58,10 @@ namespace UnityEditor.TestTools.TestRunner.GUI
         internal TestRunnerUIFilter m_TestRunnerUIFilter = new TestRunnerUIFilter();
 
         private Vector2 m_TestInfoScroll, m_TestListScroll;
+        private string m_PreviousProjectPath;
         private List<TestRunnerResult> m_QueuedResults = new List<TestRunnerResult>();
-        private ITestResultAdaptor m_LatestTestResults;
 
-        public TestListGUI()
+        protected TestListGUI()
         {
             MonoCecilHelper = new MonoCecilHelper();
             AssetsDatabaseHelper = new AssetsDatabaseHelper();
@@ -84,112 +69,68 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             GuiHelper = new GuiHelper(MonoCecilHelper, AssetsDatabaseHelper);
         }
 
-        IMonoCecilHelper MonoCecilHelper { get; set; }
-        IAssetsDatabaseHelper AssetsDatabaseHelper { get; set; }
-        IGuiHelper GuiHelper { get; set; }
-        TestMode TestMode => (TestMode)m_TestRunnerUIFilter.SelectedTestMode;
+        protected IMonoCecilHelper MonoCecilHelper { get; private set; }
+        protected IAssetsDatabaseHelper AssetsDatabaseHelper { get; private set; }
+        protected IGuiHelper GuiHelper { get; private set; }
+        protected UITestRunnerFilter[] SelectedTestsFilter => GetSelectedTestsAsFilter(m_TestListTree.GetSelection());
 
-        bool? RequiresPlayModeSelection
+        public abstract TestMode TestMode { get; }
+
+        public virtual void PrintHeadPanel()
         {
-            get
+            EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
+            using (new EditorGUI.DisabledScope(IsBusy()))
             {
-                var selectedMode = m_TestRunnerUIFilter.SelectedTestMode;
-                if (selectedMode == (RequirePlaymodeMode.TestsRequiringPlaymodeInEditor | RequirePlaymodeMode.TestsNotRequiringPlaymodeInEditor))
+                if (GUILayout.Button(s_GUIRunAllTests, EditorStyles.toolbarButton))
                 {
-                    return null;
+                    var filter = new UITestRunnerFilter {categoryNames = m_TestRunnerUIFilter.CategoryFilter};
+                    RunTests(filter);
+                    GUIUtility.ExitGUI();
                 }
-
-                return selectedMode == RequirePlaymodeMode.TestsRequiringPlaymodeInEditor;
             }
-        }
-
-        AssemblyType AssemblyTypeSelection
-        {
-            get
+            using (new EditorGUI.DisabledScope(m_TestListTree == null || !m_TestListTree.HasSelection() || IsBusy()))
             {
-                var platform = m_TestRunnerUIFilter.SelectedTestPlatform.PlatformTarget;
-                if (platform == TestPlatformTarget.CustomPlayer || platform == TestPlatformTarget.Player)
+                if (GUILayout.Button(s_GUIRunSelectedTests, EditorStyles.toolbarButton))
                 {
-                    return AssemblyType.EditorAndPlatforms;
+                    RunTests(SelectedTestsFilter);
+                    GUIUtility.ExitGUI();
                 }
-
-                return m_TestRunnerUIFilter.SelectedAssemblyTypes;
             }
-        }
-
-        public void PrintHeadPanel()
-        {
-            using (new EditorGUI.DisabledScope(m_TestListTree == null || IsBusy()))
+            using (new EditorGUI.DisabledScope(m_TestRunnerUIFilter.FailedCount == 0 || IsBusy()))
             {
-                m_TestRunnerUIFilter.OnModeGUI();
-                DrawFilters();
-            }
-        }
-
-        public void PrintBottomPanel()
-        {
-            using (new EditorGUI.DisabledScope(m_TestListTree == null || IsBusy()))
-            {
-                EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
+                if (GUILayout.Button(s_GUIRerunFailedTests, EditorStyles.toolbarButton))
                 {
-                    using (new EditorGUI.DisabledScope(m_LatestTestResults == null))
+                    var failedTestnames = new List<string>();
+                    foreach (var result in newResultList)
                     {
-                        if (GUILayout.Button(s_SaveResults))
-                        {
-                            var filePath = EditorUtility.SaveFilePanel(s_SaveResults.text, "",
-                                $"TestResults_{DateTime.Now:yyyyMMdd_HHmmss}.xml", "xml");
-                            if (!string.IsNullOrEmpty(filePath))
-                            {
-                                TestRunnerApi.SaveResultToFile(m_LatestTestResults, filePath);
-                            }
-
-                            GUIUtility.ExitGUI();
-                        }
+                        if (result.isSuite)
+                            continue;
+                        if (result.resultStatus == TestRunnerResult.ResultStatus.Failed ||
+                            result.resultStatus == TestRunnerResult.ResultStatus.Inconclusive)
+                            failedTestnames.Add(result.fullName);
                     }
-
-                    if (GUILayout.Button(s_GUIClearResults))
-                    {
-                        foreach (var result in newResultList)
-                        {
-                            result.Clear();
-                        }
-
-                        m_TestRunnerUIFilter.UpdateCounters(newResultList, filteredTree);
-                        Reload();
-                        GUIUtility.ExitGUI();
-                    }
-
-                    GUILayout.FlexibleSpace();
-
-                    using (new EditorGUI.DisabledScope(m_TestRunnerUIFilter.FailedCount == 0))
-                    {
-                        if (GUILayout.Button(s_GUIRerunFailedTests))
-                        {
-                            RunTests(RunFilterType.RunFailed);
-                            GUIUtility.ExitGUI();
-                        }
-                    }
-
-                    using (new EditorGUI.DisabledScope(m_TestListTree == null || !m_TestListTree.HasSelection()))
-                    {
-                        if (GUILayout.Button(s_GUIRunSelectedTests))
-                        {
-                            RunTests(RunFilterType.RunSelected);
-                            GUIUtility.ExitGUI();
-                        }
-                    }
-
-                    if (GUILayout.Button(s_GUIRunAllTests))
-                    {
-                        RunTests(RunFilterType.RunAll);
-                        GUIUtility.ExitGUI();
-                    }
+                    RunTests(new UITestRunnerFilter {testNames = failedTestnames.ToArray(), categoryNames = m_TestRunnerUIFilter.CategoryFilter});
+                    GUIUtility.ExitGUI();
                 }
-                EditorGUILayout.EndHorizontal();
             }
+            using (new EditorGUI.DisabledScope(IsBusy()))
+            {
+                if (GUILayout.Button(s_GUIClearResults, EditorStyles.toolbarButton))
+                {
+                    foreach (var result in newResultList)
+                    {
+                        result.Clear();
+                    }
+                    m_TestRunnerUIFilter.UpdateCounters(newResultList);
+                    Reload();
+                    GUIUtility.ExitGUI();
+                }
+            }
+            GUILayout.FlexibleSpace();
+            EditorGUILayout.EndHorizontal();
         }
 
-        void DrawFilters()
+        protected void DrawFilters()
         {
             EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
             m_TestRunnerUIFilter.Draw();
@@ -201,7 +142,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             return m_TestListTree != null;
         }
 
-        public void RenderTestList()
+        public virtual void RenderTestList()
         {
             if (m_TestListTree == null)
             {
@@ -217,14 +158,10 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             {
                 if (m_TestRunnerUIFilter.IsFiltering)
                 {
-                    var notMatchFoundStyle = new GUIStyle("label");
-                    notMatchFoundStyle.normal.textColor = Color.red;
-                    notMatchFoundStyle.alignment = TextAnchor.MiddleCenter;
-                    GUILayout.Label("No match found", notMatchFoundStyle);
                     if (GUILayout.Button("Clear filters"))
                     {
                         m_TestRunnerUIFilter.Clear();
-                        UpdateTestTree();
+                        m_TestListTree.ReloadData();
                         m_Window.Repaint();
                     }
                 }
@@ -238,48 +175,12 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                 m_TestListTree.OnGUI(treeRect, treeViewKeyboardControlId);
             }
 
-            m_TestRunnerUIFilter.UpdateCounters(newResultList, filteredTree);
             EditorGUILayout.EndScrollView();
         }
 
-        void RenderNoTestsInfo()
+        public virtual void RenderNoTestsInfo()
         {
-            var testScriptAssetsCreator = new TestScriptAssetsCreator();
-            if (!testScriptAssetsCreator.ActiveFolderContainsTestAssemblyDefinition())
-            {
-                var noTestsText = "No tests to show.";
-
-                if (!PlayerSettings.playModeTestRunnerEnabled)
-                {
-                    const string testsMustLiveInCustomTestAssemblies =
-                        "Test scripts can be added to assemblies referencing the \"nunit.framework.dll\" library " +
-                        "or folders with Assembly Definition References targeting \"UnityEngine.TestRunner\" or \"UnityEditor.TestRunner\".";
-
-                    noTestsText += Environment.NewLine + testsMustLiveInCustomTestAssemblies;
-                }
-
-                EditorGUILayout.HelpBox(noTestsText, MessageType.Info);
-                if (GUILayout.Button("Create a new Test Assembly Folder in the active path."))
-                {
-                    testScriptAssetsCreator.AddNewFolderWithTestAssemblyDefinition(true);
-                }
-            }
-
-            const string notTestAssembly = "Test Scripts can only be created inside test assemblies.";
-            const string createTestScriptInCurrentFolder = "Create a new Test Script in the active path.";
-            var canAddTestScriptAndItWillCompile = testScriptAssetsCreator.TestScriptWillCompileInActiveFolder();
-
-            using (new EditorGUI.DisabledScope(!canAddTestScriptAndItWillCompile))
-            {
-                var createTestScriptInCurrentFolderGUI = !canAddTestScriptAndItWillCompile
-                    ? new GUIContent(createTestScriptInCurrentFolder, notTestAssembly)
-                    : new GUIContent(createTestScriptInCurrentFolder);
-
-                if (GUILayout.Button(createTestScriptInCurrentFolderGUI))
-                {
-                    testScriptAssetsCreator.AddNewTestScript();
-                }
-            }
+            EditorGUILayout.HelpBox("No tests to show", MessageType.Info);
         }
 
         public void RenderDetails()
@@ -318,11 +219,6 @@ namespace UnityEditor.TestTools.TestRunner.GUI
 
         public void Init(TestRunnerWindow window, ITestAdaptor rootTest)
         {
-            Init(window, new[] {rootTest});
-        }
-
-        void Init(TestRunnerWindow window, ITestAdaptor[] rootTests)
-        {
             if (m_Window == null)
             {
                 m_Window = window;
@@ -343,7 +239,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                 m_TestListTree.itemDoubleClickedCallback += TestDoubleClickCallback;
                 m_TestListTree.contextClickItemCallback += TestContextClickCallback;
 
-                var testListTreeViewDataSource = new TestListTreeViewDataSource(m_TestListTree, this, rootTests);
+                var testListTreeViewDataSource = new TestListTreeViewDataSource(m_TestListTree, this, rootTest);
 
                 if (!newResultList.Any())
                     testListTreeViewDataSource.ExpandTreeOnCreation();
@@ -354,12 +250,12 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                     null);
             }
 
-            m_TestRunnerUIFilter.UpdateCounters(newResultList, filteredTree);
+            EditorApplication.update += RepaintIfProjectPathChanged;
+
+            m_TestRunnerUIFilter.UpdateCounters(newResultList);
             m_TestRunnerUIFilter.RebuildTestList = () => m_TestListTree.ReloadData();
-            m_TestRunnerUIFilter.UpdateTestTreeRoots = UpdateTestTree;
-            m_TestRunnerUIFilter.SearchStringChanged = s => m_TestListTree.ReloadData();
+            m_TestRunnerUIFilter.SearchStringChanged = s => m_TestListTree.searchString = s;
             m_TestRunnerUIFilter.SearchStringCleared = () => FrameSelection();
-            m_TestRunnerUIFilter.BuildPlayer = () => RunTests(RunFilterType.BuildOnly);
         }
 
         public void UpdateResult(TestRunnerResult result)
@@ -370,45 +266,23 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                 return;
             }
 
-
-            if (!ResultsByKey.TryGetValue(result.uniqueId, out var testRunnerResult))
+            if (ResultsByKey.TryGetValue(result.uniqueId, out var testRunnerResult))
             {
-                // Add missing result due to e.g. changes in code for uniqueId due to change of package version.
-                m_NewResultList.Add(result);
-                ResultsByKey[result.uniqueId] = result;
-                testRunnerResult = result;
+                testRunnerResult.Update(result);
+                Repaint();
+                m_Window.Repaint();
             }
-
-            testRunnerResult.Update(result);
-            Repaint();
-            m_Window.Repaint();
         }
 
-        public void RunFinished(ITestResultAdaptor results)
-        {
-            m_LatestTestResults = results;
-            UpdateTestTree();
-        }
-
-        void UpdateTestTree()
-        {
-            var testList = this;
-            TestRunnerApi.RetrieveTestTree(GetExecutionSettings(), rootTest =>
-            {
-                testList.UpdateTestTree(new[] { rootTest });
-                testList.Reload();
-            });
-        }
-
-        public void UpdateTestTree(ITestAdaptor[] tests)
+        public void UpdateTestTree(ITestAdaptor test)
         {
             if (!HasTreeData())
             {
                 return;
             }
-
-            (m_TestListTree.data as TestListTreeViewDataSource).UpdateRootTest(tests);
-
+            
+            (m_TestListTree.data as TestListTreeViewDataSource).UpdateRootTest(test);
+            
             m_TestListTree.ReloadData();
             Repaint();
             m_Window.Repaint();
@@ -425,7 +299,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             }
             m_QueuedResults.Clear();
             TestSelectionCallback(m_TestListState.selectedIDs.ToArray());
-            m_TestRunnerUIFilter.UpdateCounters(newResultList, filteredTree);
+            m_TestRunnerUIFilter.UpdateCounters(newResultList);
             Repaint();
             m_Window.Repaint();
         }
@@ -451,62 +325,27 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             }
         }
 
-        void TestDoubleClickCallback(int id)
+        protected virtual void TestDoubleClickCallback(int id)
         {
             if (IsBusy())
                 return;
 
-            RunTests(RunFilterType.RunSpecific, id);
+            RunTests(GetSelectedTestsAsFilter(new List<int> { id }));
             GUIUtility.ExitGUI();
         }
 
-        void RunTests(RunFilterType runFilter, params int[] specificTests)
+        protected virtual void RunTests(params UITestRunnerFilter[] filters)
         {
-            if (EditorUtility.scriptCompilationFailed)
-            {
-                Debug.LogError("Fix compilation issues before running tests");
-                return;
-            }
-
-            var filters = ConstructFilter(runFilter, specificTests);
-            if (filters == null)
-            {
-                return;
-            }
-
-            foreach (var filter in filters)
-            {
-                filter.ClearResults(newResultList.OfType<UITestRunnerFilter.IClearableResult>().ToList());
-            }
-
-            var assemblyType = AssemblyTypeSelection;
-            var requiresPlayMode = RequiresPlayModeSelection;
-            var testFilters = filters.Select(filter => new Filter
-            {
-                assemblyNames = filter.assemblyNames,
-                categoryNames = filter.categoryNames,
-                groupNames = filter.groupNames,
-                requiresPlayMode = requiresPlayMode,
-                testNames = filter.testNames,
-                assemblyType = assemblyType
-            }).ToArray();
-
-            var executionSettings = CreateExecutionSettings(m_TestRunnerUIFilter.SelectedTestPlatform, testFilters);
-            executionSettings.IsBuildOnly = runFilter == RunFilterType.BuildOnly;
-            TestRunnerApi.ExecuteTestRun(executionSettings);
-
-            if (executionSettings.targetPlatform != null)
-            {
-                GUIUtility.ExitGUI();
-            }
+            throw new NotImplementedException();
         }
 
-        void TestContextClickCallback(int id)
+        protected virtual void TestContextClickCallback(int id)
         {
             if (id == 0)
                 return;
 
             var m = new GenericMenu();
+            var testFilters = GetSelectedTestsAsFilter(m_TestListState.selectedIDs);
             var multilineSelection = m_TestListState.selectedIDs.Count > 1;
 
             if (!multilineSelection)
@@ -541,7 +380,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             {
                 m.AddItem(multilineSelection ? s_GUIRunSelectedTests : s_GUIRun,
                     false,
-                    data => RunTests(RunFilterType.RunSelected),
+                    data => RunTests(testFilters),
                     "");
             }
             else
@@ -550,96 +389,89 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             m.ShowAsContext();
         }
 
-        private enum RunFilterType
+        private UITestRunnerFilter[] GetSelectedTestsAsFilter(IEnumerable<int> selectedIDs)
         {
-            RunAll,
-            RunSelected,
-            RunFailed,
-            RunSpecific,
-            BuildOnly
-        }
-
-        private UITestRunnerFilter[] ConstructFilter(RunFilterType runFilter, int[] specificTests = null)
-        {
-            if (runFilter == RunFilterType.RunAll && !m_TestRunnerUIFilter.IsFiltering)
+            var namesToRun = new List<string>();
+            var assembliesForNamesToRun = new List<string>();
+            var exactNamesToRun = new List<string>();
+            var assembliesToRun = new List<string>();
+            foreach (var lineId in selectedIDs)
             {
-                // Shortcut for RunAll, which will not trigger any explicit tests
-                return new[] {new UITestRunnerFilter()};
-            }
-
-            var includedIds = GetIdsIncludedInRunFilter(runFilter, specificTests);
-
-            var testsToRun = new List<string>();
-            for (int i = 0; i < includedIds.Count; i++)
-            {
-                var id = includedIds[i];
-                var item = m_TestListTree.FindItem(id);
-                if (item.hasChildren)
+                var line = m_TestListTree.FindItem(lineId);
+                if (line is TestTreeViewItem)
                 {
-                    foreach (var child in item.children)
+                    var testLine = line as TestTreeViewItem;
+                    if (testLine.IsGroupNode && !testLine.FullName.Contains("+")) 
                     {
-                        var childId = child.id;
-                        if (!includedIds.Contains(childId))
+                        if (testLine.parent != null && testLine.parent.displayName == "Invisible Root Item")
                         {
-                            var testItem = (TestTreeViewItem)child;
-                            if (testItem.m_Test.RunState == RunState.Explicit)
+                            //Root node selected. Use an empty TestRunnerFilter to run every test
+                            return new[] {new UITestRunnerFilter()};
+                        }
+
+                        if (testLine.FullName.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
+                        {
+                            assembliesToRun.Add(UITestRunnerFilter.AssemblyNameFromPath(testLine.FullName));
+                        }
+                        else
+                        {
+                            namesToRun.Add($"^{Regex.Escape(testLine.FullName)}$");
+                            var assembly = UITestRunnerFilter.AssemblyNameFromPath(testLine.GetAssemblyName());
+                            if (!string.IsNullOrEmpty(assembly) && !assembliesForNamesToRun.Contains(assembly))
                             {
-                                // Do not add explicit tests if a ancestor is selected.
-                                continue;
+                                assembliesForNamesToRun.Add(assembly);
                             }
-
-                            includedIds.Add(childId);
                         }
                     }
-                }
-                else
-                {
-                    var testItem = (TestTreeViewItem)item;
-                    if (runFilter == RunFilterType.RunFailed)
+                    else
                     {
-                        ResultsByKey.TryGetValue(testItem.UniqueName, out var testRunnerResult);
-                        if (testRunnerResult?.resultStatus == TestRunnerResult.ResultStatus.Failed)
-                        {
-                            continue;
-                        }
+                        exactNamesToRun.Add(testLine.FullName);
                     }
-
-                    testsToRun.Add(testItem.FullName);
                 }
             }
 
-            if (testsToRun.Count == 0)
-            {
-                return null;
-            }
+            var filters = new List<UITestRunnerFilter>();
 
-            return new[]
+            if (assembliesToRun.Count > 0)
             {
-                new UITestRunnerFilter()
+                filters.Add(new UITestRunnerFilter
                 {
-                    testNames = testsToRun.ToArray(),
-                    categoryNames = m_TestRunnerUIFilter.CategoryFilter
-                }
-            };
-        }
-
-        private List<int> GetIdsIncludedInRunFilter(RunFilterType runFilter, int[] specificTests)
-        {
-            switch (runFilter)
-            {
-                case RunFilterType.RunSelected:
-                    return m_TestListState.selectedIDs.ToList();
-                case RunFilterType.RunSpecific:
-                    if (specificTests == null)
-                    {
-                        throw new ArgumentNullException(
-                            $"For {nameof(RunFilterType.RunSpecific)}, the {nameof(specificTests)} argument must not be null.");
-                    }
-
-                    return specificTests.ToList();
-                default:
-                    return m_TestListTree.GetRowIDs().ToList();
+                    assemblyNames = assembliesToRun.ToArray()
+                });
             }
+            
+            if (namesToRun.Count > 0)
+            {
+                filters.Add(new UITestRunnerFilter
+                {
+                    groupNames = namesToRun.ToArray(),
+                    assemblyNames = assembliesForNamesToRun.ToArray()
+                });
+            }
+            
+            if (exactNamesToRun.Count > 0)
+            {
+                filters.Add(new UITestRunnerFilter
+                {
+                    testNames = exactNamesToRun.ToArray()
+                });
+            }
+            
+            if (filters.Count == 0)
+            {
+                filters.Add(new UITestRunnerFilter());
+            }
+
+            var categories = m_TestRunnerUIFilter.CategoryFilter.ToArray();
+            if (categories.Length > 0)
+            {
+                foreach (var filter in filters)
+                {
+                    filter.categoryNames = categories;
+                }
+            }
+            
+            return filters.ToArray();
         }
 
         private TestTreeViewItem GetSelectedTest()
@@ -659,59 +491,34 @@ namespace UnityEditor.TestTools.TestRunner.GUI
         {
             if (m_TestListTree.HasSelection())
             {
-                var firstClickedID = m_TestListState.selectedIDs.First<int>() == m_TestListState.lastClickedID ? m_TestListState.selectedIDs.Last<int>() : m_TestListState.selectedIDs.First<int>();
+                var firstClickedID = m_TestListState.selectedIDs.First() == m_TestListState.lastClickedID ? m_TestListState.selectedIDs.Last() : m_TestListState.selectedIDs.First();
                 m_TestListTree.Frame(firstClickedID, true, false);
             }
         }
 
+        public abstract TestPlatform TestPlatform { get; }
+
         public void RebuildUIFilter()
         {
-            m_TestRunnerUIFilter.UpdateCounters(newResultList, filteredTree);
+            m_TestRunnerUIFilter.UpdateCounters(newResultList);
             if (m_TestRunnerUIFilter.IsFiltering)
             {
                 m_TestListTree.ReloadData();
             }
         }
 
-        static bool IsBusy()
+        public void RepaintIfProjectPathChanged()
         {
-            return TestRunnerApi.IsAnyRunActive() || EditorApplication.isCompiling || EditorApplication.isPlaying;
-        }
-
-        public ExecutionSettings GetExecutionSettings()
-        {
-            m_TestRunnerUIFilter.ValidateTestPlatformSelection();
-
-            var filter = new Filter
+            var path = TestListGUIHelper.GetActiveFolderPath();
+            if (path != m_PreviousProjectPath)
             {
-                assemblyType = AssemblyTypeSelection,
-                requiresPlayMode = RequiresPlayModeSelection
-            };
+                m_PreviousProjectPath = path;
+                TestRunnerWindow.s_Instance.Repaint();
+            }
 
-            return CreateExecutionSettings(m_TestRunnerUIFilter.SelectedTestPlatform, filter);
+            EditorApplication.update -= RepaintIfProjectPathChanged;
         }
 
-        static ExecutionSettings CreateExecutionSettings(TestPlatformSelection platform, params Filter[] filters)
-        {
-            var selectedBuildTarget = platform.PlatformTarget == TestPlatformTarget.Player
-                || platform.PlatformTarget == TestPlatformTarget.CustomPlayer
-                ? (BuildTarget?)EditorUserBuildSettings.activeBuildTarget
-                : null;
-
-            var playerBuilderName = platform.PlatformTarget == TestPlatformTarget.CustomPlayer
-                ? platform.CustomTargetName
-                : null;
-
-            var customRunnerName = platform.PlatformTarget == TestPlatformTarget.CustomRunner
-                ? platform.CustomTargetName
-                : null;
-
-            return new ExecutionSettings(filters)
-            {
-                targetPlatform = selectedBuildTarget,
-                playerBuilderName = playerBuilderName,
-                customRunnerName = customRunnerName
-            };
-        }
+        protected abstract bool IsBusy();
     }
 }

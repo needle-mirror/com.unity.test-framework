@@ -7,13 +7,12 @@ using NUnit.Framework.Internal;
 using NUnit.Framework.Internal.Commands;
 using UnityEngine.TestTools;
 using UnityEngine.TestTools.Logging;
-using UnityEngine.TestTools.TestRunner;
 
 namespace UnityEngine.TestRunner.NUnitExtensions.Runner
 {
-    class UnityLogCheckDelegatingCommand : DelegatingTestCommand, IEnumerableTestMethodCommand
+    internal class UnityLogCheckDelegatingCommand : DelegatingTestCommand, IEnumerableTestMethodCommand
     {
-        static Dictionary<object, bool?> s_AttributeCache = new Dictionary<object, bool?>();
+        private static Dictionary<object, bool?> s_AttributeCache = new Dictionary<object, bool?>();
 
         public UnityLogCheckDelegatingCommand(TestCommand innerCommand)
             : base(innerCommand) {}
@@ -62,7 +61,7 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
             }
         }
 
-        static bool CaptureException(TestResult result, Action action)
+        private static bool CaptureException(TestResult result, Action action)
         {
             try
             {
@@ -71,44 +70,51 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
             }
             catch (Exception e)
             {
-                result.RecordExceptionWithHint(e);
+                result.RecordException(e);
                 return false;
             }
         }
 
-        static bool ExecuteAndCheckLog(LogScope logScope, TestResult result, Action action)
+        private static bool ExecuteAndCheckLog(LogScope logScope, TestResult result, Action action)
             => CaptureException(result, action) && CheckLogs(result, logScope);
 
-        static void PostTestValidation(LogScope logScope, TestCommand command, TestResult result)
+        private static void PostTestValidation(LogScope logScope, TestCommand command, TestResult result)
         {
             if (MustExpect(command.Test.Method.MethodInfo))
                 CaptureException(result, logScope.NoUnexpectedReceived);
         }
 
-        static bool CheckLogs(TestResult result, LogScope logScope)
-            => CheckFailingLogs(logScope, result) && CheckExpectedLogs(logScope, result);
-
-        static bool CheckFailingLogs(LogScope logScope, TestResult result)
+        private static bool CheckLogs(TestResult result, LogScope logScope)
         {
-            if (!logScope.AnyFailingLogs())
-                return true;
+            try
+            {
+                logScope.EvaluateLogScope(true);
+            }
+            catch (Exception e)
+            {
+                result.RecordException(e);
+                return false;
+            }
 
-            var failingLog = logScope.FailingLogs.First();
-            result.RecordExceptionWithHint(new UnhandledLogMessageException(failingLog));
-            return false;
+            return true;
         }
 
-        static bool CheckExpectedLogs(LogScope logScope, TestResult result)
+        private static bool CheckFailingLogs(LogScope logScope, TestResult result)
         {
-            if (!logScope.ExpectedLogs.Any())
-                return true;
+            try
+            {
+                logScope.EvaluateLogScope(false);
+            }
+            catch (Exception e)
+            {
+                result.RecordException(e);
+                return false;
+            }
 
-            var expectedLog = logScope.ExpectedLogs.Peek();
-            result.RecordExceptionWithHint(new UnexpectedLogMessageException(expectedLog));
-            return false;
+            return true;
         }
 
-        static bool MustExpect(MemberInfo method)
+        private static bool MustExpect(MemberInfo method)
         {
             // method
 

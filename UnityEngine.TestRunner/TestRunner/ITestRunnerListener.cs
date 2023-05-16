@@ -6,6 +6,8 @@ namespace UnityEngine.TestTools.TestRunner
 {
     internal interface ITestRunnerListener
     {
+        void RunStarted(ITest testsToRun);
+        void RunFinished(ITestResult testResults);
         void TestStarted(ITest test);
         void TestFinished(ITestResult result);
     }

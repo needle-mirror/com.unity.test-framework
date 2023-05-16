@@ -1,3 +1,4 @@
+using System;
 using UnityEditor.TestTools.TestRunner.Api;
 
 namespace UnityEditor.TestTools.TestRunner.CommandLineTest
@@ -7,7 +8,7 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
         private ITestSettings m_TestSettings;
         public RunSettings(ITestSettings testSettings)
         {
-            this.m_TestSettings = testSettings;
+            m_TestSettings = testSettings;
         }
 
         public void Apply()

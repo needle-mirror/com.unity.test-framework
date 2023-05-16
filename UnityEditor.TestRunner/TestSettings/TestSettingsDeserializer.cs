@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using UnityEditor.TestTools.TestRunner.Api;
 using UnityEngine;
+using UnityEngine.TestRunner.NUnitExtensions.Runner;
 
 namespace UnityEditor.TestTools.TestRunner
 {
@@ -20,13 +22,59 @@ namespace UnityEditor.TestTools.TestRunner
             new SettingsMap<string>("appleDeveloperTeamID", (settings, value) => settings.appleDeveloperTeamID = value),
             new SettingsMap<ProvisioningProfileType>("iOSManualProvisioningProfileType", (settings, value) => settings.iOSManualProvisioningProfileType = value),
             new SettingsMap<string>("iOSManualProvisioningProfileID", (settings, value) => settings.iOSManualProvisioningProfileID = value),
+            new SettingsMap<string>("iOSTargetSDK", (settings, value) => settings.iOSTargetSDK = value),
             new SettingsMap<ProvisioningProfileType>("tvOSManualProvisioningProfileType", (settings, value) => settings.tvOSManualProvisioningProfileType = value),
             new SettingsMap<string>("tvOSManualProvisioningProfileID", (settings, value) => settings.tvOSManualProvisioningProfileID = value),
+            new SettingsMap<string>("tvOSTargetSDK", (settings, value) => settings.tvOSTargetSDK = value),
             new SettingsMap<string>("playerGraphicsAPI", (settings, value) =>
             {
                 settings.autoGraphicsAPIs = false;
                 settings.playerGraphicsAPIs = new[] {value};
             }),
+            new SettingsMap<bool>("androidBuildAppBundle", (settings, value) =>
+            {
+                settings.androidBuildAppBundle = value;
+            }),
+            new SettingsMap<List<object>>("ignoreTests", (settings, list) =>
+            {
+                settings.ignoreTests = list.Select(item =>
+                {
+                    var dictionary = (Dictionary<string, object>)item;
+                    if (dictionary.ContainsKey("test") && dictionary.ContainsKey("ignoreComment"))
+                    {
+                        return new IgnoreTest()
+                        {
+                            test = dictionary["test"] as string,
+                            ignoreComment = dictionary["ignoreComment"] as string
+                        };
+                    }
+
+                    throw new Exception("Wrong format for ignore test. Expected \"test\" and \"ignoreComment\".");
+                }).ToArray();
+            }),
+            new SettingsMap<Dictionary<string, object>>("featureFlags", (settings, dictionary) =>
+            {
+                var converted = dictionary.ToDictionary(pair => pair.Key, pair => (bool)pair.Value);
+                var featureFlags = new FeatureFlags();
+                if (converted.ContainsKey("fileCleanUpCheck"))
+                {
+                    featureFlags.fileCleanUpCheck = converted["fileCleanUpCheck"];
+                }
+                if (converted.ContainsKey("strictDomainReload"))
+                {
+                    featureFlags.strictDomainReload = converted["strictDomainReload"];
+                }
+                if (converted.ContainsKey("requiresSplashScreen"))
+                {
+                    featureFlags.requiresSplashScreen = converted["requiresSplashScreen"];
+                }
+
+                settings.featureFlags = featureFlags;
+            }),
+#if UNITY_2023_2_OR_NEWER
+            new SettingsMap<WebGLClientBrowserType>("webGLClientBrowserType", (settings, value) => settings.webGLClientBrowserType = value),
+            new SettingsMap<string>("webGLClientBrowserPath", (settings, value) => settings.webGLClientBrowserPath = value),
+#endif
         };
 
         private readonly Func<ITestSettings> m_TestSettingsFactory;
@@ -48,7 +96,7 @@ namespace UnityEditor.TestTools.TestRunner
 
             foreach (var settingsMap in s_SettingsMapping)
             {
-                if (!settingsDictionary.ContainsKey(settingsMap.Key) || settingsDictionary[settingsMap.Key] == null)
+                if (!settingsDictionary.ContainsKey(settingsMap.Key))
                 {
                     continue;
                 }

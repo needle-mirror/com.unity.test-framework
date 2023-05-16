@@ -1,6 +1,8 @@
+using System;
+
 namespace UnityEditor.TestRunner.CommandLineParser
 {
-    interface ICommandLineOption
+    internal interface ICommandLineOption
     {
         string ArgName { get; }
         void ApplyValue(string value);

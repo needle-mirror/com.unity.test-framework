@@ -1,3 +1,4 @@
+using System;
 using NUnit.Framework.Interfaces;
 
 namespace UnityEditor.TestTools.TestRunner.Api
@@ -5,16 +6,14 @@ namespace UnityEditor.TestTools.TestRunner.Api
     internal interface ICallbacksDelegator
     {
         void RunStarted(ITest testsToRun);
-        void RunStarted(ITestAdaptor testsToRun);
+        void RunStartedRemotely(byte[] testsToRunData);
         void RunFinished(ITestResult testResults);
-        void RunFinished(ITestResultAdaptor testResults);
+        void RunFinishedRemotely(byte[] testResultsData);
         void RunFailed(string failureMessage);
         void TestStarted(ITest test);
-        void TestStarted(ITestAdaptor test);
+        void TestStartedRemotely(byte[] testStartedData);
         void TestFinished(ITestResult result);
-        void TestFinished(ITestResultAdaptor result);
+        void TestFinishedRemotely(byte[] testResultsData);
         void TestTreeRebuild(ITest test);
-        void SetTestRunFilter(ITestFilter filter);
-        void ClearTestResultCache();
     }
 }

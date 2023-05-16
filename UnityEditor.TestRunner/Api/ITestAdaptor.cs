@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using NUnit.Framework.Interfaces;
 
 namespace UnityEditor.TestTools.TestRunner.Api
-{/// <summary>
-/// ```ITestAdaptor``` is a representation of a node in the test tree implemented as a wrapper around the [NUnit](http://www.nunit.org/) [ITest](https://github.com/nunit/nunit/blob/master/src/NUnitFramework/framework/Interfaces/ITest.cs)  interface.
-/// </summary>
+{
+    /// <summary>
+    /// ```ITestAdaptor``` is a representation of a node in the test tree implemented as a wrapper around the [NUnit](http://www.nunit.org/) [ITest](https://github.com/nunit/nunit/blob/master/src/NUnitFramework/framework/Interfaces/ITest.cs)  interface.
+    /// </summary>
     public interface ITestAdaptor
     {
         /// <summary>
@@ -100,13 +101,5 @@ namespace UnityEditor.TestTools.TestRunner.Api
         /// The mode of the test. Either **Edit Mode** or **Play Mode**.
         /// </summary>
         TestMode TestMode { get; }
-        /// <summary>
-        /// If the test explicitly requires playmode.
-        /// </summary>
-        bool? RequiresPlayMode { get; }
-        ///<summary>
-        /// An enum flag that filters whether the assembly of the test is in an editor only assembly or if it is in an assembly that also supports one or more platforms.
-        ///</summary>
-        AssemblyType AssemblyType { get; }
     }
 }

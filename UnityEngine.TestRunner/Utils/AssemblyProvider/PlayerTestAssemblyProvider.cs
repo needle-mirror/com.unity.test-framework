@@ -1,8 +1,6 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using NUnit.Framework.Interfaces;
-using UnityEngine.TestTools.NUnitExtensions;
 
 namespace UnityEngine.TestTools.Utils
 {
@@ -21,20 +19,9 @@ namespace UnityEngine.TestTools.Utils
             LoadAssemblies();
         }
 
-        public ITest GetTestsWithNUnit()
-        {
-            return BuildTests(TestPlatform.PlayMode, m_LoadedAssemblies.ToArray());
-        }
-
         public List<IAssemblyWrapper> GetUserAssemblies()
         {
             return m_LoadedAssemblies;
-        }
-
-        protected static ITest BuildTests(TestPlatform testPlatform, IAssemblyWrapper[] assemblies)
-        {
-            var builder = new UnityTestAssemblyBuilder();
-            return builder.Build(assemblies.Select(assembly => new AssemblyWithPlatform(assembly, testPlatform)).ToArray());
         }
 
         private void LoadAssemblies()

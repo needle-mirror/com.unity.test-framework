@@ -13,13 +13,13 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
         private ITestSettingsDeserializer m_TestSettingsDeserializer;
         private Action<string> m_LogAction;
         private Action<string> m_LogWarningAction;
-        private Func<string, bool> m_FileExistsCheck;
+        internal Func<string, bool> fileExistsCheck = File.Exists;
         private Func<bool> m_ScriptCompilationFailedCheck;
-        public SettingsBuilder(ITestSettingsDeserializer testSettingsDeserializer, Action<string> logAction, Action<string> logWarningAction, Func<string, bool> fileExistsCheck, Func<bool> scriptCompilationFailedCheck)
+        internal Func<string, string[]> readAllLines = filePath => File.ReadAllText(filePath).Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+        public SettingsBuilder(ITestSettingsDeserializer testSettingsDeserializer, Action<string> logAction, Action<string> logWarningAction, Func<bool> scriptCompilationFailedCheck)
         {
             m_LogAction = logAction;
             m_LogWarningAction = logWarningAction;
-            m_FileExistsCheck = fileExistsCheck;
             m_ScriptCompilationFailedCheck = scriptCompilationFailedCheck;
             m_TestSettingsDeserializer = testSettingsDeserializer;
         }
@@ -27,7 +27,7 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
         public Api.ExecutionSettings BuildApiExecutionSettings(string[] commandLineArgs)
         {
             var quit = false;
-            string testPlatform = string.Empty;
+            string testPlatform = TestMode.EditMode.ToString();
             string[] testFilters = null;
             string[] testCategories = null;
             string testSettingsFilePath = null;
@@ -35,36 +35,28 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
             int? playerHeartbeatTimeout = null;
             bool runSynchronously = false;
             string[] testAssemblyNames = null;
-            string playerBuilderName = null;
-            bool? requiresPlayMode = null;
-            string assemblyType = null;
-            string customRunnerName = string.Empty;
-            string[] testNames = null;
+            string buildPlayerPath = string.Empty;
+            string orderedTestListFilePath = null;
+            int retry = 0;
+            int repeat = 0;
+
 
             var optionSet = new CommandLineOptionSet(
                 new CommandLineOption("quit", () => { quit = true; }),
                 new CommandLineOption("testPlatform", platform => { testPlatform = platform; }),
-                new CommandLineOption("requiresPlayMode", requiresPlayModeString =>
-                {
-                    bool reqPlayMode;
-                    if (Boolean.TryParse(requiresPlayModeString, out reqPlayMode))
-                    {
-                        requiresPlayMode = reqPlayMode;
-                    }
-                }),
-                new CommandLineOption("assemblyType", type => { assemblyType = type; }),
                 new CommandLineOption("editorTestsFilter", filters => { testFilters = filters; }),
                 new CommandLineOption("testFilter", filters => { testFilters = filters; }),
-                new CommandLineOption("editorTestsCategories", categories => { testCategories = categories; }),
-                new CommandLineOption("testCategory", categories => { testCategories = categories; }),
+                new CommandLineOption("editorTestsCategories", catagories => { testCategories = catagories; }),
+                new CommandLineOption("testCategory", catagories => { testCategories = catagories; }),
                 new CommandLineOption("testSettingsFile", settingsFilePath => { testSettingsFilePath = settingsFilePath; }),
                 new CommandLineOption("testRepetitions", reps => { testRepetitions = int.Parse(reps); }),
                 new CommandLineOption("playerHeartbeatTimeout", timeout => { playerHeartbeatTimeout = int.Parse(timeout); }),
                 new CommandLineOption("runSynchronously", () => { runSynchronously = true; }),
-                new CommandLineOption("assemblyNames", assemblyNames => { testAssemblyNames = assemblyNames.Split(';'); }),
-                new CommandLineOption("playerBuilderName", builderName => { playerBuilderName = builderName; }),
-                new CommandLineOption("customRunner", customRunner => { customRunnerName = customRunner; }),
-                new CommandLineOption("testNames", name => { testNames = name.Split(';'); })
+                new CommandLineOption("assemblyNames", assemblyNames => { testAssemblyNames = assemblyNames; }),
+                new CommandLineOption("buildPlayerPath", buildPath => { buildPlayerPath = buildPath; }),
+                new CommandLineOption("orderedTestListFile", filePath => { orderedTestListFilePath = filePath; }),
+                new CommandLineOption("retry", n => { retry = int.Parse(n); }),
+                new CommandLineOption("repeat", n => { repeat = int.Parse(n); })
             );
             optionSet.Parse(commandLineArgs);
 
@@ -72,27 +64,27 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
 
             CheckForScriptCompilationErrors();
 
-            ValidateCustomRunner(customRunnerName);
-
             var testSettings = GetTestSettings(testSettingsFilePath);
-            var filter = new Filter()
+            var filter = new Filter
             {
+                testMode = testPlatform.ToLower() == "editmode" ? TestMode.EditMode : TestMode.PlayMode,
                 groupNames = testFilters,
                 categoryNames = testCategories,
-                assemblyNames = testAssemblyNames,
-                requiresPlayMode = requiresPlayMode,
-                testNames = testNames
+                assemblyNames = testAssemblyNames
             };
-            filter = ModifyApiFilter(filter, testPlatform, assemblyType, customRunnerName);
 
-            var settings = new Api.ExecutionSettings()
+            var settings = new Api.ExecutionSettings
             {
-                filters = new[] {filter},
+                filters = new []{ filter },
                 overloadTestRunSettings = new RunSettings(testSettings),
+                ignoreTests = testSettings?.ignoreTests,
+                featureFlags = testSettings?.featureFlags,
                 targetPlatform = GetBuildTarget(testPlatform),
                 runSynchronously = runSynchronously,
-                playerBuilderName = playerBuilderName,
-                customRunnerName = customRunnerName
+                playerSavePath = buildPlayerPath,
+                orderedTestNames = GetOrderedTestList(orderedTestListFilePath),
+                repeatCount = repeat,
+                retryCount = retry
             };
 
             if (playerHeartbeatTimeout != null)
@@ -115,14 +107,14 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
             );
             optionSet.Parse(commandLineArgs);
 
-            return new ExecutionSettings()
+            return new ExecutionSettings
             {
                 TestResultsFile = resultFilePath,
                 DeviceLogsDirectory = deviceLogsDirectory
             };
         }
 
-        void DisplayQuitWarningIfQuitIsGiven(bool quitIsGiven)
+        private void DisplayQuitWarningIfQuitIsGiven(bool quitIsGiven)
         {
             if (quitIsGiven)
             {
@@ -130,7 +122,7 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
             }
         }
 
-        void CheckForScriptCompilationErrors()
+        private void CheckForScriptCompilationErrors()
         {
             if (m_ScriptCompilationFailedCheck())
             {
@@ -138,12 +130,12 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
             }
         }
 
-        ITestSettings GetTestSettings(string testSettingsFilePath)
+        private ITestSettings GetTestSettings(string testSettingsFilePath)
         {
             ITestSettings testSettings = null;
             if (!string.IsNullOrEmpty(testSettingsFilePath))
             {
-                if (!m_FileExistsCheck(testSettingsFilePath))
+                if (!fileExistsCheck(testSettingsFilePath))
                 {
                     throw new SetupException(SetupException.ExceptionType.TestSettingsFileNotFound, testSettingsFilePath);
                 }
@@ -153,37 +145,18 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
             return testSettings;
         }
 
-        private static void ValidateCustomRunner(string customRunner)
+        private string[] GetOrderedTestList(string orderedTestListFilePath)
         {
-            if (string.IsNullOrEmpty(customRunner))
+            if (!string.IsNullOrEmpty(orderedTestListFilePath))
             {
-                return;
-            }
+                if (!fileExistsCheck(orderedTestListFilePath))
+                {
+                    throw new SetupException(SetupException.ExceptionType.OrderedTestListFileNotFound, orderedTestListFilePath);
+                }
 
-            if (TestRunnerApi.GetCustomRunner(customRunner) != null)
-            {
-                return;
+                return readAllLines(orderedTestListFilePath);
             }
-
-            throw new SetupException(SetupException.ExceptionType.CustomRunnerNotFound, customRunner);
-        }
-
-        static Filter ModifyApiFilter(Filter filter, string testPlatform, string assemblyType, string customRunner)
-        {
-            if (testPlatform.ToLower() == "editmode")
-            {
-                filter.assemblyType = AssemblyType.EditorOnly;
-            }
-            else if (testPlatform.ToLower() == "playmode")
-            {
-                filter.assemblyType = AssemblyType.EditorAndPlatforms;
-            }
-            if (!string.IsNullOrEmpty(assemblyType))
-            {
-                filter.assemblyType = (AssemblyType)Enum.Parse(typeof(AssemblyType), assemblyType, true);
-            }
-
-            return filter;
+            return null;
         }
 
         private static BuildTarget? GetBuildTarget(string testPlatform)

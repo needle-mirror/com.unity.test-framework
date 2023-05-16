@@ -1,3 +1,4 @@
+using System;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
 using UnityEngine.TestRunner.NUnitExtensions.Runner;

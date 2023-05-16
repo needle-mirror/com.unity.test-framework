@@ -11,6 +11,7 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
     {
         internal IRunData runData = RunData.instance;
 
+        private ITestRunnerApi m_TestRunnerApi;
         private ISettingsBuilder m_SettingsBuilder;
         private Action<string, object[]> m_LogErrorFormat;
         private Action<Exception> m_LogException;
@@ -19,10 +20,9 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
         private Func<bool> m_ScriptCompilationFailedCheck;
         private Func<bool> m_IsRunActive;
 
-        internal Func<Api.ExecutionSettings, string> ExecuteTestRun = TestRunnerApi.ExecuteTestRun;
-
-        public Executer(ISettingsBuilder settingsBuilder, Action<string, object[]> logErrorFormat, Action<Exception> logException, Action<string> logMessage, Action<int> exitEditorApplication, Func<bool> scriptCompilationFailedCheck, Func<bool> isRunActive)
+        public Executer(ITestRunnerApi testRunnerApi, ISettingsBuilder settingsBuilder, Action<string, object[]> logErrorFormat, Action<Exception> logException, Action<string> logMessage, Action<int> exitEditorApplication, Func<bool> scriptCompilationFailedCheck, Func<bool> isRunActive)
         {
+            m_TestRunnerApi = testRunnerApi;
             m_SettingsBuilder = settingsBuilder;
             m_LogErrorFormat = logErrorFormat;
             m_LogException = logException;
@@ -51,7 +51,7 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
             {
                 // It is important that the message starts with "Running tests for ", otherwise TestCleanConsole will fail.
                 m_LogMessage($"Running tests for {executionSettings}");
-                return ExecuteTestRun(executionSettings);
+                return m_TestRunnerApi.Execute(executionSettings);
             }
             catch (Exception exception)
             {
@@ -63,17 +63,7 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
 
         public void ExitIfRunIsCompleted()
         {
-            bool isRunActive;
-            try
-            {
-                isRunActive = m_IsRunActive();
-            }
-            catch (RunnerNotFoundException)
-            {
-                isRunActive = false;
-            }
-
-            if (isRunActive)
+            if (m_IsRunActive())
             {
                 return;
             }
@@ -150,12 +140,11 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
             }
         }
 
-        static ExceptionHandling[] s_ExceptionHandlingMapping = new[]
-        {
+        private static ExceptionHandling[] s_ExceptionHandlingMapping = {
             new ExceptionHandling(SetupException.ExceptionType.ScriptCompilationFailed, "Scripts had compilation errors.", ReturnCodes.RunError),
             new ExceptionHandling(SetupException.ExceptionType.PlatformNotFound, "Test platform not found ({0}).", ReturnCodes.PlatformNotFoundReturnCode),
             new ExceptionHandling(SetupException.ExceptionType.TestSettingsFileNotFound, "Test settings file not found at {0}.", ReturnCodes.RunError),
-            new ExceptionHandling(SetupException.ExceptionType.CustomRunnerNotFound, "Check the customRunner value, {0} does not exists", ReturnCodes.RunError)
+            new ExceptionHandling(SetupException.ExceptionType.OrderedTestListFileNotFound, "Ordered test list file not found at {0}.", ReturnCodes.RunError)
         };
 
         private static IDictionary<TestRunState, string> s_StateMessages = new Dictionary<TestRunState, string>()

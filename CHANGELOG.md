@@ -1,61 +1,81 @@
 # Changelog
+## [1.3.5] - 2023-05-16
+- It’s now possible to retry and repeat tests on test level, meaning as soon as the test finishs running the first iteration, we now retry or repeat it.  Command line arguments to pass to the Editor:
+  -  `-repeat x` runs the test x amount of times or until it fails. It is useful for testing unstable tests 
+  -  `-retry x` if a test fails, run that test x amount of times or until it succeeds.
+- Fixed various documentation bugs reported via the docs user feedback system.
+- Fixed TestMode not being set correctly on root level of test tree (DSTP-674).
+- It's now possible to select browser for running WebGL player tests in player settings. (DSTR-811)
 
-## [2.0.1] - 2022-01-05
-- Reverted "All tests are now run inside a InitTestScene, regardless of filter".
-- Modify the RequiresPlayMode feature in order to be opt-in.
-- Refactored documentation for 2.0.
-- Fixed an issue where Oculus Quest headsets might timeout before the test run starts (DSTR-404).
-- Fixed an issue where Explicit tests were included in the run if the assembly or namespace was selected (DSTR-405).
-- Added stack traces for exceptions thrown in other threads while a test is running (DSTR-38).
+## [1.3.4] - 2023-03-24
+- Fixes output message concurrency issue with async Setup.
+- Fixed multiple issues where tests would not time out, when running longer than the default timeout or the timeout defined in a TimeoutAttribute (DSTR-607).  
+- Added `UNITY_TEST_FRAMEWORK` define constraint to filter out test framework assemblies from normal platform and asset bundle builds. (DSTR-791)
+- Ensured that all playmode tests have a disabled splashscreen and unity logo by default if Unity license permits such action.
+- Added strictDomainReload feature to enable cheching for pending domain reloads/compilations at the end of managed tests (DSTR-793).
+
+## [1.3.3] - 2023-02-10
+- Fixes an issue where a test body would be skipped under certain conditions regarding domain reload.
+- Fixed an issue where the "uncategorized" category filter would not apply correctly to parameterized tests with a category in the fixture (DSTR-700).
+- Ensured that all samples can be loaded at once without assembly name collisions.
+
+## [1.3.2] - 2022-12-07
+- Fixed context not being restored after a domain reload outside tests (DSTR-678)
+- Fixed TestMode being set only in on the aseembly level (DSTP-674)
+- Fixed an issue where RunFinished callbacks sometimes would not be executed before the editor quits in batchmode (DSTR-692).
+- Fixed problem of samples not loading for import in Package Manager window. (DSTR-702)
+- Fixed issue GuiHelper depending on FilePath being abosolute. Updated to handle both cases.
+- Fixed an issue where ITestRunCallback are invoked double when run in EditMode.
+
+## [1.3.1] - 2022-10-18
+- Fixed an issue where TestFinished sometimes causes failures when receiving fixture test results from a player (internal).
+
+## [1.3.0] - 2022-10-11
+- Fixed Xcode not closing after building iOS/tvOS project via batchmode `-runTests` command (ANT-679).
+- Added TestSettings file options for setting `Target SDK` for iOS/tvOS (ANT-132).
+- Async test support with documentation and support for SetUp and TearDown.
+- Compute and share OneTimeSetup and OneTimeTearDown durations, these will be visible in the XML result under outputs (DSTR-597).
+- Made test method/fixture arguments available in the ITestAdaptor as the `Arguments` property (DSTR-592).
+- Added Learn Unity Test Framework section of documentation and related project files as importable package samples (DOCES-558).
+- Fix NullReferenceException when yielding EditMode intructions in PlayMode tests (DSTR-622).
+
+## [1.1.33] - 2022-07-12
+- Fixed an issue where using Assert.Expect with the same string multiple times can lead to incorrect errors in some cases (DSTR-442).
+- Improved the logging when using multiple Assert.Expect that the logs appear in another order than expected (DSTR-442).
+- Moved the targetPlatform specified when running tests in the TestRunnerApi from the Filter to the ExecutionSettings (DSTR-186).
+- Fixed an issue where an inheritance of UnityPlatformAttribute which was not working (ESTT-70).
+- Fixed the log of excluded platforms which was not displaying the right information.
+- Added filename and linenumber to test finished message (DSTR-505).
+- Add the possibility of running tests in a specified order from a test list (DSTR-494).
+
+## [1.1.32] - 2022-04-06
+- Ensured that BuildTargetGroup is set correctly before TestPlayerBuildModifier is invoked (DSTR-394).
+- Added a TestSetting that allows to build an Android App Bundle instead of APK.
+
+## [1.1.31] - 2022-02-03
 - Fixed "Open source code" on tests when located inside a package.
-- Added editor analytics.
+- Added editor analytics events.
+- Added `buildPlayerPath` argument. Path to where built player with tests is saved.
 
-## [2.0.0] - 2021-07-21
-- API improvements:
-  - Made the TestRunnerWindow public, allowing other windows to reference it.
-  - Added api for canceling test runs.
-  - Added api for saving test results to a file.
-  - Made test method/fixture arguments available in the ITestAdaptor as the `Arguments` property.
-  - Extend playmode tests to support Build Configurations from com.unity.platforms package.
-  - Added `UNITY_TEST_FRAMEWORK` define constraint to filter out test framework assemblies from platform build without tests (case 1210156)
-  - Added new `[ParameterizedIgnore]` attribute which allows ignoring tests based on arguments which were passed to the test method.
-- Performance improvements:
-  - Reduce time taken by filtering operations when only a subset of tests is run
-  - Reduce the per-test overhead of running tests in the editor
-  - Added profiler markers around test setup, teardown, and execution.
-  - Added a cache for assembly test suites, this reduces the time it takes to run tests
-  - Reduced the time it takes to rebuild the test tree, to scan for assets a test created but did not delete
-- UI improvements:
-  - Overhauled UI
-  - Progress bar actually showing the correct status of the test run
-  - Added a button for saving the test results of the latest run.
-  - Applied filtering to the ITestAdaptor argument of `ICallbacks.RunStarted` so that it corresponds to the actual test tree being run.
-  - Improving the status icon for test suites to reselect the combined test result (DSTR-239).
-- Better Logs:
-  - Running tests in batchmode now displays a summary of the execution settings being used.
-  - Improved the logging when exiting after a test run from the command line.
-- Bug fixes:
-  - Fixes that are breaking changes:
-    - Fixed problem of setup getting rerunned after a new scene gets created (DSTR-159).
-    - Fixed setup is being rerun when multiple Domain Reloads are triggered by a Test (DSTR-68).
-  - Other fixes:
-    - Fixed an issue where if the first test enters PlayMode from UnitySetup then the test body will not run on consecutive runs (case 1260901). 
-    - Fixed TestRunnerApi memory leaks by making obsolete the TestRunnerApi methods and replacing them with static versions (case DSTR-50).
-    - Moved the targetPlatform specified when running tests in the TestRunnerApi from the Filter to the ExecutionSettings.
-    - Added a new PreservedValuesAttribute to allow for using the nunit ValuesAttribute at players with a high stripping level (case DSTR-33).
-    - Changed the style of the category dropdown, fixing an issue where more than 32 categories did not work correctly (DSTR-11).
-    - Fixed issue regarding playmode tests execution status staying running even after the test finished if domain reload was disabled (DSTR-5).
-    - Internal: Remove ##utp message AssemblyCompilationErrors (ds-1277)
-    - Delay command line test run execution until the first editor update to allow InitializeOnLoad methods to execute first (DSTR-151)
-    - Improve player connection timeout problem : don't use a queue to send messages through the player connection (DSTR-100).
-    - Refactored the test runner core system, resulting in multiple smaller bug fixes and stability improvements.
-    - Fixed uncategorized UI tests filtering for parameterized tests (DSTR-219).
-    - Fixed issue when `.` suffix was applied to BuildTargets without extension.
-    - Added support for `GameCoreXboxOne` and `GameCoreXboxSeries` reduced location path length.
-    - Added validation of IEnumerator return type for parameterized tests with UnityTest attribute (DSTP-743).
+## [1.1.30] - 2021-10-15
+- Added validation of IEnumerator return type for parameterized tests with UnityTest attribute (DSTP-743).
+- Fixed runInBackground reset to original value after finishing to run playmode tests (DSTR-248).
+- Fixed issue with circular assembly references when constructing the test tree (DSTR-300).
 
-## [1.1.27] - 2021-05-25
-- Fix Repeat and Retry attribute for UnityTest in playmode (DSTR-237).
+## [1.1.29] - 2021-08-12
+- Nested enumerator execution order fix (DSTR-227).
+- Fix UI not running any tests if run select on a nested namespaces (DSTR-256).
+
+## [1.1.28] - 2021-06-25
+- Fix CountDownEvent reference due to `com.unity.ext.nunit` update.
+- Various performance optimization to fix "Test execution timed out. No activity received from the player in 600 seconds."(DSTR-100).
+
+## [1.1.27] - 2021-06-15
+- Fix empty reason on passed tests results xml (DSTR-63)
+- Fix Repeat and Retry attribute for UnityTest in PlayMode (DSTR-237).
+- Remove XDK Xbox One platform after Unity 2020.3 
+- Fixed issue when `.` suffix was applied to BuildTargets without extension.
+- Added support for `GameCoreXboxOne` and `GameCoreXboxSeries` reduced location path length.
 
 ## [1.1.26] - 2021-05-25
 - Fix html bug in TestRunnerApi API code snippet (DS-1973).
@@ -63,7 +83,7 @@
 - Fix incorrect syntax in command line reference (DS-1971).
 - Fixed a bug where test filter would match project or player path (DSTP-412).
 - Added playerGraphicsAPI TestSettings parameter
-   
+  
 ## [1.1.25] - 2021-05-05
 - Fixed a bug where test filter would match project or player path (DSTP-412).
 - Added playerGraphicsAPI TestSettings parameter
@@ -138,9 +158,9 @@
 - Fixed an issue where if the first test enters PlayMode from UnitySetup then the test body will not run on consecutive runs (case 1260901). 
 - Clear Results button clears the test results in the GUI (DSTR-16)
 - Improved UI in Test Runner window, added new options:
-  - Run Selected Tests in player
-  - Build/Export project with all tests in player
-  - Build/Export project with selected tests in player
+	- Run Selected Tests in player
+	- Build/Export project with all tests in player
+	- Build/Export project with selected tests in player
 - Fixed issue on loading EditMode or Playmode test tree in the wrong tab when switching between tabs when TestRunner is loading (DS-865)
 
 ## [1.1.16] - 2020-07-09

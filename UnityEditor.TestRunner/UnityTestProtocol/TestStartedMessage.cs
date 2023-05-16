@@ -1,3 +1,5 @@
+using System;
+
 namespace UnityEditor.TestTools.TestRunner.UnityTestProtocol
 {
     internal class TestStartedMessage : Message

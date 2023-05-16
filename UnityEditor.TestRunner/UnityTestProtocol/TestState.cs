@@ -1,3 +1,5 @@
+using System;
+
 namespace UnityEditor.TestTools.TestRunner.UnityTestProtocol
 {
     // This matches the state definitions expected by the Perl code, which in turn matches the NUnit 2 values...

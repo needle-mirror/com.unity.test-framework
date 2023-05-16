@@ -1,6 +1,6 @@
 using System;
-using UnityEngine;
 using System.Net;
+using UnityEngine;
 
 namespace UnityEditor.TestTools.TestRunner
 {
@@ -11,14 +11,14 @@ namespace UnityEditor.TestTools.TestRunner
         [SerializeField]
         private bool m_Stripping;
 
-        bool RequiresLegacyConnectionMechanism =>
+        private bool RequiresLegacyConnectionMechanism =>
 #if !UNITY_2021_2_OR_NEWER
              true;
 #else
             false;
 #endif
 
-        void PerformLegacySetup()
+        private void PerformLegacySetup()
         {
             m_oldDeviceSocketAddress = EditorUserBuildSettings.androidDeviceSocketAddress;
 
@@ -29,15 +29,15 @@ namespace UnityEditor.TestTools.TestRunner
             }
         }
 
-        void PerformLegacyCleanup()
+        private void PerformLegacyCleanup()
         {
             EditorUserBuildSettings.androidDeviceSocketAddress = m_oldDeviceSocketAddress;
         }
 
-        void PerformLegacyPostSuccessfulLaunchAction()
+        private void PerformLegacyPostSuccessfulLaunchAction()
         {
             var connectionResult = -1;
-            var maxTryCount = 30;
+            var maxTryCount = 10;
             var tryCount = maxTryCount;
             while (tryCount-- > 0 && connectionResult == -1)
             {

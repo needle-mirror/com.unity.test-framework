@@ -1,9 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
-using UnityEditor.Compilation;
 using UnityEditor.TestTools.TestRunner.Api;
 using UnityEngine;
-using UnityEngine.TestTools;
 
 namespace UnityEditor.TestTools.TestRunner.UnityTestProtocol
 {
@@ -13,11 +12,31 @@ namespace UnityEditor.TestTools.TestRunner.UnityTestProtocol
         static UnityTestProtocolStarter()
         {
             var commandLineArgs = Environment.GetCommandLineArgs();
-            if (commandLineArgs.Contains("-automated") && commandLineArgs.Contains("-runTests")) // wanna have it only for utr run
+            //Ensuring that it is used only when tests are run using UTR.
+            if (IsEnabled())
             {
-                var listener = ScriptableObject.CreateInstance<UnityTestProtocolListener>();
-                TestRunnerApi.RegisterTestCallback(listener);
+                var api = ScriptableObject.CreateInstance<TestRunnerApi>();
+                var listener = new UnityTestProtocolListener(GetRepositoryPath(commandLineArgs));
+                api.RegisterCallbacks(listener);
             }
+        }
+
+        internal static bool IsEnabled()
+        {
+            var commandLineArgs = Environment.GetCommandLineArgs();
+            return commandLineArgs.Contains("-automated") && commandLineArgs.Contains("-runTests");
+        }
+
+        private static string GetRepositoryPath(IReadOnlyList<string> commandLineArgs)
+        {
+            for (var i = 0; i < commandLineArgs.Count; i++)
+            {
+                if (commandLineArgs[i].Equals("-projectRepositoryPath"))
+                {
+                    return commandLineArgs[i + 1];
+                }
+            }
+            return string.Empty;
         }
     }
 }

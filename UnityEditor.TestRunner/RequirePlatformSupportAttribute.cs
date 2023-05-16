@@ -7,7 +7,8 @@ using NUnit.Framework.Internal;
 namespace UnityEditor.TestTools
 {
     /// <summary>
-    /// The `RequirePlatformSupportAttribute` attribute can be applied to test assemblies (affects every test in the assembly), fixtures (affects every test in the fixture), or to individual test methods. Tests under the scope of this attrbitue require Player build support for the specified platforms in order to run.
+    /// The `RequirePlatformSupportAttribute` attribute can be applied to test assemblies (will affect every test in the assembly), fixtures (will
+    /// affect every test in the fixture), or to individual test methods.
     /// </summary>
     [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Method)]
     public class RequirePlatformSupportAttribute : NUnitAttribute, IApplyToTest
@@ -24,8 +25,13 @@ namespace UnityEditor.TestTools
         /// <summary>
         /// The build target platform, see [BuildTarget](https://docs.unity3d.com/ScriptReference/BuildTarget.html).
         /// </summary>
+        /// <returns>The <see cref="BuildTarget"/> platform to run the test on.</returns>
         public BuildTarget[] platforms { get; private set; }
 
+        /// <summary>
+        /// Modifies a test as defined for the specific attribute.
+        /// </summary>
+        /// <param name="test">The test to modify</param>
         void IApplyToTest.ApplyToTest(Test test)
         {
             test.Properties.Add(PropertyNames.Category, string.Format("RequirePlatformSupport({0})", string.Join(", ", platforms.Select(p => p.ToString()).OrderBy(p => p).ToArray())));

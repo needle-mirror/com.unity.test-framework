@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
@@ -10,8 +11,8 @@ namespace UnityEngine.TestTools
     /// </summary>
     public class ConditionalIgnoreAttribute : NUnitAttribute, IApplyToTest
     {
-        string m_ConditionKey;
-        string m_IgnoreReason;
+        private string m_ConditionKey;
+        private string m_IgnoreReason;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConditionalIgnoreAttribute"/> class with a condition key.
