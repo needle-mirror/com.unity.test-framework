@@ -1,9 +1,18 @@
 # Changelog
+### [1.3.7] - 2023-06-07
+- The UTF version now automatically updates for SRP tests 
+
+## [1.3.6] - 2023-06-01
+- By using the editor command line new argument `-randomOrderSeed x` you can run the tests in a randomized order, where x is an integer different from 0. If a new test is added in the project the random order passing the same seed will be kept, and the new test will be placed in the random list accordigly.
+- Fix for WebGL platform target to close the browser tab when the run is completed. 
+- Added TestFileReferences.json to be generated on build step of the player, so can be consumed later by Test runners to enrich data for run part.
+
 ## [1.3.5] - 2023-05-16
 - It’s now possible to retry and repeat tests on test level, meaning as soon as the test finishs running the first iteration, we now retry or repeat it.  Command line arguments to pass to the Editor:
   -  `-repeat x` runs the test x amount of times or until it fails. It is useful for testing unstable tests 
   -  `-retry x` if a test fails, run that test x amount of times or until it succeeds.
 - Fixed various documentation bugs reported via the docs user feedback system.
+- Added separate reference docs page for TestSettings options to distinguish them from regular command line arguments.
 - Fixed TestMode not being set correctly on root level of test tree (DSTP-674).
 - It's now possible to select browser for running WebGL player tests in player settings. (DSTR-811)
 

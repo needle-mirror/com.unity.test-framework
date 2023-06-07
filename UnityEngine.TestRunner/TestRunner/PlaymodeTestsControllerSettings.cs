@@ -29,7 +29,10 @@ namespace UnityEngine.TestTools.TestRunner
         [SerializeField]
         public bool automated;
 
-        public static PlaymodeTestsControllerSettings CreateRunnerSettings(RuntimeTestRunnerFilter[] filters, string[] orderedTestNames, FeatureFlags featureFlags, int retryCount, int repeatCount, bool automated)
+        [SerializeField]
+        public int randomOrderSeed;
+
+        public static PlaymodeTestsControllerSettings CreateRunnerSettings(RuntimeTestRunnerFilter[] filters, string[] orderedTestNames, int randomSeed, FeatureFlags featureFlags, int retryCount, int repeatCount, bool automated)
         {
             var settings = new PlaymodeTestsControllerSettings
             {
@@ -38,6 +41,7 @@ namespace UnityEngine.TestTools.TestRunner
                 originalScene = SceneManager.GetActiveScene().path,
                 bootstrapScene = null,
                 orderedTestNames = orderedTestNames,
+                randomOrderSeed = randomSeed,
                 featureFlags = featureFlags,
                 retryCount = retryCount,
                 repeatCount = repeatCount,

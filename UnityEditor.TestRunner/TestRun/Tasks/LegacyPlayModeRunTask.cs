@@ -14,7 +14,7 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
         }
         public override IEnumerator Execute(TestJobData testJobData)
         {
-            var settings = PlaymodeTestsControllerSettings.CreateRunnerSettings(testJobData.executionSettings.filters.Select(filter => filter.ToRuntimeTestRunnerFilter(testJobData.executionSettings.runSynchronously)).ToArray(), testJobData.executionSettings.orderedTestNames,  testJobData.executionSettings.featureFlags, testJobData.executionSettings.retryCount, testJobData.executionSettings.repeatCount, IsAutomated());
+            var settings = PlaymodeTestsControllerSettings.CreateRunnerSettings(testJobData.executionSettings.filters.Select(filter => filter.ToRuntimeTestRunnerFilter(testJobData.executionSettings.runSynchronously)).ToArray(), testJobData.executionSettings.orderedTestNames, testJobData.executionSettings.randomOrderSeed, testJobData.executionSettings.featureFlags, testJobData.executionSettings.retryCount, testJobData.executionSettings.repeatCount, IsAutomated());
             var launcher = new PlaymodeLauncher(settings);
 
             launcher.Run();

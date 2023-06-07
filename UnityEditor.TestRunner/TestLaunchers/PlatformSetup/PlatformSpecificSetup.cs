@@ -115,8 +115,10 @@ namespace UnityEditor.TestTools.TestRunner
 #endif
                 {BuildTarget.Android, m_AndroidPlatformSetup},
                 {BuildTarget.WSAPlayer, m_UwpPlatformSetup},
+#if !UNITY_2023_1_OR_NEWER
                 {BuildTarget.Lumin, m_LuminPlatformSetup},
-#if UNITY_2019_3_OR_NEWER
+#endif
+#if UNITY_2019_3_OR_NEWER && !UNITY_2023_1_OR_NEWER
                 {BuildTarget.Stadia, m_StadiaPlatformSetup},
 #endif
                 {BuildTarget.Switch, m_SwitchPlatformSetup}

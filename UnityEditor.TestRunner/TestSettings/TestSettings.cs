@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor.Build;
 using UnityEditor.TestTools.TestRunner.Api;
 using UnityEngine.Rendering;
 using UnityEngine.TestRunner.NUnitExtensions.Runner;
@@ -11,10 +12,17 @@ namespace UnityEditor.TestTools.TestRunner
     {
         private readonly TestSetting[] m_Settings =
         {
+#if UNITY_2021_1_OR_NEWER            
             new TestSetting<ScriptingImplementation?>(
+                settings => settings.scriptingBackend,
+                () => PlayerSettings.GetScriptingBackend(NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.activeBuildTargetGroup)),
+                implementation => PlayerSettings.SetScriptingBackend(NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.activeBuildTargetGroup), implementation.Value)),
+#else
+            new TestSetting<ScriptingImplementation?>(            
                 settings => settings.scriptingBackend,
                 () => PlayerSettings.GetScriptingBackend(EditorUserBuildSettings.activeBuildTargetGroup),
                 implementation => PlayerSettings.SetScriptingBackend(EditorUserBuildSettings.activeBuildTargetGroup, implementation.Value)),
+#endif
             new TestSetting<string>(
                 settings => settings.Architecture,
                 () => EditorUserBuildSettings.activeBuildTarget == BuildTarget.Android ? PlayerSettings.Android.targetArchitectures.ToString() : null,
@@ -29,6 +37,19 @@ namespace UnityEditor.TestTools.TestRunner
                         }
                     }
                 }),
+#if UNITY_2021_1_OR_NEWER            
+            new TestSetting<ApiCompatibilityLevel?>(
+                settings => settings.apiProfile,
+                () => PlayerSettings.GetApiCompatibilityLevel(NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.activeBuildTargetGroup)),
+                implementation =>
+                {
+                    if (Enum.IsDefined(typeof(ApiCompatibilityLevel), implementation.Value))
+                    {
+                        PlayerSettings.SetApiCompatibilityLevel(NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.activeBuildTargetGroup),
+                            implementation.Value);
+                    }
+                }),
+#else
             new TestSetting<ApiCompatibilityLevel?>(
                 settings => settings.apiProfile,
                 () => PlayerSettings.GetApiCompatibilityLevel(EditorUserBuildSettings.activeBuildTargetGroup),
@@ -40,6 +61,7 @@ namespace UnityEditor.TestTools.TestRunner
                             implementation.Value);
                     }
                 }),
+#endif
             new TestSetting<bool?>(
                 settings => settings.appleEnableAutomaticSigning,
                 () => PlayerSettings.iOS.appleEnableAutomaticSigning,

@@ -1,10 +1,7 @@
 using System;
 using System.IO;
-using System.Linq;
 using UnityEditor.TestRunner.CommandLineParser;
 using UnityEditor.TestTools.TestRunner.Api;
-using UnityEditor.TestTools.TestRunner.GUI;
-using UnityEngine;
 
 namespace UnityEditor.TestTools.TestRunner.CommandLineTest
 {
@@ -39,6 +36,7 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
             string orderedTestListFilePath = null;
             int retry = 0;
             int repeat = 0;
+            int randomOrderSeed = 0;
 
 
             var optionSet = new CommandLineOptionSet(
@@ -55,6 +53,7 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
                 new CommandLineOption("assemblyNames", assemblyNames => { testAssemblyNames = assemblyNames; }),
                 new CommandLineOption("buildPlayerPath", buildPath => { buildPlayerPath = buildPath; }),
                 new CommandLineOption("orderedTestListFile", filePath => { orderedTestListFilePath = filePath; }),
+                new CommandLineOption("randomOrderSeed", seed => { randomOrderSeed = int.Parse(seed);}),
                 new CommandLineOption("retry", n => { retry = int.Parse(n); }),
                 new CommandLineOption("repeat", n => { repeat = int.Parse(n); })
             );
@@ -84,7 +83,8 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
                 playerSavePath = buildPlayerPath,
                 orderedTestNames = GetOrderedTestList(orderedTestListFilePath),
                 repeatCount = repeat,
-                retryCount = retry
+                retryCount = retry,
+                randomOrderSeed = randomOrderSeed
             };
 
             if (playerHeartbeatTimeout != null)

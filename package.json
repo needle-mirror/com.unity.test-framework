@@ -1,7 +1,7 @@
 {
   "name": "com.unity.test-framework",
   "displayName": "Test Framework",
-  "version": "1.3.5",
+  "version": "1.3.7",
   "unity": "2019.4",
   "unityRelease": "0a10",
   "description": "Test framework for running Edit mode and Play mode tests in Unity.",
@@ -13,7 +13,7 @@
   "repository": {
     "url": "https://github.com/Unity-Technologies/com.unity.test-framework.git",
     "type": "git",
-    "revision": "23b45c6f59354f57ae7eb59050dcba0fe20a0727"
+    "revision": "468e2ea5f976e8dee4bb02a4e9714155745c941e"
   },
   "dependencies": {
     "com.unity.ext.nunit": "2.0.3",
@@ -221,13 +221,13 @@
     }
   ],
   "relatedPackages": {
-    "com.unity.test-framework.tests": "1.3.5"
+    "com.unity.test-framework.tests": "1.3.7"
   },
   "_upm": {
-    "changelog": "- It’s now possible to retry and repeat tests on test level, meaning as soon as the test finishs running the first iteration, we now retry or repeat it.  Command line arguments to pass to the Editor:\n  -  `-repeat x` runs the test x amount of times or until it fails. It is useful for testing unstable tests \n  -  `-retry x` if a test fails, run that test x amount of times or until it succeeds.\n- Fixed various documentation bugs reported via the docs user feedback system.\n- Fixed TestMode not being set correctly on root level of test tree (DSTP-674).\n- It's now possible to select browser for running WebGL player tests in player settings. (DSTR-811)"
+    "changelog": "- By using the editor command line new argument `-randomOrderSeed x` you can run the tests in a randomized order, where x is an integer different from 0. If a new test is added in the project the random order passing the same seed will be kept, and the new test will be placed in the random list accordigly.\n- Fix for WebGL platform target to close the browser tab when the run is completed. \n- Added TestFileReferences.json to be generated on build step of the player, so can be consumed later by Test runners to enrich data for run part."
   },
   "upmCi": {
-    "footprint": "857b4203fa1a5571607c8e67ff686c16c06c0225"
+    "footprint": "e6b1b0804206abba3e0191e474d5790c4781e4b7"
   },
   "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.test-framework@1.3/manual/index.html"
 }

@@ -13,6 +13,7 @@
   * [How to retrieve the list of tests](./extension-retrieve-test-list.md)
 * [Reference](./manual.md#reference)
   * [Running tests from the command-line](./reference-command-line.md)
+    *[Test settings file](./reference-test-settings-file.md)
   * [UnityTest attribute](./reference-attribute-unitytest.md)
   * [Setup and cleanup at build time](./reference-setup-and-cleanup.md)
     * [IPrebuildSetup](./reference-setup-and-cleanup.md#iprebuildsetup)

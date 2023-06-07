@@ -4,6 +4,7 @@ using System.Text;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal.Filters;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.TestRunner.NUnitExtensions.Runner;
 
 namespace UnityEditor.TestTools.TestRunner.Api
@@ -61,6 +62,9 @@ namespace UnityEditor.TestTools.TestRunner.Api
 
         [SerializeField]
         internal FeatureFlags featureFlags;
+
+        [SerializeField]
+        internal int randomOrderSeed;
 
         internal string playerSavePath { get; set; }
         internal int retryCount { get; set; }

@@ -32,6 +32,7 @@ namespace UnityEditor.TestTools.TestRunner
             runnerSetup(runner);
             runner.settings.bootstrapScene = sceneName;
             runner.settings.orderedTestNames = m_Settings.orderedTestNames;
+            runner.settings.randomOrderSeed = m_Settings.randomOrderSeed;
             runner.AssembliesWithTests = editorLoadedTestAssemblyProvider.GetAssembliesGroupedByType(TestPlatform.PlayMode).Select(x => x.Assembly.GetName().Name).ToList();
 
             EditorSceneManager.MarkSceneDirty(scene);
@@ -51,7 +52,7 @@ namespace UnityEditor.TestTools.TestRunner
             var editorLoadedTestAssemblyProvider = new EditorLoadedTestAssemblyProvider(new EditorCompilationInterfaceProxy(), new EditorAssembliesProxy());
             var assembliesWithTests = editorLoadedTestAssemblyProvider.GetAssembliesGroupedByType(TestPlatform.PlayMode).Select(x => x.Assembly.GetName().Name).ToList();
 
-            var nUnitTestAssemblyRunner = new UnityTestAssemblyRunner(new UnityTestAssemblyBuilder(m_Settings.orderedTestNames), null, UnityTestExecutionContext.CurrentContext);
+            var nUnitTestAssemblyRunner = new UnityTestAssemblyRunner(new UnityTestAssemblyBuilder(m_Settings.orderedTestNames, m_Settings.randomOrderSeed), null, UnityTestExecutionContext.CurrentContext);
             var assemblyProvider = new PlayerTestAssemblyProvider(new AssemblyLoadProxy(), assembliesWithTests);
             nUnitTestAssemblyRunner.Load(assemblyProvider.GetUserAssemblies().Select(a => a.Assembly).ToArray(), TestPlatform.PlayMode, UnityTestAssemblyBuilder.GetNUnitTestBuilderSettings(TestPlatform.PlayMode));
             return nUnitTestAssemblyRunner;

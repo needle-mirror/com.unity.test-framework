@@ -75,8 +75,9 @@ namespace UnityEditor.TestTools.TestRunner
                 var playerBuildOptions = GetBuildOptions(scenePath);
 
                 var success = BuildAndRunPlayer(playerBuildOptions);
-                
+
                 editorConnectionTestCollector.PostBuildAction();
+                FilePathMetaInfo.TryCreateFile(runner.LoadedTest, playerBuildOptions.BuildPlayerOptions);
                 ExecutePostBuildCleanupMethods(runner.LoadedTest, filter);
 
                 ReopenOriginalScene(m_Settings.originalScene);
@@ -134,14 +135,32 @@ namespace UnityEditor.TestTools.TestRunner
             }
 #endif
             // For now, so does Lumin
+#if !UNITY_2023_1_OR_NEWER            
             if (buildOptions.BuildPlayerOptions.target == BuildTarget.Lumin)
             {
                 buildOptions.BuildPlayerOptions.options &= ~BuildOptions.ConnectToHost;
             }
+#endif
+
+#if UNITY_2023_2_OR_NEWER
+            // WebGL has to be in close on quit mode to ensure that the browser tab is closed when the player finishes running tests
+            if (buildOptions.BuildPlayerOptions.target == BuildTarget.WebGL)
+            {
+                PlayerSettings.WebGL.closeOnQuit = true;
+            }
+#endif
 
             var result = BuildPipeline.BuildPlayer(buildOptions.BuildPlayerOptions);
             if (result.summary.result != BuildResult.Succeeded)
                 Debug.LogError(result.SummarizeErrors());
+
+#if UNITY_2023_2_OR_NEWER
+            // Clean up WebGL close on quit mode
+            if (buildOptions.BuildPlayerOptions.target == BuildTarget.WebGL)
+            {
+                PlayerSettings.WebGL.closeOnQuit = false;
+            }
+#endif
 
             return result.summary.result == BuildResult.Succeeded;
         }
@@ -201,7 +220,7 @@ namespace UnityEditor.TestTools.TestRunner
                 var reduceBuildLocationPathLength = false;
 
                 //Some platforms hit MAX_PATH limits during the build process, in these cases minimize the path length
-                if ((m_TargetPlatform == BuildTarget.WSAPlayer) 
+                if ((m_TargetPlatform == BuildTarget.WSAPlayer)
 #if !UNITY_2021_1_OR_NEWER
                 || (m_TargetPlatform == BuildTarget.XboxOne)
 #endif
@@ -263,7 +282,7 @@ namespace UnityEditor.TestTools.TestRunner
 
             return buildOptions;
         }
-        
+
         private static bool ShouldReduceBuildLocationPathLength(BuildTarget target)
         {
             switch (target)

@@ -32,7 +32,6 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
             var allTests =
                 GetTestsExpectedToRun(testJobData.testTree, testJobData.executionSettings.BuildNUnitFilter());
             testJobData.testProgress = new TestProgress(allTests.ToArray());
-
             var numTasks = testJobData.Tasks.Count();
             var numTests = testJobData.testProgress.AllTestsToRun.Length;
             var progressAvailableToTests = 1.0f - numTasks * RunProgress.progressPrTask;

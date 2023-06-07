@@ -11,7 +11,7 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
             SupportsResumingEnumerator = true;
             RerunAfterResume = true;
         }
-        
+
         public override IEnumerator Execute(TestJobData testJobData)
         {
             if (testJobData.taskInfoStack.Peek().taskMode == TaskMode.Canceled)
@@ -30,17 +30,18 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
                 {
                     yield break;
                 }
-                
+
                 runner.Resume(testJobData.executionSettings.BuildNUnitFilter(), testJobData.testTree, testJobData.TestStartedEvent, testJobData.TestFinishedEvent, testJobData.Context);
                 yield break;
             }
 
             var editModeRunner = ScriptableObject.CreateInstance<EditModeRunner>();
             testJobData.editModeRunner = editModeRunner;
-            
+
             editModeRunner.UnityTestAssemblyRunnerFactory = new UnityTestAssemblyRunnerFactory();
-            editModeRunner.Init(testJobData.executionSettings.BuildNUnitFilter(), testJobData.executionSettings.runSynchronously, testJobData.testTree, testJobData.TestStartedEvent, testJobData.TestFinishedEvent, testJobData.Context, testJobData.executionSettings.orderedTestNames);
-            
+            editModeRunner.Init(testJobData.executionSettings.BuildNUnitFilter(), testJobData.executionSettings.runSynchronously, testJobData.testTree, testJobData.TestStartedEvent,
+                testJobData.TestFinishedEvent, testJobData.Context, testJobData.executionSettings.orderedTestNames, testJobData.executionSettings.randomOrderSeed);
+
             while (testJobData.editModeRunner != null && !testJobData.editModeRunner.RunFinished)
             {
                 testJobData.editModeRunner.TestConsumer(testJobData.testRunnerStateSerializer);

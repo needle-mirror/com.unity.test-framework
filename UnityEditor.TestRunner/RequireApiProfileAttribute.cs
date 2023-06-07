@@ -3,6 +3,7 @@ using System.Linq;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
+using UnityEditor.Build;
 
 namespace UnityEditor.TestTools
 {
@@ -19,7 +20,11 @@ namespace UnityEditor.TestTools
         void IApplyToTest.ApplyToTest(Test test)
         {
             test.Properties.Add(PropertyNames.Category, string.Format("ApiProfile({0})", string.Join(", ", apiProfiles.Select(p => p.ToString()).OrderBy(p => p).ToArray())));
+#if UNITY_2021_1_OR_NEWER   
+            ApiCompatibilityLevel testProfile = PlayerSettings.GetApiCompatibilityLevel(NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.activeBuildTargetGroup));
+#else
             ApiCompatibilityLevel testProfile = PlayerSettings.GetApiCompatibilityLevel(EditorUserBuildSettings.activeBuildTargetGroup);
+#endif
 
             if (!apiProfiles.Contains(testProfile))
             {

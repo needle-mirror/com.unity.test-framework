@@ -1,3 +1,5 @@
+
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,18 +12,29 @@ namespace UnityEngine.TestRunner.NUnitExtensions
     {
         internal const string suiteIsReorderedProperty = "suiteIsReordered";
         private string[] m_OrderedTestNames;
-        
-        public OrderedTestSuiteModifier(string[] orderedTestNames)
+        private readonly int m_randomOrderSeed;
+
+        public OrderedTestSuiteModifier(string[] orderedTestNames, int randomOrderSeed)
         {
             m_OrderedTestNames = orderedTestNames;
+            m_randomOrderSeed = randomOrderSeed;
         }
 
         public TestSuite ModifySuite(TestSuite root)
         {
-            if (m_OrderedTestNames.Length == 0)
+            if((m_OrderedTestNames == null || m_OrderedTestNames?.Length == 0) && m_randomOrderSeed == 0)
             {
-                // If no test list is given, return the original suite, which will perform the run as normal.
                 return root;
+            }
+            // If we don't have a orderList but we do have a random seed, we need to generate a random order list
+            if ((m_OrderedTestNames == null || m_OrderedTestNames.Length == 0) && m_randomOrderSeed != 0)
+            {
+                var testlist = GetAllTestList(root);
+                var rand = new System.Random(m_randomOrderSeed);
+                var randomNumberFromSeed = rand.Next();
+                var shuffledList = testlist.OrderBy(fullName => GetHash(fullName, randomNumberFromSeed)).ToList();
+
+                m_OrderedTestNames = shuffledList.ToArray();
             }
 
             var suite = new TestSuite(root.Name);
@@ -154,6 +167,32 @@ namespace UnityEngine.TestRunner.NUnitExtensions
             }
 
             return list;
+        }
+
+        private static List<string> GetAllTestList(ITest test)
+        {
+            var listOfTests = new List<string>();
+
+            if (test.IsSuite)
+            {
+                listOfTests.AddRange(test.Tests.SelectMany(GetAllTestList));
+            }
+            else
+            {
+                listOfTests.Add(test.FullName);
+            }
+            return listOfTests;
+        }
+
+        private static int GetHash(string fullName, int randomNumber)
+        {
+            var hash = 0;
+            foreach (var c in fullName)
+            {
+                hash = hash * 31 + c;
+            }
+
+            return hash ^ randomNumber;
         }
 
         private static ITest FindTest(ITest node, string fullName)

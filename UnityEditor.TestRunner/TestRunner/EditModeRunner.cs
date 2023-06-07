@@ -15,14 +15,15 @@ namespace UnityEditor.TestTools.TestRunner
 {
     internal interface IUnityTestAssemblyRunnerFactory
     {
-        IUnityTestAssemblyRunner Create(TestPlatform testPlatform, string[] orderedTestNames, WorkItemFactory factory, UnityTestExecutionContext context);
+        IUnityTestAssemblyRunner Create(TestPlatform testPlatform, string[] orderedTestNames, int randomOrderSeed, WorkItemFactory factory, UnityTestExecutionContext context);
     }
 
     internal class UnityTestAssemblyRunnerFactory : IUnityTestAssemblyRunnerFactory
     {
-        public IUnityTestAssemblyRunner Create(TestPlatform testPlatform, string[] orderedTestNames, WorkItemFactory factory, UnityTestExecutionContext context)
+        public IUnityTestAssemblyRunner Create(TestPlatform testPlatform, string[] orderedTestNames, int randomOrderSeed,
+            WorkItemFactory factory, UnityTestExecutionContext context)
         {
-            return new UnityTestAssemblyRunner(new UnityTestAssemblyBuilder(orderedTestNames), factory, context);
+            return new UnityTestAssemblyRunner(new UnityTestAssemblyBuilder(orderedTestNames, randomOrderSeed), factory, context);
         }
     }
 
@@ -51,7 +52,7 @@ namespace UnityEditor.TestTools.TestRunner
         [SerializeField]
         private string[] m_OrderedTestNames;
 
-        [SerializeField] 
+        [SerializeField]
         public bool RunFinished;
 
         public bool RunningSynchronously { get; private set; }
@@ -62,13 +63,14 @@ namespace UnityEditor.TestTools.TestRunner
 
         public IUnityTestAssemblyRunnerFactory UnityTestAssemblyRunnerFactory { get; set; }
 
-        public void Init(ITestFilter filter, bool runningSynchronously, ITest testTree, TestStartedEvent testStartedEvent, TestFinishedEvent testFinishedEvent, UnityTestExecutionContext context, 
-            string[] orderedTestNames)
+        public void Init(ITestFilter filter, bool runningSynchronously, ITest testTree, TestStartedEvent testStartedEvent, TestFinishedEvent testFinishedEvent, UnityTestExecutionContext context,
+            string[] orderedTestNames, int randomOrderSeed)
         {
             TestEnumerator.Reset();
             m_AlreadyStartedTests = new List<string>();
             m_ExecutedTests = new List<TestResultSerializer>();
             m_OrderedTestNames = orderedTestNames;
+            m_randomOrderSeed = randomOrderSeed;
             RunningSynchronously = runningSynchronously;
             Run(testTree, filter, context, testStartedEvent, testFinishedEvent);
         }
@@ -105,13 +107,13 @@ namespace UnityEditor.TestTools.TestRunner
         {
             m_TestStartedEvent = testStartedEvent;
             m_TestFinishedEvent = testFinishedEvent;
-            
-            m_Runner = (UnityTestAssemblyRunnerFactory ?? new UnityTestAssemblyRunnerFactory()).Create(TestPlatform.EditMode, m_OrderedTestNames, new EditmodeWorkItemFactory(), context);
+
+            m_Runner = (UnityTestAssemblyRunnerFactory ?? new UnityTestAssemblyRunnerFactory()).Create(TestPlatform.EditMode, m_OrderedTestNames, m_randomOrderSeed, new EditmodeWorkItemFactory(), context);
             m_Runner.LoadTestTree(testTree);
             hideFlags |= HideFlags.DontSave;
             EnumerableSetUpTearDownCommand.ActivePcHelper = new EditModePcHelper();
             OuterUnityTestActionCommand.ActivePcHelper = new EditModePcHelper();
-            
+
             EditModeTestCallbacks.RestoringTestContext += OnRestoringTest;
 
             m_TestStartedEvent.AddListener(TestStartedEvent);
@@ -155,6 +157,7 @@ namespace UnityEditor.TestTools.TestRunner
         private bool RunningTests;
 
         private Stack<IEnumerator> StepStack = new Stack<IEnumerator>();
+        private int m_randomOrderSeed;
 
         private bool MoveNextAndUpdateYieldObject()
         {
