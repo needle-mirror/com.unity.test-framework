@@ -1,6 +1,5 @@
 using UnityEditor.TestTools.TestRunner.Api;
 
-
 namespace UnityEditor.TestTools.TestRunner.UnityTestProtocol
 {
     internal class UtpMessageReporter : IUtpMessageReporter
@@ -16,9 +15,14 @@ namespace UnityEditor.TestTools.TestRunner.UnityTestProtocol
 
         public void ReportTestRunStarted(ITestAdaptor testsToRun)
         {
-            var msg = TestRunnerApiMapper.MapTestToTestPlanMessage(testsToRun);
-
-            Logger.Log(msg);
+            var testPlanMessage = TestRunnerApiMapper.MapTestToTestPlanMessage(testsToRun);
+            Logger.Log(testPlanMessage);
+            
+            Logger.Log(UtpMessageBuilder.BuildScreenSettings());
+            Logger.Log(UtpMessageBuilder.BuildPlayerSettings());
+            Logger.Log(UtpMessageBuilder.BuildBuildSettings());
+            Logger.Log(UtpMessageBuilder.BuildPlayerSystemInfo());
+            Logger.Log(UtpMessageBuilder.BuildQualitySettings());
         }
 
         public void ReportTestStarted(ITestAdaptor test)

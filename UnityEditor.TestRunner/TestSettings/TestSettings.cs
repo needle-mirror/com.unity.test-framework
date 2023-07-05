@@ -12,13 +12,13 @@ namespace UnityEditor.TestTools.TestRunner
     {
         private readonly TestSetting[] m_Settings =
         {
-#if UNITY_2021_1_OR_NEWER            
+#if UNITY_2021_2_OR_NEWER
             new TestSetting<ScriptingImplementation?>(
                 settings => settings.scriptingBackend,
                 () => PlayerSettings.GetScriptingBackend(NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.activeBuildTargetGroup)),
                 implementation => PlayerSettings.SetScriptingBackend(NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.activeBuildTargetGroup), implementation.Value)),
 #else
-            new TestSetting<ScriptingImplementation?>(            
+            new TestSetting<ScriptingImplementation?>(
                 settings => settings.scriptingBackend,
                 () => PlayerSettings.GetScriptingBackend(EditorUserBuildSettings.activeBuildTargetGroup),
                 implementation => PlayerSettings.SetScriptingBackend(EditorUserBuildSettings.activeBuildTargetGroup, implementation.Value)),
@@ -37,7 +37,7 @@ namespace UnityEditor.TestTools.TestRunner
                         }
                     }
                 }),
-#if UNITY_2021_1_OR_NEWER            
+#if UNITY_2021_2_OR_NEWER
             new TestSetting<ApiCompatibilityLevel?>(
                 settings => settings.apiProfile,
                 () => PlayerSettings.GetApiCompatibilityLevel(NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.activeBuildTargetGroup)),

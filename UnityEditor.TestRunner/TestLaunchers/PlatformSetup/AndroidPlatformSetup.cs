@@ -58,13 +58,13 @@ namespace UnityEditor.TestTools.TestRunner
 
         public void Setup()
         {
-#if UNITY_2021_1_OR_NEWER            
+#if UNITY_2021_2_OR_NEWER
             m_oldApplicationIdentifier = PlayerSettings.GetApplicationIdentifier(NamedBuildTarget.Android);
-#else 
+#else
             m_oldApplicationIdentifier = PlayerSettings.GetApplicationIdentifier(BuildTargetGroup.Android);
 #endif
             PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.Android, "com.UnityTestRunner.UnityTestRunner");
-            
+
             if (RequiresLegacyConnectionMechanism)
                 PerformLegacySetup();
 
@@ -92,7 +92,7 @@ namespace UnityEditor.TestTools.TestRunner
         {
             if (RequiresLegacyConnectionMechanism)
                 PerformLegacyCleanup();
-#if UNITY_2021_1_OR_NEWER 
+#if UNITY_2021_2_OR_NEWER
             PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Android, m_oldApplicationIdentifier);
 #else
             PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.Android, m_oldApplicationIdentifier);

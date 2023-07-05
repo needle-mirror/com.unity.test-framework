@@ -1,4 +1,7 @@
 # Changelog
+### [1.3.8] - 2023-07-05
+- Send new UTP messages regarding player and system settings (DSTR-831)
+
 ### [1.3.7] - 2023-06-07
 - The UTF version now automatically updates for SRP tests 
 
