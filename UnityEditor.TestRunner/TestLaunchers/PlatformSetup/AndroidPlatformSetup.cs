@@ -60,10 +60,12 @@ namespace UnityEditor.TestTools.TestRunner
         {
 #if UNITY_2021_2_OR_NEWER
             m_oldApplicationIdentifier = PlayerSettings.GetApplicationIdentifier(NamedBuildTarget.Android);
+            PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Android, "com.UnityTestRunner.UnityTestRunner");
 #else
             m_oldApplicationIdentifier = PlayerSettings.GetApplicationIdentifier(BuildTargetGroup.Android);
-#endif
             PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.Android, "com.UnityTestRunner.UnityTestRunner");
+#endif
+            
 
             if (RequiresLegacyConnectionMechanism)
                 PerformLegacySetup();

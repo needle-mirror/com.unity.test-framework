@@ -9,15 +9,14 @@ namespace UnityEditor.TestTools.TestRunner.UnityTestProtocol
     internal class PlayerSettings
     {
         public string ScriptingBackend;
-        public bool VrSupported;
         public bool MtRendering;
         public bool GraphicsJobs;
         public bool GpuSkinning;
         public string GraphicsApi;
         public string Batchmode;
-        public string StereoRenderingPath; 
+        public string StereoRenderingPath;
         public string RenderThreadingMode;
-        public string AndroidMinimumSdkVersion; 
+        public string AndroidMinimumSdkVersion;
         public string AndroidTargetSdkVersion;
         public string ScriptingRuntimeVersion;
         public string AndroidTargetArchitecture;
@@ -33,9 +32,8 @@ namespace UnityEditor.TestTools.TestRunner.UnityTestProtocol
             string androidTargetSdkVersion,
             string androidMinimumSdkVersion = "",
             bool graphicsJobs = false,
-            bool mtRendering = false,
-            bool vrSupported = false,
-            string scriptingRuntimeVersion = "")
+            bool mtRendering = false
+            )
         {
             ScriptingBackend = scriptingBackend;
             GpuSkinning = gpuSkinning;
@@ -47,8 +45,6 @@ namespace UnityEditor.TestTools.TestRunner.UnityTestProtocol
             AndroidMinimumSdkVersion = androidMinimumSdkVersion;
             GraphicsJobs = graphicsJobs;
             MtRendering = mtRendering;
-            VrSupported = vrSupported;
-            ScriptingRuntimeVersion = scriptingRuntimeVersion;
         }
 
         public PlayerSettings() { }

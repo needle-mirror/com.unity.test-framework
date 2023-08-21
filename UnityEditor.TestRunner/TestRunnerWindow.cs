@@ -261,8 +261,14 @@ namespace UnityEditor.TestTools.TestRunner
 
         private static void UpdateProgressBar()
         {
-            if (runProgress == null || runProgress.HasFinished)
+            if (runProgress == null)
             {
+                return;
+            }
+
+            if (runProgress.HasFinished)
+            {
+                runProgress = null;
                 EditorUtility.ClearProgressBar();
                 return;
             }

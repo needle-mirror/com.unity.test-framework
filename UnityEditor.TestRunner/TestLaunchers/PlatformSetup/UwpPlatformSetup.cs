@@ -24,7 +24,7 @@ namespace UnityEditor.TestTools.TestRunner
             // Otherwise we can use the existing configuration specified by the user in Build Settings.
             if (Environment.GetEnvironmentVariable("UNITY_THISISABUILDMACHINE") == "1" || wsaSettingNotInitialized)
             {
-#if UNITY_2023_1_OR_NEWER
+#if UNITY_2021_3_OR_NEWER
 #else
                 EditorUserBuildSettings.wsaSubtarget = WSASubtarget.PC;
 #endif

@@ -1,4 +1,9 @@
 # Changelog
+### [1.3.9] - 2023-08-21
+- Removed player metada fields that were using obsolete APIs (DSTR-880).
+- Added note to documentation on mitigation of problem reported in (DSTR-600).
+- Fixed an issue where the test runner ui causes progress bars to flicker or not show at all (DSTR-828). 
+
 ### [1.3.8] - 2023-07-05
 - Send new UTP messages regarding player and system settings (DSTR-831)
 

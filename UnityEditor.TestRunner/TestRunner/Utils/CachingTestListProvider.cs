@@ -40,7 +40,9 @@ namespace UnityEditor.TestTools.TestRunner
                 }
                 
                 m_TestListCache.CacheTest(platform, test.Current);
+#if !UNITY_2023_2_OR_NEWER
                 AnalyticsReporter.AnalyzeTestTreeAndReport(test.Current);
+#endif
                 yield return m_TestAdaptorFactory.Create(test.Current);
             }
         }

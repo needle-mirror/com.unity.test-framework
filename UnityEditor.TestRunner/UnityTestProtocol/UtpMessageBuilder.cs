@@ -88,9 +88,7 @@ namespace UnityEditor.TestTools.TestRunner.UnityTestProtocol
                     UnityEditor.PlayerSettings.Android.targetSdkVersion.ToString(),
                     UnityEditor.PlayerSettings.Android.minSdkVersion.ToString(),
                     UnityEditor.PlayerSettings.graphicsJobs,
-                    UnityEditor.PlayerSettings.MTRendering,
-                    UnityEditor.PlayerSettings.virtualRealitySupported,
-                    UnityEditor.PlayerSettings.scriptingRuntimeVersion.ToString()
+                    UnityEditor.PlayerSettings.MTRendering
                 ),
             };
 

@@ -139,3 +139,37 @@ public class AsyncExample
 The following shows the result of running this example in the **Test Runner** window:
 
 ![Run async test example](./images/async.png)
+
+## Editor freezing on `Assert.ThrowsAsync` and workaround
+
+NUnit's assertion for asynchronous code, [Assert.ThrowsAsync](https://docs.nunit.org/articles/nunit/writing-tests/assertions/classic-assertions/Assert.ThrowsAsync.html), blocks the calling thread until the async function you pass in completes. By default Unity runs asynchronous functions on the main thread in case they need to call the Editor API, which means `Assert.ThrowsAsync` can lock up the main thread and cause the Editor to freeze.
+
+To workaround this problem, you can unwrap the `Assert.ThrowsAsync` logic into your own `try`/`catch` blocks and assert that you caught something. For example, **do** this:
+
+```
+[Test]
+public async Task ThisDoesNotLockTheMainThread()
+ {
+  bool caught = false;
+  try
+  { 
+    await Task.Delay(1000); throw new System.Exception("Hello world."); }
+    catch (System.Exception x)
+   {
+     caught = true;
+   }
+   Assert.That(caught);
+}
+```
+
+**Instead of** this:
+
+```
+[Test]
+public void ThisLocksTheMainThread()
+ {
+  Assert.ThrowsAsync<System.Exception>(async () =>
+   { await Task.Delay(1000); throw new System.Exception("Hello world."); }
+  );
+}
+```

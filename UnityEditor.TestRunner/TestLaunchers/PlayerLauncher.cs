@@ -135,7 +135,7 @@ namespace UnityEditor.TestTools.TestRunner
             }
 #endif
             // For now, so does Lumin
-#if !UNITY_2023_1_OR_NEWER            
+#if !UNITY_2022_2_OR_NEWER            
             if (buildOptions.BuildPlayerOptions.target == BuildTarget.Lumin)
             {
                 buildOptions.BuildPlayerOptions.options &= ~BuildOptions.ConnectToHost;

@@ -1,3 +1,4 @@
+#if !UNITY_2023_2_OR_NEWER
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -158,3 +159,4 @@ namespace UnityEditor.TestTools.TestRunner.Api.Analytics
         }
     }
 }
+#endif

@@ -28,7 +28,6 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
             string[] testFilters = null;
             string[] testCategories = null;
             string testSettingsFilePath = null;
-            int testRepetitions = 1;
             int? playerHeartbeatTimeout = null;
             bool runSynchronously = false;
             string[] testAssemblyNames = null;
@@ -47,7 +46,6 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
                 new CommandLineOption("editorTestsCategories", catagories => { testCategories = catagories; }),
                 new CommandLineOption("testCategory", catagories => { testCategories = catagories; }),
                 new CommandLineOption("testSettingsFile", settingsFilePath => { testSettingsFilePath = settingsFilePath; }),
-                new CommandLineOption("testRepetitions", reps => { testRepetitions = int.Parse(reps); }),
                 new CommandLineOption("playerHeartbeatTimeout", timeout => { playerHeartbeatTimeout = int.Parse(timeout); }),
                 new CommandLineOption("runSynchronously", () => { runSynchronously = true; }),
                 new CommandLineOption("assemblyNames", assemblyNames => { testAssemblyNames = assemblyNames; }),
