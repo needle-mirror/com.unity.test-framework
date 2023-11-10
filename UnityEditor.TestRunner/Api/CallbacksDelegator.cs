@@ -25,6 +25,9 @@ namespace UnityEditor.TestTools.TestRunner.Api
         private readonly Func<ICallbacks[]> m_CallbacksProvider;
         private readonly ITestAdaptorFactory m_AdaptorFactory;
 
+        // Note that in the event of a domain reload the filter is not reapplied and will be null
+        private ITestFilter m_TestRunFilter;
+
         public CallbacksDelegator(Func<ICallbacks[]> callbacksProvider, ITestAdaptorFactory adaptorFactory)
         {
             m_CallbacksProvider = callbacksProvider;
@@ -34,7 +37,7 @@ namespace UnityEditor.TestTools.TestRunner.Api
         public void RunStarted(ITest testsToRun)
         {
             m_AdaptorFactory.ClearResultsCache();
-            var testRunnerTestsToRun = m_AdaptorFactory.Create(testsToRun);
+            var testRunnerTestsToRun = m_AdaptorFactory.Create(testsToRun, m_TestRunFilter);
             TryInvokeAllCallbacks(callbacks => callbacks.RunStarted(testRunnerTestsToRun));
         }
 
@@ -110,6 +113,11 @@ namespace UnityEditor.TestTools.TestRunner.Api
                     rebuildCallbacks.TestTreeRebuild(testAdaptor);
                 }
             });
+        }
+
+        public void SetTestRunFilter(ITestFilter filter)
+        {
+            m_TestRunFilter = filter;
         }
 
         private void TryInvokeAllCallbacks(Action<ICallbacks> callbackAction)

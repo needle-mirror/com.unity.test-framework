@@ -25,6 +25,7 @@
     * [Domain Reloads](./reference-actions-outside-tests.md#domain-reloads)
   * [Custom attributes](./reference-custom-attributes.md)
     * [ConditionalIgnore attribute](./reference-attribute-conditionalignore.md)
+    * * [ParametrizedIgnore attribute](./reference-attribute-parameterizedignore.md)
     * [PostBuildCleanup attribute](./reference-setup-and-cleanup.md#prebuildsetup-and-postbuildcleanup)
     * [PrebuildSetup attribute](./reference-setup-and-cleanup.md#prebuildsetup-and-postbuildcleanup)
     * [TestMustExpectAllLogs attribute](./reference-attribute-testmustexpectalllogs.md)

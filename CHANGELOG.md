@@ -1,13 +1,27 @@
 # Changelog
-### [1.3.9] - 2023-08-21
-- Removed player metada fields that were using obsolete APIs (DSTR-880).
+## [1.4.0] - 2023-11-10
+- Added api for saving test results to a file.
+- Added a button for saving the test results of the latest run.
+- Applied filtering to the ITestAdaptor argument of `ICallbacks.RunStarted` so that it corresponds to the actual test tree being run.
+- When running in player:
+  - the save scene dialog is shown when there are changes in the scene.
+  - the scene setup is restored after a completed run.
+- When running in playmode:
+  - the scene setup is restored after a completed run.
+- Added overloads of LogAssert.Expect which allow users to expect a log message without specifying a severity, which will match logged messages of any severity.
+- Added new `[ParametrizedIgnore]` attribute which allows ignoring tests based on arguments which were passed to the test method.
+- Added a new PreservedValuesAttribute to allow for using the nunit ValuesAttribute at players with a high stripping level (case DSTR-33).
+- Added api for canceling test runs.
+
+## [1.3.9] - 2023-08-21
+- Removed player metadata fields that were using obsolete APIs (DSTR-880).
 - Added note to documentation on mitigation of problem reported in (DSTR-600).
 - Fixed an issue where the test runner ui causes progress bars to flicker or not show at all (DSTR-828). 
 
-### [1.3.8] - 2023-07-05
+## [1.3.8] - 2023-07-05
 - Send new UTP messages regarding player and system settings (DSTR-831)
 
-### [1.3.7] - 2023-06-07
+## [1.3.7] - 2023-06-07
 - The UTF version now automatically updates for SRP tests 
 
 ## [1.3.6] - 2023-06-01

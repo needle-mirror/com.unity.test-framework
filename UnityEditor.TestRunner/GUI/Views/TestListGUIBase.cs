@@ -20,6 +20,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
         private static readonly GUIContent s_GUIOpenTest = EditorGUIUtility.TrTextContent("Open source code");
         private static readonly GUIContent s_GUIOpenErrorLine = EditorGUIUtility.TrTextContent("Open error line");
         private static readonly GUIContent s_GUIClearResults = EditorGUIUtility.TrTextContent("Clear Results", "Clear all test results");
+        private static readonly GUIContent s_SaveResults = EditorGUIUtility.TrTextContent("Export Results", "Save the latest test results to a file");
 
         [SerializeField]
         protected TestRunnerWindow m_Window;
@@ -27,7 +28,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
         public List<TestRunnerResult> newResultList
         {
             get { return m_NewResultList; }
-            set { 
+            set {
                 m_ResultByKey = null;
                 m_NewResultList = value;
             }
@@ -45,7 +46,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                 return m_ResultByKey;
             }
         }
-        
+
         [SerializeField]
         private string m_ResultText;
         [SerializeField]
@@ -60,6 +61,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
         private Vector2 m_TestInfoScroll, m_TestListScroll;
         private string m_PreviousProjectPath;
         private List<TestRunnerResult> m_QueuedResults = new List<TestRunnerResult>();
+        private ITestResultAdaptor m_LatestTestResults;
 
         protected TestListGUI()
         {
@@ -123,6 +125,20 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                     }
                     m_TestRunnerUIFilter.UpdateCounters(newResultList);
                     Reload();
+                    GUIUtility.ExitGUI();
+                }
+            }
+            using (new EditorGUI.DisabledScope(m_LatestTestResults == null))
+            {
+                if (GUILayout.Button(s_SaveResults, EditorStyles.toolbarButton))
+                {
+                    var filePath = EditorUtility.SaveFilePanel(s_SaveResults.text, "",
+                        $"TestResults_{DateTime.Now:yyyyMMdd_HHmmss}.xml", "xml");
+                    if (!string.IsNullOrEmpty(filePath))
+                    {
+                        TestRunnerApi.SaveResultToFile(m_LatestTestResults, filePath);
+                    }
+
                     GUIUtility.ExitGUI();
                 }
             }
@@ -280,12 +296,17 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             {
                 return;
             }
-            
+
             (m_TestListTree.data as TestListTreeViewDataSource).UpdateRootTest(test);
-            
+
             m_TestListTree.ReloadData();
             Repaint();
             m_Window.Repaint();
+        }
+
+        public void RunFinished(ITestResultAdaptor results)
+        {
+            m_LatestTestResults = results;
         }
 
         private void UpdateQueuedResults()
@@ -401,7 +422,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                 if (line is TestTreeViewItem)
                 {
                     var testLine = line as TestTreeViewItem;
-                    if (testLine.IsGroupNode && !testLine.FullName.Contains("+")) 
+                    if (testLine.IsGroupNode && !testLine.FullName.Contains("+"))
                     {
                         if (testLine.parent != null && testLine.parent.displayName == "Invisible Root Item")
                         {
@@ -439,7 +460,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                     assemblyNames = assembliesToRun.ToArray()
                 });
             }
-            
+
             if (namesToRun.Count > 0)
             {
                 filters.Add(new UITestRunnerFilter
@@ -448,7 +469,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                     assemblyNames = assembliesForNamesToRun.ToArray()
                 });
             }
-            
+
             if (exactNamesToRun.Count > 0)
             {
                 filters.Add(new UITestRunnerFilter
@@ -456,7 +477,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                     testNames = exactNamesToRun.ToArray()
                 });
             }
-            
+
             if (filters.Count == 0)
             {
                 filters.Add(new UITestRunnerFilter());
@@ -470,7 +491,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                     filter.categoryNames = categories;
                 }
             }
-            
+
             return filters.ToArray();
         }
 

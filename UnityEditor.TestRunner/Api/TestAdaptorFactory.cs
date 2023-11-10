@@ -54,6 +54,35 @@ namespace UnityEditor.TestTools.TestRunner.Api
             return adaptor;
         }
 
+        public ITestAdaptor Create(ITest test, ITestFilter filter)
+        {
+            if (filter == null)
+                return Create(test);
+
+            if (!filter.Pass(test))
+            {
+                if (test.Parent == null)
+                {
+                    // Create an empty root.
+                    return new TestAdaptor(test, children: new ITestAdaptor[0]);
+                }
+
+                return null;
+            }
+
+            var children = test.Tests
+                .Select(c => Create(c, filter))
+                .Where(c => c != null)
+                .ToArray();
+
+            var adaptor = new TestAdaptor(test, children: children);
+
+            foreach (var child in adaptor.Children)
+                (child as TestAdaptor).SetParent(adaptor);
+
+            return adaptor;
+        }
+
         public ITestResultAdaptor Create(RemoteTestResultData testResult, RemoteTestResultDataWithTestData allData)
         {
             return new TestResultAdaptor(testResult, allData);

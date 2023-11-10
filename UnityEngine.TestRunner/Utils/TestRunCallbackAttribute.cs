@@ -4,10 +4,15 @@ using UnityEngine.Scripting;
 namespace UnityEngine.TestRunner
 {
     /// <summary>
-    /// An assembly level attribute that indicates that a given type should be subscribed for receiving updates on the test progress.
+    /// An assembly level attribute that indicates that a given type implementing <see cref = "ITestRunCallback"/> should be subscribed to updates on the test progress. You can invoke the callbacks with [NUnit](http://www.nunit.org/) `ITest` and `ITestResult` classes.
+    ///
+    /// At the `RunStarted` and `RunFinished` methods, the test and test results are for the whole test tree. These methods invoke at each node in the test tree; first with the whole test assembly, then with the test class, and last with the test method.
+    ///
+    /// From these callbacks, it's possible to read the partial or the full results, and to save the XML version of the result for further processing or continuous integration.
     /// </summary>
     /// <example>
     /// <code>
+    /// <![CDATA[
     /// using NUnit.Framework.Interfaces;
     /// using UnityEngine;
     /// using UnityEngine.TestRunner;
@@ -36,7 +41,9 @@ namespace UnityEngine.TestRunner
     ///
     ///    }
     ///}
+    /// ]]>
     /// </code>
+    /// > Note: The `TestRunCallback` does not need any references to the `UnityEditor` namespace and can run in standalone Players on the Player side.
     /// </example>
     [AttributeUsage(AttributeTargets.Assembly)]
     public class TestRunCallbackAttribute : Attribute

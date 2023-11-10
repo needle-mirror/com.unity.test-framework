@@ -14,7 +14,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             {
                 testList.UpdateResult(result);
             }
-            
+
             cachedResults.Clear();
 
         }
@@ -27,6 +27,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             if (TestRunnerWindow.s_Instance != null)
             {
                 TestRunnerWindow.s_Instance.RebuildUIFilter();
+                TestRunnerWindow.s_Instance.m_SelectedTestTypes.RunFinished(testResults);
             }
         }
 
@@ -52,7 +53,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             {
                 return;
             }
-            
+
             TestRunnerWindow.s_Instance.m_SelectedTestTypes.UpdateTestTree(test);
         }
     }

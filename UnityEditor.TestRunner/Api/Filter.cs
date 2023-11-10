@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using UnityEngine.TestTools;
 using UnityEngine.TestTools.TestRunner.GUI;
 
 namespace UnityEditor.TestTools.TestRunner.Api
@@ -14,7 +15,7 @@ namespace UnityEditor.TestTools.TestRunner.Api
     {
         /// <summary>
         /// An enum flag that specifies if Edit Mode or Play Mode tests should run.
-        ///</summary>
+        /// </summary>
         [SerializeField]
         public TestMode testMode;
         /// <summary>
@@ -61,11 +62,12 @@ namespace UnityEditor.TestTools.TestRunner.Api
 
             return stringBuilder.ToString();
         }
-        
+
         internal RuntimeTestRunnerFilter ToRuntimeTestRunnerFilter(bool synchronousOnly)
         {
             return new RuntimeTestRunnerFilter
             {
+                testMode = ConvertTestMode(testMode),
                 testNames = testNames,
                 categoryNames = categoryNames,
                 groupNames = groupNames,
@@ -73,8 +75,28 @@ namespace UnityEditor.TestTools.TestRunner.Api
                 synchronousOnly = synchronousOnly
             };
         }
-        
-        
+
+        private static TestPlatform ConvertTestMode(TestMode testMode)
+        {
+            if (testMode == (TestMode.EditMode | TestMode.PlayMode))
+            {
+                return TestPlatform.All;
+            }
+
+            if (testMode == TestMode.EditMode)
+            {
+                return TestPlatform.EditMode;
+            }
+
+            if (testMode == TestMode.PlayMode)
+            {
+                return TestPlatform.PlayMode;
+            }
+
+            return 0;
+        }
+
+
         internal bool HasAny()
         {
             return assemblyNames != null && assemblyNames.Any()

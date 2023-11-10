@@ -11,7 +11,6 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
     {
         private string typeName;
         internal IAttributeFinder attributeFinder;
-        internal RuntimePlatform targetPlatform = Application.platform;
         internal Action<string> logAction = Debug.Log;
         internal Func<ILogScope> logScopeProvider = () => new LogScope();
         internal Func<Type, object> createInstance = Activator.CreateInstance;
@@ -31,14 +30,15 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
                 throw new Exception($"Test tree is not available for {GetType().Name}.");
             }
 
-            var enumerator = ExecuteMethods(testJobData.testTree, testJobData.executionSettings.BuildNUnitFilter());
+            var enumerator = ExecuteMethods(testJobData.testTree, testJobData.testFilter, testJobData.TargetRuntimePlatform ?? Application.platform);
+
             while (enumerator.MoveNext())
             {
                 yield return null;
             }
         }
-        
-        protected IEnumerator ExecuteMethods(ITest testTree, ITestFilter testRunnerFilter)
+
+        private IEnumerator ExecuteMethods(ITest testTree, ITestFilter testRunnerFilter, RuntimePlatform targetPlatform)
         {
             var exceptions = new List<Exception>();
 

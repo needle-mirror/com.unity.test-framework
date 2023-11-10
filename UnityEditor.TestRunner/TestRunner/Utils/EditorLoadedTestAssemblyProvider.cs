@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using UnityEditor;
 using UnityEditor.Scripting.ScriptCompilation;
 using UnityEngine.TestTools;
 using UnityEngine.TestTools.Utils;
@@ -65,7 +66,7 @@ namespace UnityEditor.TestTools.TestRunner
 
             yield return result;
         }
-        
+
         private IAssemblyWrapper[] FilterAssembliesWithTestReference(IAssemblyWrapper[] loadedAssemblies)
         {
             var filteredResults = new Dictionary<IAssemblyWrapper, bool>();
@@ -76,8 +77,8 @@ namespace UnityEditor.TestTools.TestRunner
 
             return filteredResults.Where(pair => pair.Value).Select(pair => pair.Key).ToArray();
         }
-        
-        private void FilterAssemblyForTestReference(IAssemblyWrapper assemblyToFilter, IAssemblyWrapper[] loadedAssemblies, 
+
+        private void FilterAssemblyForTestReference(IAssemblyWrapper assemblyToFilter, IAssemblyWrapper[] loadedAssemblies,
             IDictionary<IAssemblyWrapper, bool> filterResults, IDictionary<IAssemblyWrapper, bool> resultsAlreadyAnalyzed)
         {
             if(resultsAlreadyAnalyzed.ContainsKey(assemblyToFilter))
@@ -103,20 +104,20 @@ namespace UnityEditor.TestTools.TestRunner
                 }
 
                 FilterAssemblyForTestReference(referencedAssembly, loadedAssemblies, filterResults, resultsAlreadyAnalyzed);
-                
+
                 if (filterResults.ContainsKey(referencedAssembly) && filterResults[referencedAssembly])
                 {
                     filterResults[assemblyToFilter] = true;
                     return;
                 }
             }
-            
+
             filterResults[assemblyToFilter] = false;
         }
 
         private static bool IsTestReference(AssemblyName assemblyName)
         {
-            return assemblyName.Name == k_NunitAssemblyName || 
+            return assemblyName.Name == k_NunitAssemblyName ||
                    assemblyName.Name == k_TestRunnerAssemblyName ||
                    assemblyName.Name == k_PerformanceTestingAssemblyName;
         }

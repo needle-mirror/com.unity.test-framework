@@ -6,7 +6,9 @@ using NUnit;
 using NUnit.Framework.Api;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
+using Unity.Profiling;
 using UnityEngine.TestRunner.NUnitExtensions;
+using UnityEngine.TestRunner.NUnitExtensions.Filters;
 
 namespace UnityEngine.TestTools.NUnitExtensions
 {
@@ -42,11 +44,20 @@ namespace UnityEngine.TestTools.NUnitExtensions
                 var assembly = assemblies[index];
                 var platform = testPlatforms[index];
 
-                var assemblySuite = Build(assembly, options) as TestSuite;
-                if (assemblySuite != null && assemblySuite.HasChildren)
+                using (new ProfilerMarker(nameof(UnityTestAssemblyBuilder) + "." + assembly.GetName().Name).Auto())
                 {
-                    suite.Add(assemblySuite);
-                    suite.ApplyPlatformToPropertyBag(platform);
+                    var assemblySuite = Build(assembly, GetNUnitTestBuilderSettings(platform)) as TestSuite;
+                    if (assemblySuite != null)
+                    {
+                        assemblySuite.Properties.Set("platform", platform);
+                        assemblySuite.Properties.Set("isAssembly", true);
+                        EditorOnlyFilter.ApplyPropertyToTest(assemblySuite, platform == TestPlatform.EditMode);
+                    }
+
+                    if (assemblySuite != null && assemblySuite.HasChildren)
+                    {
+                        suite.Add(assemblySuite);
+                    }
                 }
 
                 yield return null;

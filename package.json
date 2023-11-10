@@ -1,7 +1,7 @@
 {
   "name": "com.unity.test-framework",
   "displayName": "Test Framework",
-  "version": "1.3.9",
+  "version": "1.4.0",
   "unity": "2019.4",
   "unityRelease": "0a10",
   "description": "Test framework for running Edit mode and Play mode tests in Unity.",
@@ -13,7 +13,7 @@
   "repository": {
     "url": "https://github.com/Unity-Technologies/com.unity.test-framework.git",
     "type": "git",
-    "revision": "5c8a1448cee4d7607be0d60dceb66703b0cfe016"
+    "revision": "69ea42f7de7b719febb362c0f8df442c9e03e8c7"
   },
   "dependencies": {
     "com.unity.ext.nunit": "2.0.3",
@@ -221,13 +221,13 @@
     }
   ],
   "relatedPackages": {
-    "com.unity.test-framework.tests": "1.3.9"
+    "com.unity.test-framework.tests": "1.4.0"
   },
   "_upm": {
-    "changelog": "- By using the editor command line new argument `-randomOrderSeed x` you can run the tests in a randomized order, where x is an integer different from 0. If a new test is added in the project the random order passing the same seed will be kept, and the new test will be placed in the random list accordigly.\n- Fix for WebGL platform target to close the browser tab when the run is completed. \n- Added TestFileReferences.json to be generated on build step of the player, so can be consumed later by Test runners to enrich data for run part."
+    "changelog": "- Added api for saving test results to a file.\n- Added a button for saving the test results of the latest run.\n- Applied filtering to the ITestAdaptor argument of `ICallbacks.RunStarted` so that it corresponds to the actual test tree being run.\n- When running in player:\n  - the save scene dialog is shown when there are changes in the scene.\n  - the scene setup is restored after a completed run.\n- When running in playmode:\n  - the scene setup is restored after a completed run.\n- Added overloads of LogAssert.Expect which allow users to expect a log message without specifying a severity, which will match logged messages of any severity.\n- Added new `[ParametrizedIgnore]` attribute which allows ignoring tests based on arguments which were passed to the test method.\n- Added a new PreservedValuesAttribute to allow for using the nunit ValuesAttribute at players with a high stripping level (case DSTR-33).\n- Added api for canceling test runs."
   },
   "upmCi": {
-    "footprint": "afab85ea939bfda57db27d19b4c56f006adbe470"
+    "footprint": "16dd7a2132eb67a0bf3a8e60756d1770d9d2cc4d"
   },
-  "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.test-framework@1.3/manual/index.html"
+  "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.test-framework@1.4/manual/index.html"
 }

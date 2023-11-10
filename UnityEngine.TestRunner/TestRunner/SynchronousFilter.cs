@@ -1,24 +1,26 @@
 using System;
 using System.Collections;
 using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
+using UnityEngine.TestRunner.NUnitExtensions.Filters;
 
 namespace UnityEngine.TestTools.TestRunner.GUI
 {
-    internal class SynchronousFilter : ITestFilter
+    internal class SynchronousFilter : NonExplicitFilter
     {
-        public TNode ToXml(bool recursive)
+        public new TNode ToXml(bool recursive)
         {
             return new TNode("synchronousOnly");
         }
 
-        public TNode AddToXml(TNode parentNode, bool recursive)
+        public override TNode AddToXml(TNode parentNode, bool recursive)
         {
             return parentNode.AddElement("synchronousOnly");
         }
 
-        public bool Pass(ITest test)
+        public override bool Match(ITest test)
         {
             if (test.Method == null)
                 return true;
@@ -40,12 +42,18 @@ namespace UnityEngine.TestTools.TestRunner.GUI
                     return false;
             }
 
-            return true;
+            if (test.Method.ReturnType.Type == typeof(void))
+                return true;
+
+            if (test.Method.ReturnType.Type == typeof(Task))
+                return true;
+
+            return false;
         }
 
-        public bool IsExplicitMatch(ITest test)
+        public override bool Pass(ITest test)
         {
-            return Pass(test);
+            return Match(test);
         }
     }
 }

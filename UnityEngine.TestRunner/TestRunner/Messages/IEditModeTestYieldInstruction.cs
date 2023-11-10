@@ -5,11 +5,34 @@ namespace UnityEngine.TestTools
 {
     /// <summary>
     /// In an Edit Mode test, you can use `IEditModeTestYieldInstruction` interface to implement your own instruction. There are also a couple of commonly used implementations available:
-    /// - [EnterPlayMore](https://docs.unity3d.com/Packages/com.unity.test-framework@1.1/api/UnityEngine.TestTools.EnterPlayMode.html)
-    /// - <see cref = "ExitPlayMode"/> 
-    /// - <see cref = "RecompileScripts"/> 
-    /// - <see cref = "WaitForDomainReload"/> 
+    /// - <see cref = "EnterPlayMode"/>
+    /// - <see cref = "ExitPlayMode"/>
+    /// - <see cref = "RecompileScripts"/>
+    /// - <see cref = "WaitForDomainReload"/>
     /// </summary>
+    /// <example>
+    /// <code>
+    /// <![CDATA[
+    /// [UnityTest]
+    /// public IEnumerator PlayOnAwakeDisabled_DoesntPlayWhenEnteringPlayMode()
+    /// {
+    ///    var videoPlayer = PrefabUtility.InstantiatePrefab(m_VideoPlayerPrefab.GetComponent<VideoPlayer>()) as VideoPlayer;
+    ///
+    ///    videoPlayer.playOnAwake = false;
+    ///
+    ///    yield return new EnterPlayMode();
+    ///
+    ///    var videoPlayerGO = GameObject.Find(m_VideoPlayerPrefab.name);
+    ///
+    ///    Assert.IsFalse(videoPlayerGO.GetComponent<VideoPlayer>().isPlaying);
+    ///
+    ///    yield return new ExitPlayMode();
+    ///
+    ///    Object.DestroyImmediate(GameObject.Find(m_VideoPlayerPrefab.name));
+    /// }
+    /// ]]>
+    /// </code>
+    /// </example>
     public interface IEditModeTestYieldInstruction
     {
         /// <summary>

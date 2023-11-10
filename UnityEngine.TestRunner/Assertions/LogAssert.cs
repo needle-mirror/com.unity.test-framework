@@ -5,11 +5,11 @@ using UnityEngine.TestTools.Logging;
 namespace UnityEngine.TestTools
 {
     /// <summary>
-    /// A test fails if Unity logs a message other than a regular log or warning message. Use `LogAssert` to check for an expected message in the log so that the test does not fail when Unity logs the message.
+    /// `LogAssert` lets you expect Unity log messages that would otherwise cause the test to fail. A test fails if Unity logs a message other than a regular log or warning message. Use `LogAssert` to check for an expected message in the log so that the test does not fail when Unity logs the message.
+    ///
     /// Use `LogAssert.Expect` before running the code under test, as the check for expected logs runs at the end of each frame.
+    ///
     /// A test also reports a failure, if an expected message does not appear, or if Unity does not log any regular log or warning messages.
-    /// 
-    /// `LogAssert` lets you expect Unity log messages that would otherwise cause the test to fail.
     /// </summary>
     public static class LogAssert
     {
@@ -52,6 +52,39 @@ namespace UnityEngine.TestTools
         public static void Expect(LogType type, Regex message)
         {
             LogScope.Current.ExpectedLogs.Enqueue(new LogMatch { LogType = type, MessageRegex = message });
+        }
+
+        /// <summary>
+        /// Verifies that a log message of any type appears in the log. A test won't fail from an expected error, assertion, or exception log message. It does fail if an expected message does not appear in the log.
+        /// If multiple LogAssert.Expect are used to expect multiple messages, they are expected to be logged in that order.
+        /// </summary>
+        /// <param name="message">A string value that should equate to the expected message.</param>
+        /// <example>
+        /// <code>
+        /// [Test]
+        /// public void LogAssertExample()
+        /// {
+        ///     // Expect a log entry of any kind with this message
+        ///     LogAssert.Expect("Log message");
+        ///
+        ///     // Logging the message does not cause the test to fail
+        ///     Debug.LogError("Log message");
+        /// }
+        ///
+        /// </code>
+        /// </example>
+        public static void Expect(string message)
+        {
+            LogScope.Current.ExpectedLogs.Enqueue(new LogMatch { LogType = null, Message = message });
+        }
+
+        /// <summary>
+        /// Verifies that a log message of any type appears in the log. A test won't fail from an expected error, assertion, or exception log message. It does fail if an expected message does not appear in the log.
+        /// </summary>
+        /// <param name="message">A regular expression pattern to match the expected message.</param>
+        public static void Expect(Regex message)
+        {
+            LogScope.Current.ExpectedLogs.Enqueue(new LogMatch { LogType = null, MessageRegex = message });
         }
 
         /// <summary>

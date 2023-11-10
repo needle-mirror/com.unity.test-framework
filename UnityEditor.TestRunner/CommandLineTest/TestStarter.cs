@@ -13,11 +13,11 @@ namespace UnityEditor.TestTools.TestRunner.CommandLineTest
             new TestStarter().Init();
         }
 
-        internal Action<EditorApplication.CallbackFunction> registerEditorUpdateCallback = (action) =>
+        internal Action<EditorApplication.CallbackFunction> registerEditorUpdateCallback = action =>
         {
             EditorApplication.update += action;
         };
-        internal Action<EditorApplication.CallbackFunction> unregisterEditorUpdateCallback = (action) =>
+        internal Action<EditorApplication.CallbackFunction> unregisterEditorUpdateCallback = action =>
         {
             EditorApplication.update -= action;
         };

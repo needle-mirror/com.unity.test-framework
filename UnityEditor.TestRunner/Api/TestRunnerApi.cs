@@ -185,12 +185,23 @@ namespace UnityEditor.TestTools.TestRunner.Api
             job.Start();
         }
 
-        /// <summary>
-        /// Cancel the test run with a given guid. The guid can be retrieved when executing the test run. Currently only supports EditMode tests.
+        ///<summary>
+        /// Save a given set of ITestResultAdaptor in [NUnit XML Format](https://docs.nunit.org/articles/nunit/technical-notes/usage/Test-Result-XML-Format.html) to a file at the provided file path. Any matching existing file is overwritten.
         /// </summary>
-        /// <param name="guid">Test run GUID.</param>
-        /// <returns></returns>
-        internal static bool CancelTestRun(string guid)
+        /// <param name="results">Test results to write in a file.</param>
+        /// <param name="xmlFilePath">An xml file path relative to the project folder.</param>
+        public static void SaveResultToFile(ITestResultAdaptor results, string xmlFilePath)
+        {
+            var resultsWriter = new ResultsWriter();
+            resultsWriter.WriteResultToFile(results, xmlFilePath);
+        }
+
+        /// <summary>
+        /// Cancel the test run with a given guid string. The guid string can be retrieved when executing the test run. The test run may take multiple frames to finish cleaning up from the test run. Any current active test will be marked as "Canceled" and any other remaining tests marked as "NotRun".
+        /// </summary>
+        /// <param name="guid">Test run guid string.</param>
+        /// <returns>A boolean indicating whether canceling of the given job was successful. Canceling of a job will not be a success if no test job is found matching the guid, if the job is not currently or the job is already canceling.</returns>
+        public static bool CancelTestRun(string guid)
         {
             var runner = m_testJobDataHolder.GetRunner(guid);
             if (runner == null || !runner.IsRunningJob())

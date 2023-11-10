@@ -18,12 +18,9 @@ namespace UnityEditor.TestRunner.TestLaunchers
         internal bool isRunning;
 
         [SerializeField]
-        private PlatformSpecificSetup m_PlatformSpecificSetup;
-
-        [SerializeField]
         private bool m_RegisteredConnectionCallbacks;
 
-        [SerializeField] 
+        [SerializeField]
         private int m_HearbeatTimeOut;
 
         private enum MessageType
@@ -53,13 +50,11 @@ namespace UnityEditor.TestRunner.TestLaunchers
         private bool m_RegisteredMessageCallback;
 
         private TestTools.TestRunner.DelayedCallback m_TimeoutCallback;
-        
+
         public void Init(BuildTarget buildTarget, int heartbeatTimeout)
         {
             isRunning = true;
             m_HearbeatTimeOut = heartbeatTimeout;
-            m_PlatformSpecificSetup = new PlatformSpecificSetup(buildTarget);
-            m_PlatformSpecificSetup.Setup();
             EditorConnection.instance.Initialize();
             if (!m_RegisteredConnectionCallbacks)
             {
@@ -141,12 +136,11 @@ namespace UnityEditor.TestRunner.TestLaunchers
             m_TimeoutCallback?.Clear();
             EditorConnection.instance.Send(PlayerConnectionMessageIds.quitPlayerMessageId, null, messageEventArgs.playerId);
             EditorConnection.instance.DisconnectAll();
-            m_PlatformSpecificSetup.CleanUp();
 
             CallbacksDelegator.instance.RunFinishedRemotely(messageEventArgs.data);
             isRunning = false;
         }
-        
+
         private void PlayerAliveHeartbeat(MessageEventArgs messageEventArgs)
         {
             m_TimeoutCallback?.Reset();
@@ -157,25 +151,9 @@ namespace UnityEditor.TestRunner.TestLaunchers
             CallbacksDelegator.instance.RunFailed($"Test execution timed out. No activity received from the player in {m_HearbeatTimeOut} seconds.");
         }
 
-        public void PostBuildAction()
-        {
-            m_PlatformSpecificSetup.PostBuildAction();
-        }
-
         public void PostSuccessfulBuildAction()
         {
-            m_PlatformSpecificSetup.PostSuccessfulBuildAction();
             m_TimeoutCallback = new TestTools.TestRunner.DelayedCallback(TimeoutCallback, m_HearbeatTimeOut);
-        }
-
-        public void PostSuccessfulLaunchAction()
-        {
-            m_PlatformSpecificSetup.PostSuccessfulLaunchAction();
-        }
-
-        public void CleanUp()
-        {
-            m_PlatformSpecificSetup.CleanUp();
         }
     }
 }

@@ -55,6 +55,7 @@ namespace UnityEngine.TestTools
         ///     }
         /// }
         /// </code>
+        /// > **Tip**: Use `#if UNITY_EDITOR` if you want to access Editor only APIs, but the setup/cleanup is inside a **Play Mode** assembly.
         /// </example>
         void Setup();
     }

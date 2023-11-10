@@ -13,12 +13,14 @@ namespace UnityEngine.TestTools.TestRunner.GUI
     [Serializable]
     internal class RuntimeTestRunnerFilter
     {
+        public TestPlatform testMode;
+
         public string[] assemblyNames;
         public string[] groupNames;
         public string[] categoryNames;
         public string[] testNames;
         public bool synchronousOnly;
-        
+
         public ITestFilter BuildNUnitFilter()
         {
             var filters = new List<ITestFilter>();
@@ -33,7 +35,12 @@ namespace UnityEngine.TestTools.TestRunner.GUI
                 filters.Add(new SynchronousFilter());
             }
 
-            return filters.Count == 0 ? TestFilter.Empty : new AndFilter(filters.ToArray());
+            if (testMode != 0 && testMode != TestPlatform.All)
+            {
+                filters.Add(new EditorOnlyFilter(testMode == TestPlatform.EditMode));
+            }
+
+            return filters.Count == 0 ? TestFilter.Empty : new AndFilterExtended(filters.ToArray());
         }
 
         private static FullNameFilter OptimizedGroupFilter(string s)

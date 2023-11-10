@@ -14,7 +14,7 @@ namespace UnityEngine.TestTools.TestRunner
 
         private static string BuildMessage(LogEvent log, LogMatch nextExpected)
         {
-            return $"Expected {log.LogType} with '{log.Message}' arrived out of order. Expected '{nextExpected}' next.";
+            return $"Expected {log.LogType} with '{log.Message}' arrived out of order. Expected {nextExpected.LogType} with '{nextExpected.Message}' next.";
         }
 
         public override ResultState ResultState

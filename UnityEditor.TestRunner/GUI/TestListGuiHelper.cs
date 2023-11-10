@@ -54,7 +54,11 @@ namespace UnityEditor.TestTools.TestRunner.GUI
         {
             var basePath = Path.Combine(EditorApplication.applicationContentsPath, kResourcesTemplatePath);
             var destPath = Path.Combine(GetActiveFolderPath(), kNewTestScriptName);
+#if UNITY_2023_3_OR_NEWER
+            var templatePath = Path.Combine(basePath, AssetsMenuUtility.GetScriptTemplatePath(ScriptTemplate.CSharp_NewTestScript));
+#else
             var templatePath = Path.Combine(basePath, kTestScriptTemplate);
+#endif
             var icon = EditorGUIUtility.IconContent("cs Script Icon").image as Texture2D;
             ProjectWindowUtil.StartNameEditingIfProjectWindowExists(0,
                 ScriptableObject.CreateInstance<DoCreateScriptAsset>(), destPath, icon, templatePath);

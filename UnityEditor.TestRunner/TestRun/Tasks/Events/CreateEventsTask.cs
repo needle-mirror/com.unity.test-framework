@@ -19,15 +19,6 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks.Events
             testJobData.TestFinishedEvent = new TestFinishedEvent();
             testJobData.RunFinishedEvent = new RunFinishedEvent();
 
-            if (PlaymodeTestsController.ActiveController != null)
-            {
-                var controller = PlaymodeTestsController.ActiveController;
-                controller.runStartedEvent.AddListener(testJobData.RunStartedEvent.Invoke);
-                controller.testStartedEvent.AddListener(testJobData.TestStartedEvent.Invoke);
-                controller.testFinishedEvent.AddListener(testJobData.TestFinishedEvent.Invoke);
-                controller.runFinishedEvent.AddListener(testJobData.RunFinishedEvent.Invoke);
-            }
-
             yield break;
         }
     }

@@ -15,5 +15,6 @@ namespace UnityEditor.TestTools.TestRunner.Api
         void TestFinished(ITestResult result);
         void TestFinishedRemotely(byte[] testResultsData);
         void TestTreeRebuild(ITest test);
+        void SetTestRunFilter(ITestFilter filter);
     }
 }

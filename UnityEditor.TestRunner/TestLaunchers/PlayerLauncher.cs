@@ -27,15 +27,22 @@ namespace UnityEditor.TestTools.TestRunner
         private readonly BuildTarget m_TargetPlatform;
         private ITestRunSettings m_OverloadTestRunSettings;
         private string m_SceneName;
+        private Scene m_Scene;
         private int m_HeartbeatTimeout;
         private string m_PlayerWithTestsPath;
+        private PlaymodeTestsController m_Runner;
 
-        public PlayerLauncher(PlaymodeTestsControllerSettings settings, BuildTarget? targetPlatform, ITestRunSettings overloadTestRunSettings, int heartbeatTimeout, string playerWithTestsPath) : base(settings)
+        internal PlayerLauncherBuildOptions playerBuildOptions { get; private set; }
+
+        public PlayerLauncher(PlaymodeTestsControllerSettings settings, BuildTarget? targetPlatform, ITestRunSettings overloadTestRunSettings, int heartbeatTimeout, string playerWithTestsPath, string scenePath, Scene scene, PlaymodeTestsController runner) : base(settings)
         {
             m_TargetPlatform = targetPlatform ?? EditorUserBuildSettings.activeBuildTarget;
             m_OverloadTestRunSettings = overloadTestRunSettings;
             m_HeartbeatTimeout = heartbeatTimeout;
             m_PlayerWithTestsPath = playerWithTestsPath;
+            m_SceneName = scenePath;
+            m_Scene = scene;
+            m_Runner = runner;
         }
 
         protected override RuntimePlatform? TestTargetPlatform
@@ -54,9 +61,7 @@ namespace UnityEditor.TestTools.TestRunner
 
             using (var settings = new PlayerLauncherContextSettings(m_OverloadTestRunSettings))
             {
-                m_SceneName = CreateSceneName();
-                var scene = PrepareScene(m_SceneName);
-                string scenePath = scene.path;
+                PrepareScene(m_SceneName, m_Scene, m_Runner);
 
                 var filter = m_Settings.BuildNUnitFilter();
                 var runner = LoadTests(filter);
@@ -64,28 +69,24 @@ namespace UnityEditor.TestTools.TestRunner
                 if (exceptionThrown)
                 {
                     ReopenOriginalScene(m_Settings.originalScene);
-                    AssetDatabase.DeleteAsset(m_SceneName);
                     CallbacksDelegator.instance.RunFailed("Run Failed: One or more errors in a prebuild setup. See the editor log for details.");
                     return;
                 }
 
-                EditorSceneManager.MarkSceneDirty(scene);
-                EditorSceneManager.SaveScene(scene);
+                EditorSceneManager.MarkSceneDirty(m_Scene);
+                EditorSceneManager.SaveScene(m_Scene);
 
-                var playerBuildOptions = GetBuildOptions(scenePath);
+                playerBuildOptions = GetBuildOptions(m_SceneName);
 
                 var success = BuildAndRunPlayer(playerBuildOptions);
 
-                editorConnectionTestCollector.PostBuildAction();
                 FilePathMetaInfo.TryCreateFile(runner.LoadedTest, playerBuildOptions.BuildPlayerOptions);
                 ExecutePostBuildCleanupMethods(runner.LoadedTest, filter);
 
                 ReopenOriginalScene(m_Settings.originalScene);
-                AssetDatabase.DeleteAsset(m_SceneName);
 
                 if (!success)
                 {
-                    editorConnectionTestCollector.CleanUp();
                     Object.DestroyImmediate(editorConnectionTestCollector);
                     Debug.LogError("Player build failed");
                     throw new TestLaunchFailedException("Player build failed");
@@ -94,7 +95,6 @@ namespace UnityEditor.TestTools.TestRunner
                 if ((playerBuildOptions.BuildPlayerOptions.options & BuildOptions.AutoRunPlayer) != 0)
                 {
                     editorConnectionTestCollector.PostSuccessfulBuildAction();
-                    editorConnectionTestCollector.PostSuccessfulLaunchAction();
                 }
 
                 var runSettings = m_OverloadTestRunSettings as PlayerLauncherTestRunSettings;
@@ -105,21 +105,19 @@ namespace UnityEditor.TestTools.TestRunner
             }
         }
 
-        public Scene PrepareScene(string sceneName)
+        public void PrepareScene(string sceneName, Scene scene, PlaymodeTestsController runner)
         {
-            var scene = CreateBootstrapScene(sceneName, runner =>
+            CreateBootstrapScene(sceneName, scene, runner, bootstrapRunner =>
             {
-                runner.AddEventHandlerMonoBehaviour<PlayModeRunnerCallback>();
-                runner.settings = m_Settings;
+                bootstrapRunner.AddEventHandlerMonoBehaviour<PlayModeRunnerCallback>();
                 var commandLineArgs = Environment.GetCommandLineArgs();
                 if (!commandLineArgs.Contains("-doNotReportTestResultsBackToEditor"))
                 {
-                    runner.AddEventHandlerMonoBehaviour<RemoteTestResultSender>();
+                    bootstrapRunner.AddEventHandlerMonoBehaviour<RemoteTestResultSender>();
                 }
-                runner.AddEventHandlerMonoBehaviour<PlayerQuitHandler>();
-                runner.AddEventHandlerScriptableObject<TestRunCallbackListener>();
+                bootstrapRunner.AddEventHandlerMonoBehaviour<PlayerQuitHandler>();
+                bootstrapRunner.AddEventHandlerScriptableObject<TestRunCallbackListener>();
             });
-            return scene;
         }
 
         private static bool BuildAndRunPlayer(PlayerLauncherBuildOptions buildOptions)
@@ -135,7 +133,7 @@ namespace UnityEditor.TestTools.TestRunner
             }
 #endif
             // For now, so does Lumin
-#if !UNITY_2022_2_OR_NEWER            
+#if !UNITY_2022_2_OR_NEWER
             if (buildOptions.BuildPlayerOptions.target == BuildTarget.Lumin)
             {
                 buildOptions.BuildPlayerOptions.options &= ~BuildOptions.ConnectToHost;

@@ -10,6 +10,7 @@ namespace UnityEditor.TestTools.TestRunner.Api
         ITestAdaptor Create(ITest test);
         ITestAdaptor Create(RemoteTestData testData);
         ITestResultAdaptor Create(ITestResult testResult);
+        ITestAdaptor Create(ITest test, ITestFilter filter);
         ITestResultAdaptor Create(RemoteTestResultData testResult, RemoteTestResultDataWithTestData allData);
         ITestAdaptor BuildTree(RemoteTestResultDataWithTestData data);
         IEnumerator<ITestAdaptor> BuildTreeAsync(RemoteTestResultDataWithTestData data);

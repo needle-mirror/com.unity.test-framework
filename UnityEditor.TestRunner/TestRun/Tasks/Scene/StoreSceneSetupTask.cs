@@ -4,7 +4,7 @@ using UnityEditor.SceneManagement;
 
 namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks.Scene
 {
-    internal class SaveSceneSetupTask : TestTaskBase
+    internal class StoreSceneSetupTask : TestTaskBase
     {
         internal Func<SceneSetup[]> GetSceneManagerSetup = EditorSceneManager.GetSceneManagerSetup;
         public override IEnumerator Execute(TestJobData testJobData)

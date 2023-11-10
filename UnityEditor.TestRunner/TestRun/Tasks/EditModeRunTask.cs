@@ -49,7 +49,6 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
             }
 
             testJobData.TestResults = testJobData.editModeRunner.m_Runner.Result;
-            testJobData.editModeRunner.Dispose();
         }
     }
 }

@@ -5,6 +5,7 @@ using UnityEditor.SceneManagement;
 using UnityEditor.TestTools.TestRunner.Api;
 using UnityEditor.TestTools.TestRunner.TestRun.Tasks;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.TestRunner.NUnitExtensions.Runner;
 using UnityEngine.TestTools;
 using UnityEngine.TestTools.NUnitExtensions;
@@ -24,7 +25,7 @@ namespace UnityEditor.TestTools.TestRunner.TestRun
         [NonSerialized]
         public Stack<TaskInfo> taskInfoStack = new Stack<TaskInfo>();
 
-        [SerializeField] 
+        [SerializeField]
         public int taskPC;
 
         [SerializeField]
@@ -50,13 +51,13 @@ namespace UnityEditor.TestTools.TestRunner.TestRun
 
         [SerializeField]
         public BeforeAfterTestCommandState outerUnityTestActionState;
-        
+
         [SerializeField]
         public TestRunnerStateSerializer testRunnerStateSerializer;
-        
+
         [SerializeField]
         public EnumerableTestState enumerableTestState;
-        
+
         [SerializeField]
         private TaskInfo[] savedTaskInfoStack;
 
@@ -68,11 +69,14 @@ namespace UnityEditor.TestTools.TestRunner.TestRun
         [NonSerialized]
         public TestTaskBase[] Tasks;
 
-        [SerializeField] 
+        [SerializeField]
         public TestProgress testProgress;
-        
+
         public ITest testTree;
-        
+
+        [NonSerialized]
+        public ITestFilter testFilter;
+
         [NonSerialized]
         public TestStartedEvent TestStartedEvent;
         [NonSerialized]
@@ -87,10 +91,31 @@ namespace UnityEditor.TestTools.TestRunner.TestRun
 
         [NonSerialized]
         public ConstructDelegator ConstructDelegator;
-        
+
         [NonSerialized]
         public ITestResult TestResults;
-        
+
+        [SerializeField]
+        public Scene InitTestScene;
+
+        [SerializeField]
+        public string InitTestScenePath;
+
+        [SerializeField]
+        public BuildPlayerOptions PlayerBuildOptions;
+
+        [SerializeField]
+        public PlaymodeTestsController PlaymodeTestsController;
+
+        [SerializeField]
+        public PlaymodeTestsControllerSettings PlayModeSettings;
+
+        [SerializeField]
+        public PlatformSpecificSetup PlatformSpecificSetup;
+
+        [NonSerialized]
+        public RuntimePlatform? TargetRuntimePlatform;
+
         [SerializeField]
         public EnumerableTestState RetryRepeatState;
 

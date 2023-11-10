@@ -9,17 +9,6 @@ namespace UnityEditor.TestTools.TestRunner
     {
         public void RunStarted(ITest testsToRun)
         {
-            EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
-        }
-
-        private void OnPlayModeStateChanged(PlayModeStateChange state)
-        {
-            if (state == PlayModeStateChange.ExitingPlayMode)
-            {
-                EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
-                //We need to make sure we don't block NUnit thread in case we exit PlayMode earlier
-                PlaymodeTestsController.TryCleanup();
-            }
         }
 
         public void RunFinished(ITestResult testResults)

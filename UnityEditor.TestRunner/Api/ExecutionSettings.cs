@@ -95,9 +95,9 @@ namespace UnityEditor.TestTools.TestRunner.Api
             return new OrFilter(filters.Select(f => f.ToRuntimeTestRunnerFilter(runSynchronously).BuildNUnitFilter()).ToArray());
         }
 
-        /// <returns>
+        /// <summary>
         /// The <see cref="BuildTarget"/> platform to run the test on. If set to null, then the Editor is the target for the tests.
-        /// </returns>
+        /// </summary>
         internal BuildTarget? targetPlatform
         {
             get { return m_HasTargetPlatform ? (BuildTarget?)m_TargetPlatform : null; }

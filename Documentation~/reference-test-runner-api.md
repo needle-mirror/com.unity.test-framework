@@ -21,3 +21,4 @@ The `TestRunnerApi` supports the following workflows:
 | `void RegisterCallbacks(ICallbacks testCallbacks, int priority = 0)` | Sets up a given instance of [ICallbacks](./reference-icallbacks.md) to be invoked on test runs. |
 | `void UnregisterCallbacks(ICallbacks testCallbacks)` | Unregisters an instance of ICallbacks to no longer receive callbacks from test runs. |
 | `void RetrieveTestList(TestMode testMode, Action<ITestAdaptor> callback)` | Retrieve the full test tree as [ITestAdaptor](./reference-itest-adaptor.md) for a given test mode. |
+| `void SaveResultToFile(ITestResultAdaptor results, string filePath)` | Save a given set of [ITestResultAdaptor](./reference-itest-result-adaptor.md) to a file at the provided file path. |

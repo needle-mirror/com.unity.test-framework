@@ -21,30 +21,13 @@ namespace UnityEditor.TestTools.TestRunner
         {
             m_Settings = mSettings;
         }
-        protected Scene CreateBootstrapScene(string sceneName, Action<PlaymodeTestsController> runnerSetup)
+        protected void CreateBootstrapScene(string sceneName, Scene scene, PlaymodeTestsController runner, Action<PlaymodeTestsController> runnerSetup)
         {
-            var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
-            var go = new GameObject(PlaymodeTestsController.kPlaymodeTestControllerName);
-
-            var editorLoadedTestAssemblyProvider = new EditorLoadedTestAssemblyProvider(new EditorCompilationInterfaceProxy(), new EditorAssembliesProxy());
-
-            var runner = go.AddComponent<PlaymodeTestsController>();
             runnerSetup(runner);
-            runner.settings.bootstrapScene = sceneName;
-            runner.settings.orderedTestNames = m_Settings.orderedTestNames;
-            runner.settings.randomOrderSeed = m_Settings.randomOrderSeed;
-            runner.AssembliesWithTests = editorLoadedTestAssemblyProvider.GetAssembliesGroupedByType(TestPlatform.PlayMode).Select(x => x.Assembly.GetName().Name).ToList();
 
             EditorSceneManager.MarkSceneDirty(scene);
             AssetDatabase.SaveAssets();
             EditorSceneManager.SaveScene(scene, sceneName, false);
-
-            return scene;
-        }
-
-        public string CreateSceneName()
-        {
-            return "Assets/InitTestScene" + DateTime.Now.Ticks + ".unity";
         }
 
         protected UnityTestAssemblyRunner LoadTests(ITestFilter filter)

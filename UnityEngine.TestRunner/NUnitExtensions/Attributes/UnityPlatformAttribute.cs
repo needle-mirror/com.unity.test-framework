@@ -16,6 +16,26 @@ namespace UnityEngine.TestTools
     /// - Not explicitly specified in the included platforms list
     /// - In the excluded platforms list
     /// </summary>
+    /// <example>
+    /// <code>
+    /// <![CDATA[
+    /// using UnityEngine;
+    /// using UnityEngine.TestTools;
+    /// using NUnit.Framework;
+    ///
+    /// [TestFixture]
+    /// public class TestClass
+    /// {
+    ///     [Test]
+    ///     [UnityPlatform(RuntimePlatform.WindowsPlayer)]
+    ///     public void TestMethod()
+    ///     {
+    ///         Assert.AreEqual(Application.platform, RuntimePlatform.WindowsPlayer);
+    ///     }
+    /// }
+    /// ]]>
+    /// </code>
+    /// </example>
     [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
     public class UnityPlatformAttribute : NUnitAttribute, IApplyToTest
     {

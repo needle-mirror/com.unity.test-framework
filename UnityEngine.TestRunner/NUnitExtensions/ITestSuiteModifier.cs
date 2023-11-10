@@ -1,4 +1,3 @@
-using System;
 using NUnit.Framework.Internal;
 
 namespace UnityEngine.TestRunner.NUnitExtensions

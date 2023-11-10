@@ -5,7 +5,7 @@ using NUnit.Framework.Interfaces;
 using UnityEditor.TestTools.TestRunner.Api;
 using UnityEngine;
 
-namespace UnityEditor.TestTools.TestRunner.CommandLineTest
+namespace UnityEditor.TestTools.TestRunner.Api
 {
     internal class ResultsWriter
     {

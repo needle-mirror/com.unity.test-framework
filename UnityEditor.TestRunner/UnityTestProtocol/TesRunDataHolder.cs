@@ -6,9 +6,9 @@ using UnityEngine;
 namespace UnityEditor.TestRunner.UnityTestProtocol
 {
     [Obsolete("No longer in use")]
-	public interface ITestRunDataHolder
+    public interface ITestRunDataHolder
     {
-		IList<TestRunData> TestRunDataList { get; }
+        IList<TestRunData> TestRunDataList { get; }
     }
 
     [Obsolete("No longer in use")]

@@ -55,9 +55,9 @@ namespace UnityEngine.TestTools
             // Add this point the domain reload should have occured and stopped any further progress on the instruction.
             EditorApplication.LockReloadAssemblies();
             throw new Exception(
-                EditorUtility.scriptCompilationFailed ? 
-                    "Script compilation failed" : 
-                    "Expected domain reload, but it did not occur");
+                EditorUtility.scriptCompilationFailed
+                    ? "Script compilation failed"
+                    : "Expected domain reload, but it did not occur");
         }
     }
 }

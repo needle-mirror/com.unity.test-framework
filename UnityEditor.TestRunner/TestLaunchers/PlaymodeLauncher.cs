@@ -17,12 +17,18 @@ namespace UnityEditor.TestTools.TestRunner
         private Scene m_Scene;
         private bool m_IsTestSetupPerformed;
         private ITestFilter testFilter;
+        private PlaymodeTestsController m_Runner;
 
         [SerializeField]
         private List<Type> m_EventHandlers = new List<Type>();
 
-        public PlaymodeLauncher(PlaymodeTestsControllerSettings settings) : base(settings)
+        private string m_SceneName;
+
+        public PlaymodeLauncher(PlaymodeTestsControllerSettings settings, string sceneName, Scene scene, PlaymodeTestsController runner) : base(settings)
         {
+            m_SceneName = sceneName;
+            m_Scene = scene;
+            m_Runner = runner;
         }
 
         public override void Run()
@@ -34,27 +40,22 @@ namespace UnityEditor.TestTools.TestRunner
             ConsoleWindow.SetConsoleErrorPause(false);
             Application.runInBackground = true;
 
-            var sceneName = CreateSceneName();
-            m_Scene = CreateBootstrapScene(sceneName, runner =>
+            CreateBootstrapScene(m_SceneName, m_Scene, m_Runner, runner =>
             {
                 runner.AddEventHandlerMonoBehaviour<PlayModeRunnerCallback>();
                 runner.AddEventHandlerScriptableObject<TestRunnerCallback>();
-                runner.AddEventHandlerScriptableObject<CallbacksDelegatorListener>();
-                runner.AddEventHandlerScriptableObject<TestRunCallbackListener>();
 
                 foreach (var eventHandler in m_EventHandlers)
                 {
                     var obj = ScriptableObject.CreateInstance(eventHandler);
                     runner.AddEventHandlerScriptableObject(obj as ITestRunnerListener);
                 }
-
-                runner.settings = m_Settings;
             });
 
             if (m_Settings.sceneBased)
             {
                 var newListOfScenes =
-                    new List<EditorBuildSettingsScene> {new EditorBuildSettingsScene(sceneName, true)};
+                    new List<EditorBuildSettingsScene> {new EditorBuildSettingsScene(m_SceneName, true)};
                 newListOfScenes.AddRange(EditorBuildSettings.scenes);
                 EditorBuildSettings.scenes = newListOfScenes.ToArray();
             }
@@ -84,7 +85,6 @@ namespace UnityEditor.TestTools.TestRunner
                         EditorApplication.update -= UpdateCallback;
                         var controller = PlaymodeTestsController.GetController();
                         ReopenOriginalScene(controller);
-                        AssetDatabase.DeleteAsset(controller.settings.bootstrapScene);
                         CallbacksDelegator.instance.RunFailed("Run Failed: One or more errors in a prebuild setup. See the editor log for details.");
                         HasFinished = true;
                         IsRunning = false;
@@ -120,9 +120,11 @@ namespace UnityEditor.TestTools.TestRunner
                     return;
                 if (state == PlayModeStateChange.ExitingPlayMode)
                 {
-                    AssetDatabase.DeleteAsset(runner.settings.bootstrapScene);
-                    ExecutePostBuildCleanupMethods(runner.m_Runner.LoadedTest, runner.settings.BuildNUnitFilter(), Application.platform);
                     HasFinished = true;
+                    if (runner.m_Runner != null)
+                    {
+                        ExecutePostBuildCleanupMethods(runner.m_Runner.LoadedTest, runner.settings.BuildNUnitFilter(), Application.platform);
+                    }
                 }
                 else if (state == PlayModeStateChange.EnteredEditMode)
                 {

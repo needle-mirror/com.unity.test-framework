@@ -21,8 +21,8 @@ namespace UnityEngine.TestTools.Utils
         private Vector3EqualityComparer() : this(k_DefaultError) {}
 
         /// <summary>
-        /// Initializes an instance of Vector3Equality comparer with custom allowed calculation error.
-        /// </summary>
+        /// A comparer instance with the default calculation error value equal to 0.0001f.
+        ///</summary>
         /// <param name="allowedError">This value identifies the calculation error allowed.</param>
         public Vector3EqualityComparer(float allowedError)
         {

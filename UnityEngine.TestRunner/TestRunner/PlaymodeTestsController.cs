@@ -133,14 +133,5 @@ namespace UnityEngine.TestTools.TestRunner
                 }
             }
         }
-
-        public static void TryCleanup()
-        {
-            var controller = GetController();
-            if (controller != null)
-            {
-                controller.Cleanup();
-            }
-        }
     }
 }
