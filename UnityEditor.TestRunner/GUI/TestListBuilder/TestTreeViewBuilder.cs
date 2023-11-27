@@ -3,16 +3,25 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor.IMGUI.Controls;
 using UnityEditor.TestTools.TestRunner.Api;
+using UnityEngine;
 using UnityEngine.TestRunner.NUnitExtensions.Filters;
 
 namespace UnityEditor.TestTools.TestRunner.GUI
 {
     internal class TestTreeViewBuilder
     {
+        internal struct TestCount
+        {
+            public int TotalTestCount;
+            public int TotalFailedTestCount;
+        }
+
         public List<TestRunnerResult> results = new List<TestRunnerResult>();
+        public readonly Dictionary<string, TestTreeViewItem> m_treeFiltered = new Dictionary<string, TestTreeViewItem>();
         private readonly Dictionary<string, TestRunnerResult> m_OldTestResults;
         private readonly TestRunnerUIFilter m_UIFilter;
-        private readonly ITestAdaptor m_TestListRoot;
+        private readonly ITestAdaptor[] m_TestListRoots;
+        private readonly Dictionary<string, List<TestRunnerResult>> m_ChildrenResults;
 
         private readonly List<string> m_AvailableCategories = new List<string>();
 
@@ -21,18 +30,24 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             get { return m_AvailableCategories.Distinct().OrderBy(a => a).ToArray(); }
         }
 
-        public TestTreeViewBuilder(ITestAdaptor tests, Dictionary<string, TestRunnerResult> oldTestResultResults, TestRunnerUIFilter uiFilter)
+        public TestTreeViewBuilder(ITestAdaptor[] tests, Dictionary<string, TestRunnerResult> oldTestResultResults, TestRunnerUIFilter uiFilter)
         {
             m_AvailableCategories.Add(CategoryFilterExtended.k_DefaultCategory);
             m_OldTestResults = oldTestResultResults;
-            m_TestListRoot = tests;
+            m_ChildrenResults = new Dictionary<string, List<TestRunnerResult>>();
+            m_TestListRoots = tests;
             m_UIFilter = uiFilter;
         }
 
-        public TreeViewItem BuildTreeView(TestFilterSettings settings, bool sceneBased, string sceneName)
+        public TreeViewItem BuildTreeView()
         {
+            m_treeFiltered.Clear();
             var rootItem = new TreeViewItem(int.MaxValue, 0, null, "Invisible Root Item");
-            ParseTestTree(0, rootItem, m_TestListRoot);
+            foreach (var testRoot in m_TestListRoots)
+            {
+                ParseTestTree(0, rootItem, testRoot);
+            }
+
             return rootItem;
         }
 
@@ -44,13 +59,23 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                 return true;
             if (m_UIFilter.NotRunHidden && (result.resultStatus == TestRunnerResult.ResultStatus.NotRun || result.resultStatus == TestRunnerResult.ResultStatus.Skipped))
                 return true;
+            if (!string.IsNullOrEmpty(m_UIFilter.m_SearchString) && result.FullName.IndexOf(m_UIFilter.m_SearchString, StringComparison.InvariantCultureIgnoreCase) < 0)
+                return true;
             if (m_UIFilter.CategoryFilter.Length > 0)
                 return !test.Categories.Any(category => m_UIFilter.CategoryFilter.Contains(category));
+
             return false;
         }
 
-        private void ParseTestTree(int depth, TreeViewItem rootItem, ITestAdaptor testElement)
+        private TestCount ParseTestTree(int depth, TreeViewItem rootItem, ITestAdaptor testElement)
         {
+            if (testElement == null)
+            {
+                return default;
+            }
+
+            var testCount = new TestCount();
+
             m_AvailableCategories.AddRange(testElement.Categories);
 
             var testElementId = testElement.UniqueName;
@@ -78,33 +103,64 @@ namespace UnityEditor.TestTools.TestRunner.GUI
 
                 var test = new TestTreeViewItem(testElement, depth, rootItem);
                 if (!IsFilteredOutByUIFilter(testElement, result))
+                {
                     rootItem.AddChild(test);
+                    if (!m_treeFiltered.ContainsKey(test.FullName))
+                        m_treeFiltered.Add(test.FullName, test);
+                }
+                else
+                {
+                    return testCount;
+                }
                 test.SetResult(result);
-                return;
+                testCount.TotalTestCount = 1;
+                testCount.TotalFailedTestCount = result.resultStatus == TestRunnerResult.ResultStatus.Failed ? 1 : 0;
+                if (m_ChildrenResults != null && testElement.Parent != null)
+                {
+                    m_ChildrenResults.TryGetValue(testElement.ParentUniqueName, out var resultList);
+                    if (resultList != null)
+                    {
+                        resultList.Add(result);
+                    }
+                    else
+                    {
+                        resultList = new List<TestRunnerResult> {result};
+                        m_ChildrenResults.Add(testElement.ParentUniqueName, resultList);
+                    }
+                }
+
+                return testCount;
             }
 
-            m_OldTestResults.TryGetValue(testElementId, out var groupResult);
-            if (groupResult == null)
-            {
-                groupResult = new TestRunnerResult(testElement);
-            }
-
+            var groupResult = new TestRunnerResult(testElement);
             results.Add(groupResult);
             var group = new TestTreeViewItem(testElement, depth, rootItem);
-            group.SetResult(groupResult);
 
             depth++;
+
             foreach (var child in testElement.Children)
             {
-                ParseTestTree(depth, group, child);
+                var childTestCount = ParseTestTree(depth, group, child);
+
+                testCount.TotalTestCount += childTestCount.TotalTestCount;
+                testCount.TotalFailedTestCount += childTestCount.TotalFailedTestCount;
             }
 
 
             if (testElement.IsTestAssembly && !testElement.HasChildren)
-                return;
+            {
+                return testCount;
+            }
 
             if (group.hasChildren)
                 rootItem.AddChild(group);
+
+            group.TotalChildrenCount = testCount.TotalTestCount;
+            group.TotalSuccessChildrenCount = testCount.TotalFailedTestCount;
+            groupResult.CalculateParentResult(testElementId, m_ChildrenResults);
+            group.SetResult(groupResult);
+
+            return testCount;
         }
     }
 }

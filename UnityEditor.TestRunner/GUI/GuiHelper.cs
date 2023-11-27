@@ -94,14 +94,14 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             if (string.IsNullOrEmpty(filePath))
                 return string.Empty;
 
+#if UNITY_2021_3_OR_NEWER
+            return Path.GetRelativePath(Directory.GetCurrentDirectory(), filePath);
+#else
             filePath = Paths.UnifyDirectorySeparator(filePath);
+            var length = Paths.UnifyDirectorySeparator(Application.dataPath).Length - "Assets".Length;
 
-            const string assetsFolder = "Assets";
-            var assetsFolderIndex = filePath.IndexOf(assetsFolder);
-            if (assetsFolderIndex < 0)
-                return filePath;
-
-            return filePath.Substring(assetsFolderIndex, filePath.Length - assetsFolderIndex);
+            return filePath.Substring(length);
+#endif
         }
 
         public bool OpenScriptInExternalEditor(string stacktrace)

@@ -4,7 +4,7 @@ using UnityEditor.TestTools.TestRunner.Api;
 
 namespace UnityEditor.TestTools.TestRunner.GUI
 {
-    internal class WindowResultUpdater : ICallbacks, ITestTreeRebuildCallbacks
+    internal class WindowResultUpdater : ICallbacks
     {
         public WindowResultUpdater()
         {
@@ -45,16 +45,6 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             }
 
             TestRunnerWindow.s_Instance.m_SelectedTestTypes.UpdateResult(result);
-        }
-
-        public void TestTreeRebuild(ITestAdaptor test)
-        {
-            if (TestRunnerWindow.s_Instance == null)
-            {
-                return;
-            }
-
-            TestRunnerWindow.s_Instance.m_SelectedTestTypes.UpdateTestTree(test);
         }
     }
 }

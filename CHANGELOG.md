@@ -1,4 +1,9 @@
 # Changelog
+## [1.4.1] - 2023-11-27
+- Multiple improvements to the UI, including better dropdowns, filtering, and a new test list view for Player.
+- Fixed uncategorized UI tests filtering for parameterized tests (DSTR-219).
+- In async tests, any failing logs will now first be evaluated after the async method has completed. (DSTR-839)
+
 ## [1.4.0] - 2023-11-10
 - Added api for saving test results to a file.
 - Added a button for saving the test results of the latest run.

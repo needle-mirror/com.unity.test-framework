@@ -1,7 +1,7 @@
 {
   "name": "com.unity.test-framework",
   "displayName": "Test Framework",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "unity": "2019.4",
   "unityRelease": "0a10",
   "description": "Test framework for running Edit mode and Play mode tests in Unity.",
@@ -13,7 +13,7 @@
   "repository": {
     "url": "https://github.com/Unity-Technologies/com.unity.test-framework.git",
     "type": "git",
-    "revision": "69ea42f7de7b719febb362c0f8df442c9e03e8c7"
+    "revision": "147960f420428a4fc24c5f359e5f198a03567e36"
   },
   "dependencies": {
     "com.unity.ext.nunit": "2.0.3",
@@ -221,13 +221,13 @@
     }
   ],
   "relatedPackages": {
-    "com.unity.test-framework.tests": "1.4.0"
+    "com.unity.test-framework.tests": "1.4.1"
   },
   "_upm": {
-    "changelog": "- Added api for saving test results to a file.\n- Added a button for saving the test results of the latest run.\n- Applied filtering to the ITestAdaptor argument of `ICallbacks.RunStarted` so that it corresponds to the actual test tree being run.\n- When running in player:\n  - the save scene dialog is shown when there are changes in the scene.\n  - the scene setup is restored after a completed run.\n- When running in playmode:\n  - the scene setup is restored after a completed run.\n- Added overloads of LogAssert.Expect which allow users to expect a log message without specifying a severity, which will match logged messages of any severity.\n- Added new `[ParametrizedIgnore]` attribute which allows ignoring tests based on arguments which were passed to the test method.\n- Added a new PreservedValuesAttribute to allow for using the nunit ValuesAttribute at players with a high stripping level (case DSTR-33).\n- Added api for canceling test runs."
+    "changelog": "- Multiple improvements to the UI, including better dropdowns, filtering, and a new test list view for Player.\n- Fixed uncategorized UI tests filtering for parameterized tests (DSTR-219).\n- In async tests, any failing logs will now first be evaluated after the async method has completed. (DSTR-839)"
   },
   "upmCi": {
-    "footprint": "16dd7a2132eb67a0bf3a8e60756d1770d9d2cc4d"
+    "footprint": "0a4ea4de2ebe5e23c9bd5d30cabc6f5cc66a2423"
   },
   "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.test-framework@1.4/manual/index.html"
 }

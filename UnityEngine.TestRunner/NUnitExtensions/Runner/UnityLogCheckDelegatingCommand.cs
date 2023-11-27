@@ -44,12 +44,16 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
                     () => executeEnumerable = enumerableTestMethodCommand.ExecuteEnumerable(context)))
                     yield break;
 
+                var innerCommandIsTask = enumerableTestMethodCommand is TaskTestMethodCommand;
                 foreach (var step in executeEnumerable)
                 {
                     // do not check expected logs here - we want to permit expecting and receiving messages to run
-                    // across frames. (but we do always want to catch a fail immediately.)
-                    if (!CheckFailingLogs(logScope, context.CurrentResult))
+                    // across frames. This means that we break on failing logs and fail on next frame.
+                    // An exception is async (Task), in which case we first fail after the task has run, as we cannot cancel the task. 
+                    if (!innerCommandIsTask && !CheckFailingLogs(logScope, context.CurrentResult))
+                    {
                         yield break;
+                    }
 
                     yield return step;
                 }

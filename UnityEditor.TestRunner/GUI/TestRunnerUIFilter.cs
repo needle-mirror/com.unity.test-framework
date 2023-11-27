@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor.TestTools.TestRunner.Api;
+using UnityEditor.TestTools.TestRunner.GUI.Controls;
 using UnityEngine;
 
 namespace UnityEditor.TestTools.TestRunner.GUI
@@ -26,9 +28,9 @@ namespace UnityEditor.TestTools.TestRunner.GUI
         public bool NotRunHidden;
 
         [SerializeField]
-        private string m_SearchString;
+        public string m_SearchString;
         [SerializeField]
-        private int selectedCategoryMask;
+        private string[] selectedCategories = new string[0];
 
         public string[] availableCategories = new string[0];
 
@@ -38,6 +40,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
         private GUIContent m_NotRunBtn;
 
         public Action RebuildTestList;
+        public Action UpdateTestTreeRoots;
         public Action<string> SearchStringChanged;
         public Action SearchStringCleared;
         public bool IsFiltering
@@ -45,32 +48,23 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             get
             {
                 return !string.IsNullOrEmpty(m_SearchString) || PassedHidden || FailedHidden || NotRunHidden ||
-                    selectedCategoryMask != 0;
+                    (selectedCategories != null && selectedCategories.Length > 0);
             }
         }
 
         public string[] CategoryFilter
         {
-            get
-            {
-                var list = new List<string>();
-                for (int i = 0; i < availableCategories.Length; i++)
-                {
-                    if ((selectedCategoryMask & (1 << i)) != 0)
-                    {
-                        list.Add(availableCategories[i]);
-                    }
-                }
-                return list.ToArray();
-            }
+            get { return selectedCategories; }
         }
 
-        public void UpdateCounters(List<TestRunnerResult> resultList)
+        public void UpdateCounters(List<TestRunnerResult> resultList, Dictionary<string, TestTreeViewItem> filteredTree)
         {
             m_PassedCount = m_FailedCount = m_NotRunCount =  m_InconclusiveCount = m_SkippedCount = 0;
             foreach (var result in resultList)
             {
                 if (result.isSuite)
+                    continue;
+                if (filteredTree != null && !filteredTree.ContainsKey(result.fullName))
                     continue;
                 switch (result.resultStatus)
                 {
@@ -118,12 +112,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
 
             if (availableCategories != null && availableCategories.Any())
             {
-                EditorGUI.BeginChangeCheck();
-                selectedCategoryMask = EditorGUILayout.MaskField(selectedCategoryMask, availableCategories, EditorStyles.toolbarDropDown, GUILayout.MaxWidth(150));
-                if (EditorGUI.EndChangeCheck() && RebuildTestList != null)
-                {
-                    RebuildTestList();
-                }
+                TestRunnerGUI.CategorySelectionDropDown(BuildCategorySelectionProvider());
             }
             else
             {
@@ -150,6 +139,27 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             }
         }
 
+        public void OnModeGUI()
+        {
+            EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
+            {
+                // TODO: Tabs for editmode, playmode and player
+            }
+            EditorGUILayout.EndHorizontal();
+        }
+
+        private ISelectionDropDownContentProvider BuildCategorySelectionProvider()
+        {
+            var itemProvider = new MultiValueContentProvider<string>(availableCategories, selectedCategories,
+                categories =>
+                {
+                    selectedCategories = categories;
+                    UpdateTestTreeRoots();
+                });
+
+            return itemProvider;
+        }
+
         private static int GetMaxWidth(int count)
         {
             if (count < 10)
@@ -162,7 +172,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             PassedHidden = false;
             FailedHidden = false;
             NotRunHidden = false;
-            selectedCategoryMask = 0;
+            selectedCategories = new string[0];
             m_SearchString = "";
             if (SearchStringChanged != null)
             {

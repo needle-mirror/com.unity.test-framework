@@ -101,7 +101,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             return true;
         }
 
-        private bool NameMatchesExactly(string name)
+        private bool NameMatchesExactly(string name, HashSet<string> nameLookup)
         {
             if (AreOptionalFiltersEmpty())
                 return true;
@@ -109,38 +109,28 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             if (testNames == null || testNames.Length == 0)
                 return true;
 
-            foreach (var exactName in testNames)
-            {
-                if (name == exactName)
-                    return true;
-            }
-
-            return false;
+            return nameLookup.Contains(name);
         }
 
-        private static void ClearAncestors(IEnumerable<IClearableResult> newResultList, string parentID)
+        private static void ClearAncestors(Dictionary<string, IClearableResult> newResultList, string parentID)
         {
-            if (string.IsNullOrEmpty(parentID))
-                return;
-            foreach (var result in newResultList)
+            while (!string.IsNullOrEmpty(parentID) && newResultList.TryGetValue(parentID, out var parent))
             {
-                if (result.Id == parentID)
-                {
-                    result.Clear();
-                    ClearAncestors(newResultList, result.ParentId);
-                    break;
-                }
+                parent.Clear();
+                parentID = parent.ParentId;
             }
         }
 
-        public void ClearResults(List<IClearableResult> newResultList)
+        public void ClearResults(Dictionary<string, IClearableResult> newResultList)
         {
-            foreach (var result in newResultList)
+            var nameLookup = new HashSet<string>(testNames ?? new string[0]);
+            foreach (var kvp in newResultList)
             {
+                var result = kvp.Value;
                 if (!result.IsSuite && CategoryMatches(result.Categories))
                 {
                     if (IDMatchesAssembly(result.Id) && NameMatches(result.FullName) &&
-                        NameMatchesExactly(result.FullName))
+                        NameMatchesExactly(result.FullName, nameLookup))
                     {
                         result.Clear();
                         ClearAncestors(newResultList, result.ParentId);

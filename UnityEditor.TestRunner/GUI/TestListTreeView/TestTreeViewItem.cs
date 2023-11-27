@@ -19,7 +19,14 @@ namespace UnityEditor.TestTools.TestRunner.GUI
         public bool IsGroupNode { get { return m_Test.IsSuite; } }
 
         public string FullName { get { return m_Test.FullName; } }
-        
+        public string UniqueName { get { return m_Test.UniqueName; } }
+
+        public override string displayName
+        {
+            get => $"{base.displayName}{(hasChildren ? $" ({TotalChildrenCount} tests) {(TotalSuccessChildrenCount > 0 ? $" {TotalSuccessChildrenCount} tests failed" : null)}" : null)}";
+            set => base.displayName = value;
+        }
+
         public string GetAssemblyName()
         {
             var test = m_Test;
@@ -53,6 +60,9 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             displayName = test.Name.Replace("\n", "");
             icon = Icons.s_UnknownImg;
         }
+
+        public int TotalChildrenCount { get; set; }
+        public int TotalSuccessChildrenCount { get; set; }
 
         private static int GetId(ITestAdaptor test)
         {

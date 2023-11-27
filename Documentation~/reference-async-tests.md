@@ -2,6 +2,8 @@
 
 You can use the dotnet Task asynchronous programming model to write asynchronous tests. If you're new to asynchronous programming and its applications, see the [Microsoft documentation](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/concepts/async/) for a comprehensive guide. See also the documentation for NUnit [Test](https://docs.nunit.org/articles/nunit/writing-tests/attributes/test.html), which explains the requirements for an async test. Async code is run on the main thread and Unity Test Framework will `await` it by checking if the task is done on each [update](https://docs.unity3d.com/ScriptReference/PlayerLoop.Update.html) for Play Mode or on each [EditorApplication.update](https://docs.unity3d.com/ScriptReference/EditorApplication-update.html) outside Play Mode.
 
+Note that any failing log messages will first be evaluated after the async test has completed. This means that if you have a failing log message in an async test, it will not be reported until the test has completed.
+
 The following code snippet demonstrates an async test based on Microsoft's making breakfast example. Note that the test method is marked with the `async` keyword and has return type `Task`. We set up a list of Tasks corresponding to asynchronous methods representing parts of the breakfast making process. We use `await` to start these tasks in a non-blocking way, write to the log when each one completes, and write again to the log when all are completed.
 
 ```

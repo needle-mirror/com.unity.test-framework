@@ -10,32 +10,28 @@ namespace UnityEngine.TestRunner.NUnitExtensions
 {
     internal static class TestExtensions
     {
-        private static IEnumerable<string> GetCategoriesInTestAndAncestors(ITest test)
+        private static List<string> ExtractFixtureCategories(ITest test)
         {
-            var categories = test.Properties[PropertyNames.Category].Cast<string>().ToList();
+            var fixtureCategories = test.Properties[PropertyNames.Category].Cast<string>().ToList();
             if (test.Parent != null)
             {
-                categories.AddRange(GetCategoriesInTestAndAncestors(test.Parent));
+                fixtureCategories.AddRange(ExtractFixtureCategories(test.Parent));
             }
 
-            return categories;
-        }
-
-        public static bool HasCategory(this ITest test, string[] categoryFilter)
-        {
-            var categories = test.GetAllCategoriesFromTest().Distinct();
-            return categoryFilter.Any(c => categories.Any(r => r == c));
+            return fixtureCategories;
         }
 
         public static List<string> GetAllCategoriesFromTest(this ITest test)
         {
-            var categories = GetCategoriesInTestAndAncestors(test).ToList();
+            // Only mark tests as Uncategorized if the test fixture doesn't have a category,
+            // otherwise the test inherits the Fixture category.
+            // Recursively try checking until Parent is null - cause category can be set on higher level.
+            var categories = ExtractFixtureCategories(test);
             if (categories.Count == 0 && test is TestMethod)
             {
-                // only mark tests as Uncategorized if the test fixture doesn't have a category,
-                // otherwise the test inherits the Fixture category
                 categories.Add(CategoryFilterExtended.k_DefaultCategory);
             }
+
             return categories;
         }
 
