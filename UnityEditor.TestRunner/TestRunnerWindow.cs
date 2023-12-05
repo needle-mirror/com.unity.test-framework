@@ -21,8 +21,8 @@ namespace UnityEditor.TestTools.TestRunner
 
             static Styles()
             {
-                info = new GUIStyle(EditorStyles.wordWrappedLabel);
-                info.wordWrap = false;
+                info = new GUIStyle("CN Message");
+                info.wordWrap = true;
                 info.stretchHeight = true;
                 info.margin.right = 15;
 
@@ -230,7 +230,7 @@ namespace UnityEditor.TestTools.TestRunner
             EditorGUILayout.EndVertical();
             EditorGUILayout.EndVertical();
 
-            m_SelectedTestTypes.RenderDetails();
+            m_SelectedTestTypes.RenderDetails(position.width);
 
             if (m_Settings.verticalSplit)
                 SplitterGUILayout.EndVerticalSplit();

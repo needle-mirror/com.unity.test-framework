@@ -1,7 +1,7 @@
 {
   "name": "com.unity.test-framework",
   "displayName": "Test Framework",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "unity": "2019.4",
   "unityRelease": "0a10",
   "description": "Test framework for running Edit mode and Play mode tests in Unity.",
@@ -13,7 +13,7 @@
   "repository": {
     "url": "https://github.com/Unity-Technologies/com.unity.test-framework.git",
     "type": "git",
-    "revision": "147960f420428a4fc24c5f359e5f198a03567e36"
+    "revision": "29edcbd6a45d5c7554f251728ff91c3676bfffa3"
   },
   "dependencies": {
     "com.unity.ext.nunit": "2.0.3",
@@ -221,13 +221,13 @@
     }
   ],
   "relatedPackages": {
-    "com.unity.test-framework.tests": "1.4.1"
+    "com.unity.test-framework.tests": "1.4.2"
   },
   "_upm": {
-    "changelog": "- Multiple improvements to the UI, including better dropdowns, filtering, and a new test list view for Player.\n- Fixed uncategorized UI tests filtering for parameterized tests (DSTR-219).\n- In async tests, any failing logs will now first be evaluated after the async method has completed. (DSTR-839)"
+    "changelog": "- Issue where playmode tests were not recording test results correctly after the first run was fixed. (DSTR-984)\n- A timeout message is now printed when the test failures occurs before the test finishes. (DSTR-476)\n- Nested enumerators are now having their first step executed in the same frame as the parent enumerator. (DSTR-888)\n- Fixed an issue where test projects without PlayMode tests would give the error \"No callbacks received.\" when running in batchmode on some Unity versions."
   },
   "upmCi": {
-    "footprint": "0a4ea4de2ebe5e23c9bd5d30cabc6f5cc66a2423"
+    "footprint": "f1fb285e06f2806710d3d502c57e017039cb8753"
   },
   "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.test-framework@1.4/manual/index.html"
 }

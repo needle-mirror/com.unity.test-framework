@@ -8,5 +8,6 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
         public bool fileCleanUpCheck;
         public bool requiresSplashScreen;
         public bool strictDomainReload;
+        public bool disableNestedEnumeratorBugfix;
     }
 }

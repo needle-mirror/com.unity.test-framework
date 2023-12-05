@@ -249,7 +249,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                 EditorGUILayout.HelpBox(noTestsText, MessageType.Info);
                 if (GUILayout.Button("Create a new Test Assembly Folder in the active path."))
                 {
-                    testScriptAssetsCreator.AddNewFolderWithTestAssemblyDefinition(true);
+                    testScriptAssetsCreator.AddNewFolderWithTestAssemblyDefinition(m_TestMode == TestMode.EditMode);
                 }
             }
 
@@ -270,15 +270,14 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             }
         }
 
-        public void RenderDetails()
+        public void RenderDetails(float width)
         {
-            m_TestInfoScroll = EditorGUILayout.BeginScrollView(m_TestInfoScroll);
-            var resultTextSize = TestRunnerWindow.Styles.info.CalcSize(new GUIContent(m_ResultText));
+            m_TestInfoScroll = EditorGUILayout.BeginScrollView(m_TestInfoScroll, GUILayout.ExpandWidth(true));
+            var resultTextHeight = TestRunnerWindow.Styles.info.CalcHeight(new GUIContent(m_ResultText), width);
             EditorGUILayout.SelectableLabel(m_ResultText, TestRunnerWindow.Styles.info,
                 GUILayout.ExpandHeight(true),
                 GUILayout.ExpandWidth(true),
-                GUILayout.MinWidth(resultTextSize.x),
-                GUILayout.MinHeight(resultTextSize.y));
+                GUILayout.MinHeight(resultTextHeight));
             EditorGUILayout.EndScrollView();
         }
 

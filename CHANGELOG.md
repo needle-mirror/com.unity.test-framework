@@ -1,5 +1,11 @@
 # Changelog
-## [1.4.1] - 2023-11-27
+## [1.4.2] - 2023-12-05
+- Issue where playmode tests were not recording test results correctly after the first run was fixed. (DSTR-984)
+- A timeout message is now printed when the test failures occurs before the test finishes. (DSTR-476)
+- Nested enumerators are now having their first step executed in the same frame as the parent enumerator. (DSTR-888)
+- Fixed an issue where test projects without PlayMode tests would give the error "No callbacks received." when running in batchmode on some Unity versions.
+
+## [1.4.1] - 2023-11-13
 - Multiple improvements to the UI, including better dropdowns, filtering, and a new test list view for Player.
 - Fixed uncategorized UI tests filtering for parameterized tests (DSTR-219).
 - In async tests, any failing logs will now first be evaluated after the async method has completed. (DSTR-839)

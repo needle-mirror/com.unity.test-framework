@@ -170,6 +170,7 @@ namespace UnityEditor.TestTools.TestRunner.Api
                 stringBuilder.AppendLine($"  {nameof(featureFlags.fileCleanUpCheck)} = {featureFlags.fileCleanUpCheck}");
 				stringBuilder.AppendLine($"  {nameof(featureFlags.requiresSplashScreen)} = {featureFlags.requiresSplashScreen}");
 				stringBuilder.AppendLine($"  {nameof(featureFlags.strictDomainReload)} = {featureFlags.strictDomainReload}");
+                stringBuilder.AppendLine($"  {nameof(featureFlags.disableNestedEnumeratorBugfix)} = {featureFlags.disableNestedEnumeratorBugfix}");
             }
 
 

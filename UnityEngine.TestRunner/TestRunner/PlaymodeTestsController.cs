@@ -16,7 +16,7 @@ namespace UnityEngine.TestTools.TestRunner
     {
         private IEnumerator m_TestSteps;
 
-        public static PlaymodeTestsController ActiveController { get; private set; }
+        public static PlaymodeTestsController ActiveController { get; set; }
 
         [SerializeField]
         private List<string> m_AssembliesWithTests;
@@ -46,6 +46,8 @@ namespace UnityEngine.TestTools.TestRunner
 
         [SerializeField]
         public PlaymodeTestsControllerSettings settings = new PlaymodeTestsControllerSettings();
+        [NonSerialized]
+        public bool RunInfrastructureHasRegistered = false;
 
         internal UnityTestAssemblyRunner m_Runner;
 
@@ -92,6 +94,12 @@ namespace UnityEngine.TestTools.TestRunner
 
         public IEnumerator Run()
         {
+            if (!RunInfrastructureHasRegistered)
+            {
+                // Wait for the infrastructure to be ready
+                yield return null;
+            }
+            
             CoroutineTestWorkItem.monoBehaviourCoroutineRunner = this;
             gameObject.hideFlags |= HideFlags.DontSave;
 

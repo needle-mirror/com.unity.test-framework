@@ -1,16 +1,24 @@
-# Workflow: How to run a test
+# Workflow: Running tests
 
-To run a test, you need to double-click on the test or test fixture name in the **Test Runner** window.
+There are several ways to run tests in the **Test Runner** window:
 
-You can also use one of the buttons on the top bar, **Run All** or **Run Selected**. As a result, you’ll see the test status icon changed and a counter in the top right corner updated:
+* Double-click on the test or test fixture name.
+* Use the **Run All** or **Run Selected** buttons at the bottom of the window.
+* Right-click on any item in the test tree and choose **Run** in the context menu to run the test and all of its children. 
 
-![EditMode Run Test](./images/editmode-run-test.png)
+When you run a test the test status icon changes to show the result and a counter in the top right corner updates:
 
-You may also use a context menu option **Run**, right-click on any item in the test tree to have it (with all its children if any) run. 
+![Run Test](./images/run-tests.png)
 
-![EditMode Run Tests](./images/editmode-run-tests.png)
+## Filters
 
+If you have a lot of tests, and you only want to view/run a sub-set of them, you can filter them in several ways (see image above): 
 
+* Type in the search box in the top left
+
+* Click a test class or fixture (such as **NewTestScript** in the image above)
+
+* Click one of the test result icon buttons in the top right
 
 ## Run tests within Rider
 

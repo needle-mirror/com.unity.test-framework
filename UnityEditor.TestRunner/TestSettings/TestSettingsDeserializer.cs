@@ -68,6 +68,10 @@ namespace UnityEditor.TestTools.TestRunner
                 {
                     featureFlags.requiresSplashScreen = converted["requiresSplashScreen"];
                 }
+                if (converted.ContainsKey("disableNestedEnumeratorBugfix"))
+                {
+                    featureFlags.disableNestedEnumeratorBugfix = converted["disableNestedEnumeratorBugfix"];
+                }
 
                 settings.featureFlags = featureFlags;
             }),

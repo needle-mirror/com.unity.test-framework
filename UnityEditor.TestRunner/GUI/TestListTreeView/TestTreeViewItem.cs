@@ -1,8 +1,10 @@
 using System;
+using System.IO;
 using System.Reflection;
 using System.Text;
 using UnityEditor.IMGUI.Controls;
 using UnityEditor.TestTools.TestRunner.Api;
+using UnityEngine;
 
 namespace UnityEditor.TestTools.TestRunner.GUI
 {
@@ -91,17 +93,17 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             if (!string.IsNullOrEmpty(result.messages))
             {
                 sb.Append("\n---\n");
-                sb.Append(result.messages.Trim());
+                sb.Append(result.messages);
             }
             if (!string.IsNullOrEmpty(result.stacktrace))
             {
                 sb.Append("\n---\n");
-                sb.Append(result.stacktrace.Trim());
+                sb.Append(StacktraceWithHyperlinks(result.stacktrace));
             }
             if (!string.IsNullOrEmpty(result.output))
             {
                 sb.Append("\n---\n");
-                sb.Append(result.output.Trim());
+                sb.Append(result.output);
             }
             if (sb.Length > k_ResultTestMaxLength)
             {
@@ -142,6 +144,47 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                     }
                     break;
             }
+        }
+        
+        private static string StacktraceWithHyperlinks(string stacktraceText)
+        {
+            StringBuilder textWithHyperlinks = new StringBuilder();
+            var lines = stacktraceText.Split(new string[] { "\n" }, StringSplitOptions.None);
+
+            for (int i = 0; i < lines.Length; ++i)
+            {
+                string textBeforeFilePath = "] in ";
+                int filePathIndex = lines[i].IndexOf(textBeforeFilePath, StringComparison.Ordinal);
+                if (filePathIndex > 0)
+                {
+                    filePathIndex += textBeforeFilePath.Length;
+                    if (lines[i][filePathIndex] != '<') // sometimes no url is given, just an id between <>, we can't do an hyperlink
+                    {
+                        string filePathPart = lines[i].Substring(filePathIndex);
+                        int lineIndex = filePathPart.LastIndexOf(":", StringComparison.Ordinal); // LastIndex because the url can contain ':' ex:"C:"
+                        if (lineIndex > 0)
+                        {
+                            string lineString = filePathPart.Substring(lineIndex + 1);
+                            string filePath = filePathPart.Substring(0, lineIndex);
+#if UNITY_2021_3_OR_NEWER
+                            var displayedPath = Path.GetRelativePath(Directory.GetCurrentDirectory(), filePath);
+#else
+                            var displayedPath = filePath;
+#endif
+                            textWithHyperlinks.Append($"{lines[i].Substring(0, filePathIndex)}<color=#40a0ff><a href=\"{filePath}\" line=\"{lineString}\">{displayedPath}:{lineString}</a></color>\n");
+
+                            continue; // continue to evade the default case
+                        }
+                    }
+                }
+                // default case if no hyperlink : we just write the line
+                textWithHyperlinks.Append(lines[i] + "\n");
+            }
+            // Remove the last \n
+            if (textWithHyperlinks.Length > 0) // textWithHyperlinks always ends with \n if it is not empty
+                textWithHyperlinks.Remove(textWithHyperlinks.Length - 1, 1);
+            
+            return textWithHyperlinks.ToString();
         }
     }
 }

@@ -40,7 +40,7 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
 
             editModeRunner.UnityTestAssemblyRunnerFactory = new UnityTestAssemblyRunnerFactory();
             editModeRunner.Init(testJobData.executionSettings.BuildNUnitFilter(), testJobData.executionSettings.runSynchronously, testJobData.testTree, testJobData.TestStartedEvent,
-                testJobData.TestFinishedEvent, testJobData.Context, testJobData.executionSettings.orderedTestNames, testJobData.executionSettings.randomOrderSeed);
+                testJobData.TestFinishedEvent, testJobData.Context, testJobData.executionSettings.orderedTestNames, testJobData.executionSettings.randomOrderSeed, testJobData.executionSettings.featureFlags.disableNestedEnumeratorBugfix);
 
             while (testJobData.editModeRunner != null && !testJobData.editModeRunner.RunFinished)
             {

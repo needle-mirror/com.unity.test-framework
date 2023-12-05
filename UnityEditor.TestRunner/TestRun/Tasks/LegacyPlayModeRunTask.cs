@@ -32,6 +32,8 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
             controller.testFinishedEvent.AddListener(testJobData.TestFinishedEvent.Invoke);
             controller.runFinishedEvent.AddListener(testJobData.RunFinishedEvent.Invoke);
 
+            controller.RunInfrastructureHasRegistered = true;
+            
             while (!PlaymodeLauncher.HasFinished)
             {
                 yield return null;

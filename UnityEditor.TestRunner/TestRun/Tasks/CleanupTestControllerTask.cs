@@ -14,6 +14,7 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
 
         public override IEnumerator Execute(TestJobData testJobData)
         {
+            PlaymodeTestsController.ActiveController = null;
             if (testJobData.PlaymodeTestsController == null)
             {
                 yield break;

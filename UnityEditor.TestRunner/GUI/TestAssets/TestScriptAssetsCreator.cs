@@ -35,12 +35,24 @@ namespace UnityEditor.TestTools.TestRunner.GUI.TestAssets
 
         private static string ActiveFolderPath => ActiveFolderTemplateAssetCreator.GetActiveFolderPath();
         private static string ScriptTemplatesResourcesPath => Path.Combine(EditorApplication.applicationContentsPath, resourcesTemplatePath);
-        private static string ScriptTemplatePath => Path.Combine(ScriptTemplatesResourcesPath, testScriptTemplate);
+        
+#if UNITY_2023_3_OR_NEWER
+        private static string ScriptTemplatePath => Path.Combine(ScriptTemplatesResourcesPath, AssetsMenuUtility.GetScriptTemplatePath(ScriptTemplate.CSharp_NewTestScript));
+#else
+        private static string ScriptTemplatePath => Path.Combine(ScriptTemplatesResourcesPath, testScriptTemplate);            
+#endif
 
         /// <inheritdoc />
         public void AddNewFolderWithTestAssemblyDefinition(bool isEditorOnly = false)
         {
+#if UNITY_2023_3_OR_NEWER
+            var assemblyDefinitionTemplate =
+                AssetsMenuUtility.GetScriptTemplatePath(isEditorOnly
+                    ? ScriptTemplate.AsmDef_NewEditModeTestAssembly
+                    : ScriptTemplate.AsmDef_NewTestAssembly);          
+#else    
             var assemblyDefinitionTemplate = isEditorOnly ? k_AssemblyDefinitionEditModeTestTemplate : assemblyDefinitionTestTemplate;
+#endif
             ActiveFolderTemplateAssetCreator.CreateFolderWithTemplates(defaultNewTestAssemblyFolderName, assemblyDefinitionTemplate);
         }
 

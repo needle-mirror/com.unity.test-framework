@@ -55,6 +55,9 @@ namespace UnityEditor.TestTools.TestRunner
         [SerializeField]
         public bool RunFinished;
 
+        [SerializeField]
+        private bool m_DisableNestedEnumeratorBugfix;
+
         public bool RunningSynchronously { get; private set; }
 
         internal IUnityTestAssemblyRunner m_Runner;
@@ -64,7 +67,7 @@ namespace UnityEditor.TestTools.TestRunner
         public IUnityTestAssemblyRunnerFactory UnityTestAssemblyRunnerFactory { get; set; }
 
         public void Init(ITestFilter filter, bool runningSynchronously, ITest testTree, TestStartedEvent testStartedEvent, TestFinishedEvent testFinishedEvent, UnityTestExecutionContext context,
-            string[] orderedTestNames, int randomOrderSeed)
+            string[] orderedTestNames, int randomOrderSeed, bool disableNestedEnumeratorBugfix)
         {
             TestEnumerator.Reset();
             m_AlreadyStartedTests = new List<string>();
@@ -72,6 +75,7 @@ namespace UnityEditor.TestTools.TestRunner
             m_OrderedTestNames = orderedTestNames;
             m_randomOrderSeed = randomOrderSeed;
             RunningSynchronously = runningSynchronously;
+            m_DisableNestedEnumeratorBugfix = disableNestedEnumeratorBugfix;
             Run(testTree, filter, context, testStartedEvent, testFinishedEvent);
         }
 
@@ -175,6 +179,11 @@ namespace UnityEditor.TestTools.TestRunner
 
                     m_RunStep = currentEnumerator;
                     m_CurrentYieldObject = m_RunStep.Current;
+
+                    if (!m_DisableNestedEnumeratorBugfix)
+                    {
+                        return MoveNextAndUpdateYieldObject();
+                    }
                 }
 
                 if (StepStack.Count > 0 && m_CurrentYieldObject != null)    // not null and not IEnumerator, nested

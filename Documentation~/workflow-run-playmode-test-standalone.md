@@ -1,10 +1,10 @@
-# Workflow: How to run a Play Mode test in player
+# Workflow: Running Play Mode tests in a player
 
-If you run a **Play Mode** test in the same way as an [Editor test](./workflow-run-test.md), it runs inside the Unity Editor. You can also run Play Mode tests on specific platforms. Click **Run all in the player** to build and run your tests on the currently active target platform.
+If you run a **Play Mode** test in the same way as an [Editor test](./workflow-run-test.md), it runs inside the Unity Editor. You can also run Play Mode tests on specific platforms. Select **Player** tab to build and run your tests on the currently active target platform. 
 
-![Run PlayMode test in player](./images/playmode-run-standalone.png)
+![Run PlayMode test in player](./images/run-playmode-standalone.png)
 
-> **Note**: Your current platform displays in brackets on the button. For example, in the image above, the button reads **Run all in player (StandaloneWindows)**, because the current platform is Windows. The target platform is always the current Platform selected in [Build Settings](https://docs.unity3d.com/Manual/BuildSettings.html) (menu: **File** > **Build Settings**). 
+> **Note**: Your current platform shows at the top of the Test Runner window. For example, in the image above, the bar above the search bar reads **Running in StandaloneOSX**, because the current platform is MacOS. The target platform is always the current Platform selected in [Build Settings](https://docs.unity3d.com/Manual/BuildSettings.html) (menu: **File** > **Build Settings**). 
 
 The test result displays in the build once the test completes:
 
