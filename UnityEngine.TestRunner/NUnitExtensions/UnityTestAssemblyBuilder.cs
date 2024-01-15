@@ -34,6 +34,32 @@ namespace UnityEngine.TestTools.NUnitExtensions
 
             return test.Current;
         }
+        
+        struct PlatformAssembly : IEquatable<PlatformAssembly>
+        {
+            public System.Reflection.Assembly Assembly;
+            public TestPlatform Platform;
+
+            public bool Equals(PlatformAssembly other)
+            {
+                return Equals(Assembly, other.Assembly) && Platform == other.Platform;
+            }
+
+            public override bool Equals(object obj)
+            {
+                return obj is PlatformAssembly other && Equals(other);
+            }
+
+            public override int GetHashCode()
+            {
+                unchecked
+                {
+                    return ((Assembly != null ? Assembly.GetHashCode() : 0) * 397) ^ (int) Platform;
+                }
+            }
+        }
+
+        private static Dictionary<PlatformAssembly, TestSuite> CachedAssemblies = new Dictionary<PlatformAssembly, TestSuite>();
 
         public IEnumerator<ITest> BuildAsync(Assembly[] assemblies, TestPlatform[] testPlatforms, IDictionary<string, object> options)
         {
@@ -46,12 +72,16 @@ namespace UnityEngine.TestTools.NUnitExtensions
 
                 using (new ProfilerMarker(nameof(UnityTestAssemblyBuilder) + "." + assembly.GetName().Name).Auto())
                 {
-                    var assemblySuite = Build(assembly, GetNUnitTestBuilderSettings(platform)) as TestSuite;
-                    if (assemblySuite != null)
+                    var key = new PlatformAssembly {Assembly = assembly, Platform = platform};
+                    if (!CachedAssemblies.TryGetValue(key, out var assemblySuite))
                     {
-                        assemblySuite.Properties.Set("platform", platform);
-                        assemblySuite.Properties.Set("isAssembly", true);
-                        EditorOnlyFilter.ApplyPropertyToTest(assemblySuite, platform == TestPlatform.EditMode);
+                        assemblySuite = Build(assembly, GetNUnitTestBuilderSettings(platform)) as TestSuite;
+                        if (assemblySuite != null)
+                        {
+                            assemblySuite.Properties.Set("platform", platform);
+                            EditorOnlyFilter.ApplyPropertyToTest(assemblySuite, platform == TestPlatform.EditMode);
+                        }
+                        CachedAssemblies.Add(key, assemblySuite);
                     }
 
                     if (assemblySuite != null && assemblySuite.HasChildren)

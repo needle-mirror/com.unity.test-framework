@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Text;
 using NUnit.Framework.Interfaces;
+using Unity.Profiling;
 using UnityEngine;
 using UnityEngine.TestRunner.TestLaunchers;
 
@@ -103,16 +104,21 @@ namespace UnityEditor.TestTools.TestRunner.Api
 
         public void TestTreeRebuild(ITest test)
         {
-            m_AdaptorFactory.ClearTestsCache();
-            var testAdaptor = m_AdaptorFactory.Create(test);
-            TryInvokeAllCallbacks(callbacks =>
+            using (new ProfilerMarker(nameof(TestTreeRebuild)).Auto())
             {
-                var rebuildCallbacks = callbacks as ITestTreeRebuildCallbacks;
-                if (rebuildCallbacks != null)
+                m_AdaptorFactory.ClearTestsCache();
+                ITestAdaptor testAdaptor;
+                using (new ProfilerMarker("CreateTestAdaptors").Auto())
+                    testAdaptor = m_AdaptorFactory.Create(test);
+                TryInvokeAllCallbacks(callbacks =>
                 {
-                    rebuildCallbacks.TestTreeRebuild(testAdaptor);
-                }
-            });
+                    var rebuildCallbacks = callbacks as ITestTreeRebuildCallbacks;
+                    if (rebuildCallbacks != null)
+                    {
+                        rebuildCallbacks.TestTreeRebuild(testAdaptor);
+                    }
+                });
+            }
         }
 
         public void SetTestRunFilter(ITestFilter filter)

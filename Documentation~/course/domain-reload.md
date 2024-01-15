@@ -26,6 +26,8 @@ After running `CreateScript` Unity now has a new C# file in the project and thus
   
 Remember that your script should also clean up after itself, by deleting the file and recompiling the script again. This is recommended to do in a `TearDown` or `UnityTearDown`, which will run even if the test fails.
 
+> **Important**: After importing, you should **move the sample test folder** `Tests_13` into the `Assets` folder for this exercise to work.
+
 ## Hints
 
 *   If `RecompileScripts` is unavailable to you due to it being internal, then you need to upgrade the Unity Test Framework package to version 1.1.0 or higher.

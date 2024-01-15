@@ -1,4 +1,11 @@
 # Changelog
+## [1.4.3] - 2024-01-15
+- Fixed a performance issue in relation to the new ui, where running a large selection of tests did not perform well. (DSTR-983)
+- The test tree no longer is fully expanded when the window is first opened, fixing test tree explosion. (DSTR-985)
+- Fixed an issue in Solution 13 of Samples where the path was pointing to a wrong location. (DSTR-1005)
+- Updated documentation of Solution 13 of Samples to reflect more accurate solution for the example. (DSTR-1005)
+- Added ability to build all or selected tests from test runner UI. (UTF-553)
+
 ## [1.4.2] - 2023-12-05
 - Issue where playmode tests were not recording test results correctly after the first run was fixed. (DSTR-984)
 - A timeout message is now printed when the test failures occurs before the test finishes. (DSTR-476)

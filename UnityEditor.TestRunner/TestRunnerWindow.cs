@@ -14,6 +14,8 @@ namespace UnityEditor.TestTools.TestRunner
     [Serializable]
     public class TestRunnerWindow : EditorWindow, IHasCustomMenu
     {
+        private const string WindowTitle = "Test Runner";
+
         internal static class Styles
         {
             public static GUIStyle info;
@@ -70,7 +72,7 @@ namespace UnityEditor.TestTools.TestRunner
         [MenuItem("Window/General/Test Runner", false, 201, false)]
         public static void ShowWindow()
         {
-            s_Instance = GetWindow<TestRunnerWindow>("Test Runner");
+            s_Instance = GetWindow<TestRunnerWindow>(WindowTitle);
             s_Instance.Show();
         }
 
@@ -119,6 +121,7 @@ namespace UnityEditor.TestTools.TestRunner
         private void OnEnable()
         {
             s_Instance = this;
+            titleContent = new GUIContent(WindowTitle, "Test framework for running Edit mode and Play mode tests in Unity. Part of the com.unity.test-framework package.");
             SelectTestListGUI(m_TestTypeToolbarIndex);
 
             m_testRunnerApi = CreateInstance<TestRunnerApi>();

@@ -1,7 +1,7 @@
 {
   "name": "com.unity.test-framework",
   "displayName": "Test Framework",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "unity": "2019.4",
   "unityRelease": "0a10",
   "description": "Test framework for running Edit mode and Play mode tests in Unity.",
@@ -13,7 +13,7 @@
   "repository": {
     "url": "https://github.com/Unity-Technologies/com.unity.test-framework.git",
     "type": "git",
-    "revision": "29edcbd6a45d5c7554f251728ff91c3676bfffa3"
+    "revision": "b2b8bb3a69967e76a874a55ff39aa35e52ea2095"
   },
   "dependencies": {
     "com.unity.ext.nunit": "2.0.3",
@@ -221,13 +221,13 @@
     }
   ],
   "relatedPackages": {
-    "com.unity.test-framework.tests": "1.4.2"
+    "com.unity.test-framework.tests": "1.4.3"
   },
   "_upm": {
-    "changelog": "- Issue where playmode tests were not recording test results correctly after the first run was fixed. (DSTR-984)\n- A timeout message is now printed when the test failures occurs before the test finishes. (DSTR-476)\n- Nested enumerators are now having their first step executed in the same frame as the parent enumerator. (DSTR-888)\n- Fixed an issue where test projects without PlayMode tests would give the error \"No callbacks received.\" when running in batchmode on some Unity versions."
+    "changelog": "- Fixed a performance issue in relation to the new ui, where running a large selection of tests did not perform well. (DSTR-983)\n- The test tree no longer is fully expanded when the window is first opened, fixing test tree explosion. (DSTR-985)\n- Fixed an issue in Solution 13 of Samples where the path was pointing to a wrong location. (DSTR-1005)\n- Updated documentation of Solution 13 of Samples to reflect more accurate solution for the example. (DSTR-1005)\n- Added ability to build all or selected tests from test runner UI. (UTF-553)"
   },
   "upmCi": {
-    "footprint": "f1fb285e06f2806710d3d502c57e017039cb8753"
+    "footprint": "a86383bc10b7483798fb0c18c104487fc98f4522"
   },
   "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.test-framework@1.4/manual/index.html"
 }

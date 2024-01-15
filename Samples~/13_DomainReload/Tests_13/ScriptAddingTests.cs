@@ -7,7 +7,7 @@ namespace Tests_13
 {
     internal class ScriptAddingTests
     {
-        private const string pathToFile = "Assets/Tests/TempScript.cs"; 
+        private const string pathToFile = "Assets/Tests_13/TempScript.cs"; 
         
         [Test]
         public void YourTestGoesHere()

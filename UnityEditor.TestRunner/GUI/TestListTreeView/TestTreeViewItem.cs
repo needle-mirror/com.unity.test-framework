@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using UnityEditor.IMGUI.Controls;
@@ -43,6 +45,30 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             }
 
             return null;
+        }
+
+
+        public IEnumerable<ITestAdaptor> GetMinimizedSelectedTree()
+        {
+            if (!m_Test.HasChildren)
+            {
+                yield return m_Test;
+                yield break;
+            }
+
+            var minimizedDescendants = children.OfType<TestTreeViewItem>().SelectMany(c => c.GetMinimizedSelectedTree()).ToArray();
+            var includeChildren = minimizedDescendants.Count(c => c.Parent == m_Test);
+            if (includeChildren == m_Test.Children.Count())
+            {
+                // All children are included in the filter, so we can just return the parent
+                yield return m_Test;
+                yield break;
+            }
+            
+            foreach (var child in minimizedDescendants)
+            {
+                yield return child;
+            }
         }
 
         public TestTreeViewItem(ITestAdaptor test, int depth, TreeViewItem parent)

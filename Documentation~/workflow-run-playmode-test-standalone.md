@@ -1,5 +1,7 @@
 # Workflow: Running Play Mode tests in a player
 
+## Build and run Tests in a player
+
 If you run a **Play Mode** test in the same way as an [Editor test](./workflow-run-test.md), it runs inside the Unity Editor. You can also run Play Mode tests on specific platforms. Select **Player** tab to build and run your tests on the currently active target platform. 
 
 ![Run PlayMode test in player](./images/run-playmode-standalone.png)
@@ -16,6 +18,15 @@ The application running on the platform reports back the test results to the Edi
 
 If Unity cannot instantiate the connection, you can see the tests succeed in the running application. Running tests on platforms with arguments, in this state, does not provide XML test results.
 
+## Build a player with tests
 
+You can use the dropdown selector next to the **Run All** button to build a player with all the tests, or a selected subset of tests, without running it.
+
+![Build Player with Tests in Test Runner](./images/playmode-standalone-build-tests.png)
+
+> **Note**: In some cases the available selections are different:
+- If the selected platform is Android or iOS and **Export project** is enabled in **Build Settings**, the selections are **Export All Tests** and **Export Selected Tests**.
+
+![Export Project with Tests in Test Runner](./images/playmode-standalone-build-tests-android-ios.png)
 
 For more information, see [Edit Mode vs Play Mode tests](./edit-mode-vs-play-mode-tests.md).

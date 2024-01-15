@@ -9,7 +9,7 @@ namespace Tests_13s
 {
     internal class ScriptAddingTests
     {
-        private const string pathToFile = "Assets/Tests/TempScript.cs"; 
+        private const string pathToFile = "Assets/Tests_13s/TempScript.cs"; 
         
         [UnityTest]
         public IEnumerator CreatedScriptIsVerified()
@@ -29,8 +29,13 @@ namespace Tests_13s
             {
                 yield break;
             }
+            if (!File.Exists(pathToFile + ".meta"))
+            {
+                yield break;
+            }
             
             File.Delete(pathToFile);
+            File.Delete(pathToFile + ".meta");
             yield return new RecompileScripts();
         }
         
