@@ -42,6 +42,10 @@ namespace UnityEditor.TestTools.TestRunner.TestRun
 
             // ReSharper disable once BadControlBracesIndent
         var editMode = settings.EditModeIncluded() || (PlayerSettings.runPlayModeTestAsEditModeTest && settings.PlayModeInEditorIncluded());
+        if (!editMode)
+        {
+            yield return new MarkRunAsPlayModeTask();
+        }
             yield return new SaveModifiedSceneTask();
             yield return new RegisterFilesForCleanupVerificationTask();
             yield return new SaveUndoIndexTask();
@@ -54,29 +58,32 @@ namespace UnityEditor.TestTools.TestRunner.TestRun
             yield return new CreateEventsTask();
             yield return new RegisterCallbackDelegatorEventsTask();
             yield return new RegisterTestRunCallbackEventsTask();
+            yield return new PrebuildSetupTask();
+            yield return new EnableTestOutLoggerTask();
 
         if (editMode)
         {
-            yield return new PrebuildSetupTask();
             yield return new InitializeTestProgressTask();
             yield return new UpdateTestProgressTask();
             yield return new GenerateContextTask();
-            yield return new EnableTestOutLoggerTask();
             yield return new SetupConstructDelegatorTask();
             yield return new RunStartedInvocationEvent();
             yield return new EditModeRunTask();
             yield return new RunFinishedInvocationEvent();
             yield return new CleanupConstructDelegatorTask();
-            yield return new PostbuildCleanupTask();
-            yield return new CleanUpContext();
         }
         else
         {
             yield return new GenerateContextTask();
-            yield return new LegacyPlayModeRunTask();
+            yield return new PreparePlayModeRunTask();
+            yield return new EnterPlayModeTask();
+            yield return new PlayModeRunTask();
+            yield return new ExitPlayModeTask();
+            yield return new RestoreProjectSettingsTask();
             yield return new CleanupTestControllerTask();
-            yield return new CleanUpContext();
         }
+            yield return new PostbuildCleanupTask();
+            yield return new CleanUpContext();
             yield return new RestoreSceneSetupTask();
             yield return new DeleteBootstrapSceneTask();
             yield return new PerformUndoTask();

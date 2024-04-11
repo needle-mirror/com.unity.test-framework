@@ -18,4 +18,4 @@ public IEnumerator MyTestWithMultipleValues([ValueSource("values")] int value)
 
 ## Ignore based on parameters
 
-You can selectively ignore tests based on the parameters supplied to the test method by using the [ParameterizedIgnoreAttribute](xref:UnityEngine.TestTools.ParameterizedIgnoreAttribute).
+You can selectively ignore tests based on the parameters supplied to the test method by using the [ParameterizedIgnoreAttribute](xref:UnityEngine.TestTools.ParametrizedIgnoreAttribute).

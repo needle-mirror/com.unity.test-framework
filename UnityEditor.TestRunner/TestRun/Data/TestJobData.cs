@@ -119,6 +119,9 @@ namespace UnityEditor.TestTools.TestRunner.TestRun
         [SerializeField]
         public EnumerableTestState RetryRepeatState;
 
+        [SerializeField]
+        public SavedProjectSettings OriginalProjectSettings;
+
         public TestJobData(ExecutionSettings settings)
         {
             guid = Guid.NewGuid().ToString();
@@ -137,5 +140,12 @@ namespace UnityEditor.TestTools.TestRunner.TestRun
             taskInfoStack = new Stack<TaskInfo>(savedTaskInfoStack);
         }
 
+        [Serializable]
+        internal class SavedProjectSettings
+        {
+            public bool runInBackgroundValue;
+
+            public bool consoleErrorPaused;
+        }
     }
 }

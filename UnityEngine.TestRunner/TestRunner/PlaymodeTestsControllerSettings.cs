@@ -16,8 +16,6 @@ namespace UnityEngine.TestTools.TestRunner
         public bool sceneBased;
         public string originalScene;
         public string bootstrapScene;
-        public bool runInBackgroundValue;
-        public bool consoleErrorPaused;
         public string[] orderedTestNames;
         public FeatureFlags featureFlags;
         [SerializeField]

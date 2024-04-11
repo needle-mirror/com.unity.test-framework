@@ -163,6 +163,7 @@ namespace UnityEditor.TestTools.TestRunner.TestRun
 
                         if (task.SupportsResumingEnumerator)
                         {
+                            m_Enumerator.MoveNext(); // Execute the first step, to set the job data.
                             PcHelper.SetEnumeratorPC(m_Enumerator, taskInfo.pc);
                         }
                     }

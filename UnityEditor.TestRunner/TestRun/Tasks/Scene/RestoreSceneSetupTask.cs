@@ -8,6 +8,12 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks.Scene
     {
         internal Action<SceneSetup[]> RestoreSceneManagerSetup = EditorSceneManager.RestoreSceneManagerSetup;
         internal Func<NewSceneSetup, NewSceneMode, ISceneWrapper> NewScene = (setup, mode) => new SceneWrapper(EditorSceneManager.NewScene(setup, mode));
+
+        public RestoreSceneSetupTask()
+        {
+            RunOnError = ErrorRunMode.RunAlways;
+        }
+
         public override IEnumerator Execute(TestJobData testJobData)
         {
             var sceneSetup = testJobData.SceneSetup;

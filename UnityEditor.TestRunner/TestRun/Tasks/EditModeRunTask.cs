@@ -35,6 +35,7 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
                 yield break;
             }
 
+            yield return null; // Allow for setting the test job data after a resume.
             var editModeRunner = ScriptableObject.CreateInstance<EditModeRunner>();
             testJobData.editModeRunner = editModeRunner;
 

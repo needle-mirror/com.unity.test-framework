@@ -38,7 +38,7 @@ namespace UnityEditor.TestTools.TestRunner
         private void PerformLegacyPostSuccessfulLaunchAction()
         {
             var connectionResult = -1;
-            var maxTryCount = 10;
+            var maxTryCount = 30;
             var tryCount = maxTryCount;
             while (tryCount-- > 0 && connectionResult == -1)
             {

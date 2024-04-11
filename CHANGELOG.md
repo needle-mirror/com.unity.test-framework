@@ -1,4 +1,9 @@
 # Changelog
+## [1.4.4] - 2024-04-11
+- Fix the issue where playmode controller wasn't being set and cleaned up correctly, causing issues post test run. (DSTR-1025)
+- Fixed an issue where Oculus Quest headsets might timeout before the test run starts (DSTR-404).
+- Fixed a regression where the console output would no longer get attached to the test result for PlayMode.
+
 ## [1.4.3] - 2024-01-15
 - Fixed a performance issue in relation to the new ui, where running a large selection of tests did not perform well. (DSTR-983)
 - The test tree no longer is fully expanded when the window is first opened, fixing test tree explosion. (DSTR-985)

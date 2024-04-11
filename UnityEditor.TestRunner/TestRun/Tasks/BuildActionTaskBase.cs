@@ -60,14 +60,13 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
                 {
                     exceptions.Add(ex);
                 }
-
-                yield return null;
             }
 
             if (exceptions.Count > 0)
             {
                 throw new AggregateException($"One or more exceptions when executing {typeName}.", exceptions);
             }
+            yield break;
         }
     }
 }

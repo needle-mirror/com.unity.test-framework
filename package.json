@@ -1,7 +1,7 @@
 {
   "name": "com.unity.test-framework",
   "displayName": "Test Framework",
-  "version": "1.4.3",
+  "version": "1.4.4",
   "unity": "2019.4",
   "unityRelease": "0a10",
   "description": "Test framework for running Edit mode and Play mode tests in Unity.",
@@ -13,7 +13,7 @@
   "repository": {
     "url": "https://github.com/Unity-Technologies/com.unity.test-framework.git",
     "type": "git",
-    "revision": "b2b8bb3a69967e76a874a55ff39aa35e52ea2095"
+    "revision": "c9f8df94dd6b521dfd42d4d21d026130455299a5"
   },
   "dependencies": {
     "com.unity.ext.nunit": "2.0.3",
@@ -221,13 +221,13 @@
     }
   ],
   "relatedPackages": {
-    "com.unity.test-framework.tests": "1.4.3"
+    "com.unity.test-framework.tests": "1.4.4"
   },
   "_upm": {
-    "changelog": "- Fixed a performance issue in relation to the new ui, where running a large selection of tests did not perform well. (DSTR-983)\n- The test tree no longer is fully expanded when the window is first opened, fixing test tree explosion. (DSTR-985)\n- Fixed an issue in Solution 13 of Samples where the path was pointing to a wrong location. (DSTR-1005)\n- Updated documentation of Solution 13 of Samples to reflect more accurate solution for the example. (DSTR-1005)\n- Added ability to build all or selected tests from test runner UI. (UTF-553)"
+    "changelog": "- Fix the issue where playmode controller wasn't being set and cleaned up correctly, causing issues post test run. (DSTR-1025)\n- Fixed an issue where Oculus Quest headsets might timeout before the test run starts (DSTR-404).\n- Fixed a regression where the console output would no longer get attached to the test result for PlayMode."
   },
   "upmCi": {
-    "footprint": "a86383bc10b7483798fb0c18c104487fc98f4522"
+    "footprint": "65d65220211a4f0e8ad5ed8f526fa49e63cdf5ec"
   },
   "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.test-framework@1.4/manual/index.html"
 }

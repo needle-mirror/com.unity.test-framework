@@ -61,6 +61,13 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
 
             testJobData.PlayModeSettings = settings;
 
+            if (m_saveScene)
+            {
+                EditorSceneManager.MarkSceneDirty(testJobData.InitTestScene);
+                AssetDatabase.SaveAssets();
+                EditorSceneManager.SaveScene(testJobData.InitTestScene, testJobData.InitTestScenePath, false);
+            }
+
             yield break;
         }
     }

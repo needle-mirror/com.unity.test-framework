@@ -14,6 +14,7 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
         }
         public override IEnumerator Execute(TestJobData testJobData)
         {
+            yield return null; // Allow for setting the test job data after a resume.
             var executionSettings = testJobData.executionSettings;
             var launcher = new PlayerLauncher(testJobData.PlayModeSettings, executionSettings.targetPlatform, executionSettings.overloadTestRunSettings, executionSettings.playerHeartbeatTimeout, executionSettings.playerSavePath, testJobData.InitTestScenePath, testJobData.InitTestScene, testJobData.PlaymodeTestsController);
             launcher.Run();

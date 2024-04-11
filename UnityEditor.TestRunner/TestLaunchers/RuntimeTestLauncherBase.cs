@@ -21,14 +21,6 @@ namespace UnityEditor.TestTools.TestRunner
         {
             m_Settings = mSettings;
         }
-        protected void CreateBootstrapScene(string sceneName, Scene scene, PlaymodeTestsController runner, Action<PlaymodeTestsController> runnerSetup)
-        {
-            runnerSetup(runner);
-
-            EditorSceneManager.MarkSceneDirty(scene);
-            AssetDatabase.SaveAssets();
-            EditorSceneManager.SaveScene(scene, sceneName, false);
-        }
 
         protected UnityTestAssemblyRunner LoadTests(ITestFilter filter)
         {

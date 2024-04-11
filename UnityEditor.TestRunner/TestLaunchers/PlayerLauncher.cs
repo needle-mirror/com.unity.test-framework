@@ -107,17 +107,18 @@ namespace UnityEditor.TestTools.TestRunner
 
         public void PrepareScene(string sceneName, Scene scene, PlaymodeTestsController runner)
         {
-            CreateBootstrapScene(sceneName, scene, runner, bootstrapRunner =>
+            runner.AddEventHandlerMonoBehaviour<PlayModeRunnerCallback>();
+            var commandLineArgs = Environment.GetCommandLineArgs();
+            if (!commandLineArgs.Contains("-doNotReportTestResultsBackToEditor"))
             {
-                bootstrapRunner.AddEventHandlerMonoBehaviour<PlayModeRunnerCallback>();
-                var commandLineArgs = Environment.GetCommandLineArgs();
-                if (!commandLineArgs.Contains("-doNotReportTestResultsBackToEditor"))
-                {
-                    bootstrapRunner.AddEventHandlerMonoBehaviour<RemoteTestResultSender>();
-                }
-                bootstrapRunner.AddEventHandlerMonoBehaviour<PlayerQuitHandler>();
-                bootstrapRunner.AddEventHandlerScriptableObject<TestRunCallbackListener>();
-            });
+                runner.AddEventHandlerMonoBehaviour<RemoteTestResultSender>();
+            }
+            runner.AddEventHandlerMonoBehaviour<PlayerQuitHandler>();
+            runner.AddEventHandlerScriptableObject<TestRunCallbackListener>();
+
+            EditorSceneManager.MarkSceneDirty(scene);
+            AssetDatabase.SaveAssets();
+            EditorSceneManager.SaveScene(scene, sceneName, false);
         }
 
         private static bool BuildAndRunPlayer(PlayerLauncherBuildOptions buildOptions)

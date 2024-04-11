@@ -7,17 +7,15 @@ using UnityEngine.TestTools.TestRunner;
 
 namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
 {
-    internal class LegacyPlayModeRunTask : TestTaskBase
+    internal class PlayModeRunTask : TestTaskBase
     {
-        public LegacyPlayModeRunTask()
+        public PlayModeRunTask()
         {
             SupportsResumingEnumerator = true;
         }
         public override IEnumerator Execute(TestJobData testJobData)
         {
-            var launcher = new PlaymodeLauncher(testJobData.PlayModeSettings, testJobData.InitTestScenePath, testJobData.InitTestScene, testJobData.PlaymodeTestsController);
-
-            launcher.Run();
+            yield return null; // Allow for setting the test job data after a resume.
 
             // Saving of the scene causes serialization of the runner, so the events needs to be resubscribed. This is temporary for now.
             // Wait for the active controller
@@ -27,17 +25,34 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
             }
 
             var controller = PlaymodeTestsController.ActiveController;
+
+            if (controller.m_Runner != null && controller.m_Runner.IsTestComplete)
+            {
+                //Already finished, likely zero tests.
+                testJobData.RunStartedEvent.Invoke(controller.m_Runner.LoadedTest);
+                testJobData.RunFinishedEvent.Invoke(controller.m_Runner.Result);
+                yield break;
+            }
+            
             controller.runStartedEvent.AddListener(testJobData.RunStartedEvent.Invoke);
             controller.testStartedEvent.AddListener(testJobData.TestStartedEvent.Invoke);
             controller.testFinishedEvent.AddListener(testJobData.TestFinishedEvent.Invoke);
             controller.runFinishedEvent.AddListener(testJobData.RunFinishedEvent.Invoke);
 
             controller.RunInfrastructureHasRegistered = true;
-            
-            while (!PlaymodeLauncher.HasFinished)
+
+            var runDone = false;
+            controller.runFinishedEvent.AddListener((_) =>
+            {
+                runDone = true;
+            });
+
+            while (!runDone)
             {
                 yield return null;
             }
+
+            yield return null;
         }
     }
 }

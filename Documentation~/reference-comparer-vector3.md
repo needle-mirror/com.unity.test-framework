@@ -18,7 +18,7 @@ Use this class to compare two [Vector3](https://docs.unity3d.com/ScriptReference
 
 | Syntax                                          | Description                                                  |
 | ----------------------------------------------- | ------------------------------------------------------------ |
-| `bool Equals(Vector3 expected, Vector3 actual)` | Compares the `actual` and `expected` `Vector3` objects for equality using [Utils.AreFloatsEqual](http://todo) to compare the `x`, `y`, and `z` attributes of `Vector3`. |
+| `bool Equals(Vector3 expected, Vector3 actual)` | Compares the `actual` and `expected` `Vector3` objects for equality using [Utils.AreFloatsEqual](xref:UnityEngine.TestTools.Utils.Utils.AreFloatsEqual*) to compare the `x`, `y`, and `z` attributes of `Vector3`. |
 
 ## Example
 
