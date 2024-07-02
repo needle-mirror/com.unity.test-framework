@@ -26,7 +26,7 @@ namespace UnityEngine.TestTools.Utils
                 if (!m_Running)
                 {
                     m_Running = true;
-                    m_TestCoroutine = ExMethod(testEnumerator);
+                    m_TestCoroutine = ExMethod(WrapEnumeratorForChecks(testEnumerator));
                     m_Controller.StartCoroutine(m_TestCoroutine);
                 }
                 if (m_Context.ExecutionStatus == TestExecutionStatus.StopRequested || m_Context.ExecutionStatus == TestExecutionStatus.AbortRequested)
@@ -51,6 +51,20 @@ namespace UnityEngine.TestTools.Utils
         {
             yield return m_Controller.StartCoroutine(e);
             m_Running = false;
+        }
+
+        private IEnumerator WrapEnumeratorForChecks(IEnumerator e)
+        {
+            while (e.MoveNext())
+            {
+                if (Application.isBatchMode && e.Current is WaitForEndOfFrame)
+                {
+                    m_Running = false;
+                    throw new Exception("UnityTest yielded WaitForEndOfFrame, which is not evoked in batchmode.");
+                }
+
+                yield return e.Current;
+            }
         }
     }
 }

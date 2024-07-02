@@ -115,8 +115,7 @@ namespace UnityEditor.TestTools.TestRunner
             m_Runner = (UnityTestAssemblyRunnerFactory ?? new UnityTestAssemblyRunnerFactory()).Create(TestPlatform.EditMode, m_OrderedTestNames, m_randomOrderSeed, new EditmodeWorkItemFactory(), context);
             m_Runner.LoadTestTree(testTree);
             hideFlags |= HideFlags.DontSave;
-            EnumerableSetUpTearDownCommand.ActivePcHelper = new EditModePcHelper();
-            OuterUnityTestActionCommand.ActivePcHelper = new EditModePcHelper();
+            EnumeratorHelper.ActivePcHelper = new EditModePcHelper();
 
             EditModeTestCallbacks.RestoringTestContext += OnRestoringTest;
 

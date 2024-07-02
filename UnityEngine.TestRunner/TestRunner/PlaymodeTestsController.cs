@@ -17,6 +17,7 @@ namespace UnityEngine.TestTools.TestRunner
         private IEnumerator m_TestSteps;
 
         public static PlaymodeTestsController ActiveController { get; set; }
+        public Exception RaisedException { get; set; }
 
         [SerializeField]
         private List<string> m_AssembliesWithTests;
@@ -64,6 +65,12 @@ namespace UnityEngine.TestTools.TestRunner
             //Skip 2 frame because Unity.
             yield return null;
             yield return null;
+
+            if (Application.isEditor && !RunInfrastructureHasRegistered)
+            {
+                yield return null;
+            }
+            
             StartCoroutine(Run());
         }
 
@@ -79,8 +86,21 @@ namespace UnityEngine.TestTools.TestRunner
 
         public IEnumerator TestRunnerCoroutine()
         {
-            while (m_TestSteps.MoveNext())
+            while (true)
             {
+                try
+                {
+                    if (!m_TestSteps.MoveNext())
+                    {
+                        break;
+                    }
+                }
+                catch (Exception e)
+                {
+                    RaisedException = e;
+                    throw;
+                }
+
                 yield return m_TestSteps.Current;
             }
 

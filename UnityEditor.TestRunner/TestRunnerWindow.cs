@@ -79,12 +79,6 @@ namespace UnityEditor.TestTools.TestRunner
         static TestRunnerWindow()
         {
             InitBackgroundRunners();
-            TestRunnerApi.runProgressChanged.AddListener(UpdateProgressStatus);
-            var isRunFromCommandLine = Environment.GetCommandLineArgs().Any(arg => arg == "-runTests");
-            if (!isRunFromCommandLine)
-            {
-                EditorApplication.update += UpdateProgressBar;
-            }
         }
 
         private static void InitBackgroundRunners()
@@ -240,6 +234,8 @@ namespace UnityEditor.TestTools.TestRunner
             else
                 SplitterGUILayout.EndHorizontalSplit();
 
+            m_SelectedTestTypes.PrintProgressBar(position);
+
             EditorGUILayout.BeginVertical();
             using (new EditorGUI.DisabledScope(EditorApplication.isPlayingOrWillChangePlaymode))
             {
@@ -271,33 +267,6 @@ namespace UnityEditor.TestTools.TestRunner
             {
                 PlayerSettings.playModeTestRunnerEnabled = false;
                 EditorUtility.DisplayDialog(m_GUIDisablePlaymodeTestsRunner.text, "You need to restart the editor now", "Ok");
-            }
-        }
-
-        private static TestRunProgress runProgress;
-        private static void UpdateProgressStatus(TestRunProgress progress)
-        {
-            runProgress = progress;
-        }
-
-        private static void UpdateProgressBar()
-        {
-            if (runProgress == null)
-            {
-                return;
-            }
-
-            if (runProgress.HasFinished)
-            {
-                runProgress = null;
-                EditorUtility.ClearProgressBar();
-                return;
-            }
-
-            var cancel = EditorUtility.DisplayCancelableProgressBar($"Test Runner - {runProgress.CurrentStageName}", runProgress.CurrentStepName, runProgress.Progress);
-            if (cancel)
-            {
-                TestRunnerApi.CancelTestRun(runProgress.RunGuid);
             }
         }
 

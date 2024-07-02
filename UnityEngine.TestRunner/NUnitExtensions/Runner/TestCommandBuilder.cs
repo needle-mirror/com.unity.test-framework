@@ -90,7 +90,7 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
                     return new FailCommand(test, ResultState.Failure, message);
                 }
 
-                if (testReturnsIEnumerator && !(command is IEnumerableTestMethodCommand))
+                if ((testReturnsIEnumerator || testReturnsTask) && !(command is IEnumerableTestMethodCommand))
                 {
                     command = TryReplaceWithEnumerableCommand(command);
                     if (command != null)
@@ -139,6 +139,8 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
                     return new EnumerableRepeatedTestCommand(command as RepeatAttribute.RepeatedTestCommand);
                 case nameof(RetryAttribute.RetryCommand):
                     return new EnumerableRetryTestCommand(command as RetryAttribute.RetryCommand);
+                case nameof(MaxTimeCommand):
+                    return new EnumerableMaxTimeCommand(command as MaxTimeCommand);
                 default:
                     return null;
             }

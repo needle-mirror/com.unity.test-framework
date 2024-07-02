@@ -12,6 +12,12 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
         {
             SupportsResumingEnumerator = true;
         }
+
+        public override string GetName()
+        {
+            return "Build Test Player";
+        }
+
         public override IEnumerator Execute(TestJobData testJobData)
         {
             yield return null; // Allow for setting the test job data after a resume.

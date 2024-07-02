@@ -111,7 +111,8 @@ namespace UnityEngine.TestTools
                 IEnumerator enumerator;
                 try
                 {
-                    enumerator = InvokeBefore(action, Test, unityContext);
+                    enumerator = EnumeratorHelper.UnpackNestedEnumerators(InvokeBefore(action, Test, unityContext));
+                    EnumeratorHelper.SetEnumeratorPC(state.NextBeforeStepPc);
                 }
                 catch (Exception ex)
                 {
@@ -119,7 +120,6 @@ namespace UnityEngine.TestTools
                     context.CurrentResult.RecordPrefixedException(m_BeforeErrorPrefix, ex);
                     break;
                 }
-                ActivePcHelper.SetEnumeratorPC(enumerator, state.NextBeforeStepPc);
 
                 using (var logScope = new LogScope())
                 {
@@ -137,9 +137,17 @@ namespace UnityEngine.TestTools
                             {
                                 logScope.EvaluateLogScope(true);
                             }
-                            if (unityContext.TestMode == TestPlatform.PlayMode && enumerator.Current is IEditModeTestYieldInstruction)
+                            if (enumerator.Current is IEditModeTestYieldInstruction)
                             {
-                                throw new Exception($"PlayMode test are not allowed to yield {enumerator.Current.GetType().Name}");
+                                if (unityContext.TestMode == TestPlatform.PlayMode)
+                                {
+                                    throw new Exception($"PlayMode test are not allowed to yield {enumerator.Current.GetType().Name}");
+                                }
+
+                                if (EnumeratorHelper.IsRunningNestedEnumerator)
+                                {
+                                    throw new Exception($"Nested enumerators are not allowed to yield {enumerator.Current.GetType().Name}");
+                                }
                             }
                         }
                         catch (Exception ex)
@@ -150,8 +158,13 @@ namespace UnityEngine.TestTools
                             break;
                         }
 
-                        state.NextBeforeStepPc = ActivePcHelper.GetEnumeratorPC(enumerator);
-                        state.StoreContext(unityContext);
+                        if (!EnumeratorHelper.IsRunningNestedEnumerator)
+                        {
+                            // Only store the state in the main enumerator. Domain reloads are not supported from nested enumerators.
+                            state.NextBeforeStepPc = EnumeratorHelper.GetEnumeratorPC();
+                            state.StoreContext(unityContext);
+                        }
+                        
                         if (!AllowFrameSkipAfterAction(action))
                         {
                             break;
@@ -167,19 +180,18 @@ namespace UnityEngine.TestTools
 
             if (!state.TestHasRun)
             {
+                state.ShouldRestore = false; // Any inner commands that can perform domain reloads are responsible for restoring the context
                 if (innerCommand is IEnumerableTestMethodCommand)
                 {
                     var executeEnumerable = ((IEnumerableTestMethodCommand)innerCommand).ExecuteEnumerable(context);
                     foreach (var iterator in executeEnumerable)
                     {
-                        state.StoreContext(unityContext);
                         yield return iterator;
                     }
                 }
                 else
                 {
                     context.CurrentResult = innerCommand.Execute(context);
-                    state.StoreContext(unityContext);
                 }
 
                 state.TestHasRun = true;
@@ -192,7 +204,8 @@ namespace UnityEngine.TestTools
                 IEnumerator enumerator;
                 try
                 {
-                    enumerator = InvokeAfter(action, Test, unityContext);
+                    enumerator = EnumeratorHelper.UnpackNestedEnumerators(InvokeAfter(action, Test, unityContext));
+                    EnumeratorHelper.SetEnumeratorPC(state.NextAfterStepPc);
                 }
                 catch (Exception ex)
                 {
@@ -200,7 +213,6 @@ namespace UnityEngine.TestTools
                     state.StoreContext(unityContext);
                     break;
                 }
-                ActivePcHelper.SetEnumeratorPC(enumerator, state.NextAfterStepPc);
 
                 using (var logScope = new LogScope())
                 {
@@ -218,9 +230,17 @@ namespace UnityEngine.TestTools
                             {
                                 logScope.EvaluateLogScope(true);
                             }
-                            if (unityContext.TestMode == TestPlatform.PlayMode && enumerator.Current is IEditModeTestYieldInstruction)
+                            if (enumerator.Current is IEditModeTestYieldInstruction)
                             {
-                                throw new Exception($"PlayMode test are not allowed to yield {enumerator.Current.GetType().Name}");
+                                if (unityContext.TestMode == TestPlatform.PlayMode)
+                                {
+                                    throw new Exception($"PlayMode test are not allowed to yield {enumerator.Current.GetType().Name}");
+                                }
+
+                                if (EnumeratorHelper.IsRunningNestedEnumerator)
+                                {
+                                    throw new Exception($"Nested enumerators are not allowed to yield {enumerator.Current.GetType().Name}");
+                                }
                             }
                         }
                         catch (Exception ex)
@@ -230,8 +250,12 @@ namespace UnityEngine.TestTools
                             break;
                         }
 
-                        state.NextAfterStepPc = ActivePcHelper.GetEnumeratorPC(enumerator);
-                        state.StoreContext(unityContext);
+                        if (!EnumeratorHelper.IsRunningNestedEnumerator)
+                        {
+                            // Only store the state in the main enumerator. Domain reloads are not supported from nested enumerators.
+                            state.NextAfterStepPc = EnumeratorHelper.GetEnumeratorPC();
+                            state.StoreContext(unityContext);
+                        }
                         
                         if (!AllowFrameSkipAfterAction(action))
                         {
@@ -252,26 +276,6 @@ namespace UnityEngine.TestTools
         public override TestResult Execute(ITestExecutionContext context)
         {
             throw new NotImplementedException("Use ExecuteEnumerable");
-        }
-
-        private static TestCommandPcHelper pcHelper;
-
-
-        internal static TestCommandPcHelper ActivePcHelper
-        {
-            get
-            {
-                if (pcHelper == null)
-                {
-                    pcHelper = new TestCommandPcHelper();
-                }
-
-                return pcHelper;
-            }
-            set
-            {
-                pcHelper = value;
-            }
         }
     }
 }

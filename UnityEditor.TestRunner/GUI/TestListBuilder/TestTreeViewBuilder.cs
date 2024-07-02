@@ -22,6 +22,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
         private readonly TestRunnerUIFilter m_UIFilter;
         private readonly ITestAdaptor[] m_TestListRoots;
         private readonly Dictionary<string, List<TestRunnerResult>> m_ChildrenResults;
+        private readonly bool m_runningOnPlatform;
 
         private readonly List<string> m_AvailableCategories = new List<string>();
 
@@ -30,13 +31,14 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             get { return m_AvailableCategories.Distinct().OrderBy(a => a).ToArray(); }
         }
 
-        public TestTreeViewBuilder(ITestAdaptor[] tests, Dictionary<string, TestRunnerResult> oldTestResultResults, TestRunnerUIFilter uiFilter)
+        public TestTreeViewBuilder(ITestAdaptor[] tests, Dictionary<string, TestRunnerResult> oldTestResultResults, TestRunnerUIFilter uiFilter, bool runningOnPlatform)
         {
             m_AvailableCategories.Add(CategoryFilterExtended.k_DefaultCategory);
             m_OldTestResults = oldTestResultResults;
             m_ChildrenResults = new Dictionary<string, List<TestRunnerResult>>();
             m_TestListRoots = tests;
             m_UIFilter = uiFilter;
+            m_runningOnPlatform = runningOnPlatform;
         }
 
         public TreeViewItem BuildTreeView()
@@ -83,7 +85,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             {
                 m_OldTestResults.TryGetValue(testElementId, out var result);
 
-                if (result != null &&
+                if (result != null && !m_runningOnPlatform &&
                     (result.ignoredOrSkipped
                      || result.notRunnable
                      || testElement.RunState == RunState.NotRunnable
@@ -92,7 +94,8 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                     )
                 )
                 {
-                    //if the test was or becomes ignored or not runnable, we recreate the result in case it has changed
+                    // if the test was or becomes ignored or not runnable, we recreate the result in case it has changed
+                    // It does not apply if we are running on a platform, as evaluation of runstate needs to be evaluated on the player.
                     result = null;
                 }
                 if (result == null)

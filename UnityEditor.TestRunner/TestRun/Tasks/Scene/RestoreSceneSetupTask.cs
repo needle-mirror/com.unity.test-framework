@@ -12,6 +12,7 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks.Scene
         public RestoreSceneSetupTask()
         {
             RunOnError = ErrorRunMode.RunAlways;
+            RunOnCancel = true;
         }
 
         public override IEnumerator Execute(TestJobData testJobData)

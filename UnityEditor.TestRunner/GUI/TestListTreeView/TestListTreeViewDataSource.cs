@@ -26,7 +26,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
 
         public override void FetchData()
         {
-            var testListBuilder = new TestTreeViewBuilder(m_RootTests, m_TestListGUI.ResultsByKey, m_TestListGUI.m_TestRunnerUIFilter);
+            var testListBuilder = new TestTreeViewBuilder(m_RootTests, m_TestListGUI.ResultsByKey, m_TestListGUI.m_TestRunnerUIFilter, m_TestListGUI.m_RunOnPlatform);
 
             m_RootItem = testListBuilder.BuildTreeView();
             SetExpanded(m_RootItem, true);

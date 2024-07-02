@@ -108,6 +108,10 @@ namespace UnityEditor.TestTools.TestRunner.GUI
         {
             if (result.resultStatus == TestRunnerResult.ResultStatus.NotRun)
             {
+                if (result.ignoredOrSkipped)
+                {
+                    return result.messages;
+                }
                 return string.Empty;
             }
             var durationString = String.Format("{0:0.000}", result.duration);

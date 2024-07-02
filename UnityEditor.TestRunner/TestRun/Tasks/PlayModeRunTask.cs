@@ -49,6 +49,10 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
 
             while (!runDone)
             {
+                if (controller.RaisedException != null)
+                {
+                    throw controller.RaisedException;
+                }
                 yield return null;
             }
 

@@ -273,6 +273,11 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
             {
                 if (_childFilter.Pass(child))
                 {
+                    if (!ShouldExecuteEvents(child))
+                    {
+                        continue;
+                    }
+
                     Context.Listener.TestStarted(child);
                     TestResult childResult = child.MakeTestResult();
                     childResult.SetResult(resultState, message);
@@ -284,6 +289,11 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
                     Context.Listener.TestFinished(childResult);
                 }
             }
+        }
+        
+        private static bool ShouldExecuteEvents(Test test)
+        {
+            return UnityWorkItemDataHolder.alreadyExecutedTests == null || UnityWorkItemDataHolder.alreadyExecutedTests.All(x => x != test.GetUniqueName());
         }
 
         private void PerformOneTimeTearDown()

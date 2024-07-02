@@ -122,8 +122,10 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             notRunnable = result.notRunnable;
             description = result.description;
             notOutdated = result.notOutdated;
-            if (m_OnResultUpdate != null)
+            if (m_OnResultUpdate != null && !result.isSuite)
+            {
                 m_OnResultUpdate(this);
+            }
         }
 
         public void SetResultChangedCallback(Action<TestRunnerResult> resultUpdated)

@@ -22,6 +22,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
         private static readonly GUIContent s_GUIOpenErrorLine = EditorGUIUtility.TrTextContent("Open error line");
         private static readonly GUIContent s_GUIClearResults = EditorGUIUtility.TrTextContent("Clear Results", "Clear all test results");
         private static readonly GUIContent s_SaveResults = EditorGUIUtility.TrTextContent("Export Results", "Save the latest test results to a file");
+        private static readonly GUIContent s_GUICancelRun = EditorGUIUtility.TrTextContent("Cancel Run");
 
         [SerializeField]
         private TestRunnerWindow m_Window;
@@ -34,8 +35,13 @@ namespace UnityEditor.TestTools.TestRunner.GUI
         [NonSerialized]
         internal bool m_RunOnPlatform;
 
+        [NonSerialized] 
+        internal bool m_buildOnly;
 
+        [SerializeField]
+        private TestRunProgress runProgress;
         public Dictionary<string, TestTreeViewItem> filteredTree { get; set; }
+
         public List<TestRunnerResult> newResultList
         {
             get { return m_NewResultList; }
@@ -56,15 +62,15 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             {
                 if (m_ResultByKey == null)
                 {
-                    try
+                    m_ResultByKey = new Dictionary<string, TestRunnerResult>();
+                    foreach (var result in newResultList)
                     {
-                        m_ResultByKey = newResultList.ToDictionary(k => k.uniqueId);
-                    }
-                    catch (Exception ex)
-                    {
-                        // Reset the results, so we do not lock the editor in giving errors on this on every frame.
-                        newResultList = new List<TestRunnerResult>();
-                        throw ex;
+                        if (m_ResultByKey.ContainsKey(result.uniqueId))
+                        {
+                            Debug.LogWarning($"Multiple tests has the same unique id '{result.uniqueId}', their results will be overwritten.");
+                            continue;
+                        }
+                        m_ResultByKey.Add(result.uniqueId, result);
                     }
                 }
 
@@ -93,6 +99,12 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             AssetsDatabaseHelper = new AssetsDatabaseHelper();
 
             GuiHelper = new GuiHelper(MonoCecilHelper, AssetsDatabaseHelper);
+            TestRunnerApi.runProgressChanged.AddListener(UpdateProgressStatus);
+        }
+
+        private void UpdateProgressStatus(TestRunProgress progress)
+        {
+            runProgress = progress;
         }
 
         private IMonoCecilHelper MonoCecilHelper { get; set; }
@@ -103,7 +115,6 @@ namespace UnityEditor.TestTools.TestRunner.GUI
         {
             public GUIContent name;
             public bool filterSelectedTestsOnly;
-            public bool buildOnly;
         }
         
         [SerializeField]
@@ -123,6 +134,24 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                 m_TestRunnerUIFilter.OnModeGUI();
                 DrawFilters();
             }
+        }
+
+        public void PrintProgressBar(Rect rect)
+        {
+            if (runProgress == null || runProgress.HasFinished || string.IsNullOrEmpty(runProgress.RunGuid))
+            {
+                return;
+            }
+
+            EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
+
+            EditorGUI.ProgressBar(EditorGUILayout.GetControlRect(), runProgress.Progress, runProgress.CurrentStepName);
+            if (GUILayout.Button(s_GUICancelRun, GUILayout.Width(100)))
+            {
+                TestRunnerApi.CancelTestRun(runProgress.RunGuid);
+            }
+            
+            EditorGUILayout.EndHorizontal();
         }
 
         public void PrintBottomPanel()
@@ -190,31 +219,35 @@ namespace UnityEditor.TestTools.TestRunner.GUI
 
                         if (EditorUserBuildSettings.installInBuildFolder)
                         {
+                            // Note: We select here m_buildOnly = false, so build location dialog won't show up
+                            //       The player won't actually be ran when using together with EditorUserBuildSettings.installInBuildFolder
+                            m_buildOnly = false;
+                            
                             menuItems = new []
                             {
-                                // Note: We select here buildOnly = false, so build location dialog won't show up
-                                //       The player won't actually be ran when using together with EditorUserBuildSettings.installInBuildFolder
                                 new PlayerMenuItem()
                                 {
-                                    name = new GUIContent("Install All Tests In Build Folder"), buildOnly = false, filterSelectedTestsOnly = false
+                                    name = new GUIContent("Install All Tests In Build Folder"), filterSelectedTestsOnly = false
                                 },
                                 new PlayerMenuItem()
                                 {
-                                    name = new GUIContent("Install Selected Tests In Build Folder"), buildOnly = false, filterSelectedTestsOnly = true
+                                    name = new GUIContent("Install Selected Tests In Build Folder"), filterSelectedTestsOnly = true
                                 }
                             };
                         }
                         else
                         {
+                            m_buildOnly = true;
+                            
                             menuItems = new []
                             {
                                 new PlayerMenuItem()
                                 {
-                                    name = new GUIContent($"{GetBuildText()} All Tests"), buildOnly = true, filterSelectedTestsOnly = false
+                                    name = new GUIContent($"{GetBuildText()} All Tests"), filterSelectedTestsOnly = false
                                 },
                                 new PlayerMenuItem()
                                 {
-                                    name = new GUIContent($"{GetBuildText()} Selected Tests"), buildOnly = true, filterSelectedTestsOnly = true
+                                    name = new GUIContent($"{GetBuildText()} Selected Tests"), filterSelectedTestsOnly = true
                                 },
                             };
                         }
@@ -234,7 +267,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
                 EditorGUILayout.EndHorizontal();
             }
         }
-        
+
         private string GetBuildText()
         {
             switch (EditorUserBuildSettings.activeBuildTarget)
@@ -248,7 +281,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             }
             return "Build";
         }
-        
+
         private string PickBuildLocation()
         {
             var target = EditorUserBuildSettings.activeBuildTarget;
@@ -508,7 +541,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
 
         internal void TestSelectionCallback(int[] selected)
         {
-            if (m_TestListTree != null && selected.Length == 1)
+            if (m_TestListTree != null && selected.Length > 0)
             {
                 if (m_TestListTree != null)
                 {
@@ -576,13 +609,16 @@ namespace UnityEditor.TestTools.TestRunner.GUI
             if (runFilter == RunFilterType.BuildAll || runFilter == RunFilterType.BuildSelected)
             {
                 var runSettings = new PlayerLauncherTestRunSettings();
-                runSettings.buildOnlyLocationPath = PickBuildLocation();
-                runSettings.buildOnly = true;
+                runSettings.buildOnly = m_buildOnly;
 
-                if (string.IsNullOrEmpty(runSettings.buildOnlyLocationPath))
+                if (runSettings.buildOnly)
                 {
-                    Debug.LogWarning("Aborting, build selection was canceled.");
-                    return;
+                    runSettings.buildOnlyLocationPath = PickBuildLocation();
+                    if (string.IsNullOrEmpty(runSettings.buildOnlyLocationPath))
+                    {
+                        Debug.LogWarning("Aborting, build selection was canceled.");
+                        return;
+                    }
                 }
 
                 executionSettings.overloadTestRunSettings = runSettings;

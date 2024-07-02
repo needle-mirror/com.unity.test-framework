@@ -122,6 +122,12 @@ namespace UnityEditor.TestTools.TestRunner.TestRun
         [SerializeField]
         public SavedProjectSettings OriginalProjectSettings;
 
+        [SerializeField]
+        public int UserApplicationIdleTime = -1;
+
+        [SerializeField]
+        public int UserInteractionMode = -1;
+
         public TestJobData(ExecutionSettings settings)
         {
             guid = Guid.NewGuid().ToString();

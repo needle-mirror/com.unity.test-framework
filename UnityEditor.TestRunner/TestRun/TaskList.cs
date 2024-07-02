@@ -50,6 +50,7 @@ namespace UnityEditor.TestTools.TestRunner.TestRun
             yield return new RegisterFilesForCleanupVerificationTask();
             yield return new SaveUndoIndexTask();
             yield return new StoreSceneSetupTask();
+            yield return new SetInteractionModeTask();
             yield return new RemoveAdditionalUntitledSceneTask();
             yield return new ReloadModifiedScenesTask();
             yield return new BuildNUnitFilterTask();
@@ -60,11 +61,11 @@ namespace UnityEditor.TestTools.TestRunner.TestRun
             yield return new RegisterTestRunCallbackEventsTask();
             yield return new PrebuildSetupTask();
             yield return new EnableTestOutLoggerTask();
+            yield return new InitializeTestProgressTask();
+            yield return new UpdateTestProgressTask();
 
         if (editMode)
         {
-            yield return new InitializeTestProgressTask();
-            yield return new UpdateTestProgressTask();
             yield return new GenerateContextTask();
             yield return new SetupConstructDelegatorTask();
             yield return new RunStartedInvocationEvent();
@@ -84,6 +85,7 @@ namespace UnityEditor.TestTools.TestRunner.TestRun
         }
             yield return new PostbuildCleanupTask();
             yield return new CleanUpContext();
+            yield return new ResetInteractionModeTask();
             yield return new RestoreSceneSetupTask();
             yield return new DeleteBootstrapSceneTask();
             yield return new PerformUndoTask();

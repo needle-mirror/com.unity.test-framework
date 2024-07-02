@@ -1,4 +1,22 @@
 # Changelog
+## [1.4.5] - 2024-07-02
+- Fixed an issue where batchmode test runs would never finish if a test yielded WaitForEndOfFrame (DSTR-1009).
+- Fixed an issue where the location prompt was required when using the Install all tests in 'build' folder option during test builds.
+- Canceling a PlayMode test run now correctly restores the scene setup, instead of leaving the editor in the test scene.
+- Fixed an issue where UnitySetUp did not fail when nested coroutines threw an exception (DSTR-1007).
+- When selecting multiple tests and running them, the test runner now correctly updates the details of the first selected test (UTF-602).
+- The interaction mode and application idle time settings is now being changes when running tests, resulting in faster test runs if not already in use (applies to 2020.3 and later) (DSTR-690).
+- Fixed an issue where some NUnit attributes caused errors and stopped async test runs (DSTR-1040).
+- Added support for the MaxTime attribute on async and UnityTest methods (DSTR-1040).
+- Fixed a memory leak issue where a large number of domain reloads within the same test could crash the editor (DSTR-1023).
+- Changed to use a progress bar inside the test runner window when running tests. This ensures that the progress bar is not fighting to display when e.g. compiling scripts and also makes it easier to cancel a run. This progress bar is displayed for all types of runs (EditMode, PlayMode and Player). (UTF-596).
+- Fixed an issue where ignored tests with an attributes did not display the ignore reason in the test runner UI.
+- Having multiple tests with the same unique id no longer gives a error with 'An item with the same key has already been added', but instead logs an warning about the duplicate id.
+- The result icons for test suites should no longer flicker when running tests.
+- Ensured that test results ignored in the editor but run on a player are not overwritten with ignore status when shown in the UI (DSTR-1042).
+- Fixed an issue where the RunStarted event was not invoked correctly during a test run (DSTR-1046).
+- Fixed an issue where TestStarted and TestFinished events were repeated for ignored test fixtures after a domain reload (DSTR-986).
+
 ## [1.4.4] - 2024-04-11
 - Fix the issue where playmode controller wasn't being set and cleaned up correctly, causing issues post test run. (DSTR-1025)
 - Fixed an issue where Oculus Quest headsets might timeout before the test run starts (DSTR-404).
