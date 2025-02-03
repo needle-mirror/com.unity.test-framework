@@ -1,9 +1,9 @@
 {
   "name": "com.unity.test-framework",
   "displayName": "Test Framework",
-  "version": "1.4.5",
+  "version": "1.4.6",
   "unity": "2019.4",
-  "unityRelease": "0a10",
+  "unityRelease": "1f1",
   "description": "Test framework for running Edit mode and Play mode tests in Unity.",
   "keywords": [
     "Test",
@@ -13,7 +13,7 @@
   "repository": {
     "url": "https://github.com/Unity-Technologies/com.unity.test-framework.git",
     "type": "git",
-    "revision": "e50747c90fb18ab9f4f350b60d0fcdcae19bdebc"
+    "revision": "9c6028f63a9b875e714b65de151b74e170152d49"
   },
   "dependencies": {
     "com.unity.ext.nunit": "2.0.3",
@@ -221,13 +221,13 @@
     }
   ],
   "relatedPackages": {
-    "com.unity.test-framework.tests": "1.4.5"
+    "com.unity.test-framework.tests": "1.4.6"
   },
   "_upm": {
-    "changelog": "- Fixed an issue where batchmode test runs would never finish if a test yielded WaitForEndOfFrame (DSTR-1009).\n- Fixed an issue where the location prompt was required when using the Install all tests in 'build' folder option during test builds.\n- Canceling a PlayMode test run now correctly restores the scene setup, instead of leaving the editor in the test scene.\n- Fixed an issue where UnitySetUp did not fail when nested coroutines threw an exception (DSTR-1007).\n- When selecting multiple tests and running them, the test runner now correctly updates the details of the first selected test (UTF-602).\n- The interaction mode and application idle time settings is now being changes when running tests, resulting in faster test runs if not already in use (applies to 2020.3 and later) (DSTR-690).\n- Fixed an issue where some NUnit attributes caused errors and stopped async test runs (DSTR-1040).\n- Added support for the MaxTime attribute on async and UnityTest methods (DSTR-1040).\n- Fixed a memory leak issue where a large number of domain reloads within the same test could crash the editor (DSTR-1023).\n- Changed to use a progress bar inside the test runner window when running tests. This ensures that the progress bar is not fighting to display when e.g. compiling scripts and also makes it easier to cancel a run. This progress bar is displayed for all types of runs (EditMode, PlayMode and Player). (UTF-596).\n- Fixed an issue where ignored tests with an attributes did not display the ignore reason in the test runner UI.\n- Having multiple tests with the same unique id no longer gives a error with 'An item with the same key has already been added', but instead logs an warning about the duplicate id.\n- The result icons for test suites should no longer flicker when running tests.\n- Ensured that test results ignored in the editor but run on a player are not overwritten with ignore status when shown in the UI (DSTR-1042).\n- Fixed an issue where the RunStarted event was not invoked correctly during a test run (DSTR-1046).\n- Fixed an issue where TestStarted and TestFinished events were repeated for ignored test fixtures after a domain reload (DSTR-986)."
+    "changelog": "- Fixed an issue where the architecture flag would not be parsed for the StandaloneOSX platform.\n- Fixed an issue where the test results ui and progress bar would not update before a user input, such as mouse movement, was detected (UTF-609).\n- Fixed an issue where root of the test tree was marked as NotRun, when all the tests were run and at least one test is ignore.\n- Ensure that an error is raised and the test run is stopped if a playmode test method exits playmode (DSTR-1091). \n- Async editmode tests are no longer throw error when yielding a different value than null (DSTR-1066)\n- Fixed an issue where the \"C# Test Script\" button was always disabled in One Column view in Project tab. (DSTR-1083)\n- Async and UnityTest can now use ParametrizedIgnore attribute. (DSTR-1068)\n- Corrected Timeout to only apply to the test method and not the teardown methods, ensuring that TearDown is always run if a test case times out (DSTR-1077).\n- Added a queue size indicator in the player side test result ui. This can be used to track the progress of sending back result data to the editor.\n- Parent node of the test tree is now updated after all children finish running and have a result."
   },
   "upmCi": {
-    "footprint": "594e04e8fc9a267b604d2087599a8c6538f62574"
+    "footprint": "00736a083918d6aad3399b4a646720b3530ba7e1"
   },
   "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.test-framework@1.4/manual/index.html"
 }

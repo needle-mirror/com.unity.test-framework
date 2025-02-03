@@ -45,7 +45,7 @@ namespace UnityEditor.TestTools.TestRunner.Api
         /// <summary>
         ///  Note that this is only supported for EditMode tests, and that tests which take multiple frames (i.e. [UnityTest] tests, or tests with [UnitySetUp] or [UnityTearDown] scaffolding) will be filtered out.
         /// </summary>
-        /// <returns>If true, the call to Execute() will run tests synchronously, guaranteeing that all tests have finished running by the time the call returns.</returns>
+        /// <value>If true, the call to Execute() will run tests synchronously, guaranteeing that all tests have finished running by the time the call returns.</value>
         [SerializeField]
         public bool runSynchronously;
         /// <summary>

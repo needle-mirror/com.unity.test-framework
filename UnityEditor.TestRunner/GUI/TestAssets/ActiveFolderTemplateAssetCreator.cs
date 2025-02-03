@@ -1,5 +1,3 @@
-using System;
-
 namespace UnityEditor.TestTools.TestRunner.GUI.TestAssets
 {
     /// <inheritdoc />
@@ -8,7 +6,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI.TestAssets
         /// <inheritdoc />
         public string GetActiveFolderPath()
         {
-            return ProjectWindowUtil.GetActiveFolderPath();
+            return AssetDatabase.GetAssetPath(Selection.activeObject);
         }
 
         /// <inheritdoc />

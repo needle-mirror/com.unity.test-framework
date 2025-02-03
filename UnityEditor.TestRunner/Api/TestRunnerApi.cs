@@ -12,16 +12,18 @@ using UnityEngine.TestTools.NUnitExtensions;
 namespace UnityEditor.TestTools.TestRunner.Api
 {
     /// <summary>
-    /// The TestRunnerApi retrieves and runs tests programmatically from code inside the project, or inside other packages. TestRunnerApi is a [ScriptableObject](https://docs.unity3d.com/ScriptReference/ScriptableObject.html).
-    /// You can initialize the API like this:
+    /// <para>The TestRunnerApi retrieves and runs tests programmatically from code inside the project, or inside other packages. TestRunnerApi is a [ScriptableObject](https://docs.unity3d.com/ScriptReference/ScriptableObject.html).
+    /// You can initialize the API like this:</para>
     /// <code>
     /// var testRunnerApi = ScriptableObject.CreateInstance&lt;TestRunnerApi&gt;();
     /// </code>
+    /// <para>
     /// Note: You can subscribe and receive test results in one instance of the API, even if the run starts from another instance.
     /// The TestRunnerApi supports the following workflows:
     /// - [How to run tests programmatically](https://docs.unity3d.com/Packages/com.unity.test-framework@1.1/manual/extension-run-tests.html)
     /// - [How to get test results](https://docs.unity3d.com/Packages/com.unity.test-framework@1.1/manual/extension-get-test-results.html)
     /// - [How to retrieve the list of tests](https://docs.unity3d.com/Packages/com.unity.test-framework@1.1/manual/extension-retrieve-test-list.html)
+    /// </para>
     /// </summary>
     public class TestRunnerApi : ScriptableObject, ITestRunnerApi
     {
@@ -162,8 +164,8 @@ namespace UnityEditor.TestTools.TestRunner.Api
         /// <summary>
         /// Retrieve the full test tree as ITestAdaptor for a given test mode. This is obsolete. Use TestRunnerApi.RetrieveTestTree instead.
         /// </summary>
-        /// <param name="testMode"></param>
-        /// <param name="callback"></param>
+        /// <param name="testMode">The TestMode to retrieve the test list for.</param>
+        /// <param name="callback">A callback that is invoked when the test tree is retrieved.</param>
         public void RetrieveTestList(TestMode testMode, Action<ITestAdaptor> callback)
         {
             if (callback == null)

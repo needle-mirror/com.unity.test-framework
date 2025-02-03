@@ -116,7 +116,6 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
                 command = new EnumerableApplyChangesToContextCommand(command, changes);
             }
 
-            command = new TimeoutCommand(command);
             command = new IgnoreTestCommand(command, test);
             command = new StrictCheckCommand(command);
             return command;

@@ -12,8 +12,8 @@ namespace UnityEngine.TestTools.Constraints
         /// Use this with NUnit's Assert.That() method to make assertions about the GC behaviour of your code. The constraint executes the delegate you provide, and checks if it caused any GC memory to be allocated. If any GC memory was allocated, the constraint passes; otherwise, the constraint fails.
         /// See https://docs.unity3d.com/Packages/com.unity.test-framework@1.1/api/UnityEngine.TestTools.Constraints.AllocatingGCMemoryConstraint.html for an example.
         /// </summary>
-        /// <param name="chain"></param>
-        /// <returns></returns>
+        /// <param name="chain">The chain of constraints to append this constraint to.</param>
+        /// <returns>The generated constraint.</returns>
         public static AllocatingGCMemoryConstraint AllocatingGCMemory(this ConstraintExpression chain)
         {
             var constraint = new AllocatingGCMemoryConstraint();

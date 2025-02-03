@@ -5,6 +5,7 @@ namespace UnityEngine.TestTools
 {
     /// <summary>
     /// The <see cref="UnitySetUpAttribute"/> and `UnityTearDown` attributes are identical to the standard `SetUp` and `TearDown` attributes, with the exception that they allow for <see cref="IEditModeTestYieldInstruction"/>. The `UnitySetUp` and `UnityTearDown` attributes expect a return type of [IEnumerator](https://docs.microsoft.com/en-us/dotnet/api/system.collections.ienumerator?view=netframework-4.8).
+    /// </summary>
     /// <example>
     /// <code>
     ///public class SetUpTearDownExample
@@ -29,7 +30,6 @@ namespace UnityEngine.TestTools
     /// }
     /// </code>
     /// </example>
-    /// </summary>
     [AttributeUsage(AttributeTargets.Method)]
     public class UnityTearDownAttribute : NUnitAttribute
     {

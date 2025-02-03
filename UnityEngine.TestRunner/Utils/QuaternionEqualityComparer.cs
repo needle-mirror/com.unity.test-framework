@@ -40,7 +40,7 @@ namespace UnityEngine.TestTools.Utils
         /// <param name="actual">Actual Quaternion value to test</param>
         /// <returns>True if the quaternion are equals, false otherwise.</returns>
         /// <example>
-        /// The following example shows how to verify if two Quaternion are equals
+        /// <para>The following example shows how to verify if two Quaternion are equals</para>
         /// <code>
         /// [TestFixture]
         /// public class QuaternionTest

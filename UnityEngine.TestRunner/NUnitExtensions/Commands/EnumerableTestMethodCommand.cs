@@ -73,12 +73,10 @@ namespace UnityEngine.TestTools
                     break;
                 }
 
+                bool executionDone = false;
                 try
                 {
-                    if (!enumerator.MoveNext())
-                    {
-                        break;
-                    }
+                    executionDone = !enumerator.MoveNext();
                     if (unityContext.TestMode == TestPlatform.PlayMode && enumerator.Current is IEditModeTestYieldInstruction)
                     {
                         throw new Exception($"PlayMode test are not allowed to yield {enumerator.Current.GetType().Name}");
@@ -87,6 +85,17 @@ namespace UnityEngine.TestTools
                 catch (Exception ex)
                 {
                     context.RecordExceptionWithHint(ex);
+                    break;
+                }
+
+                if (unityContext.HasTimedOut())
+                {
+                    unityContext.CurrentResult.RecordException(new UnityTestTimeoutException(unityContext.TestCaseTimeout));
+                    yield return new RestoreTestContextAfterDomainReload(); // If this is right after a domain reload, give the editor a chance to restore.
+                    yield break;
+                }
+                if (executionDone)
+                {
                     break;
                 }
 
@@ -126,7 +135,6 @@ namespace UnityEngine.TestTools
                 ExceptionWasRecorded = true;
             }
         }
-
 
         public override TestResult Execute(ITestExecutionContext context)
         {

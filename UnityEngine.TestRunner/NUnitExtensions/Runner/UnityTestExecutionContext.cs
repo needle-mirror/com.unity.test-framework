@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using NUnit.Framework;
@@ -150,6 +151,12 @@ namespace UnityEngine.TestRunner.NUnitExtensions.Runner
         public void AddFormatter(ValueFormatterFactory formatterFactory)
         {
             throw new NotImplementedException();
+        }
+        
+        public bool HasTimedOut()
+        {
+            return Stopwatch.GetTimestamp() - StartTicks >
+                   TestCaseTimeout * (Stopwatch.Frequency / 1000f);
         }
     }
 }

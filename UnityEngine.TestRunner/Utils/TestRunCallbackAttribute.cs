@@ -43,7 +43,7 @@ namespace UnityEngine.TestRunner
     ///}
     /// ]]>
     /// </code>
-    /// > Note: The `TestRunCallback` does not need any references to the `UnityEditor` namespace and can run in standalone Players on the Player side.
+    /// <para>> Note: The `TestRunCallback` does not need any references to the `UnityEditor` namespace and can run in standalone Players on the Player side.</para>
     /// </example>
     [AttributeUsage(AttributeTargets.Assembly)]
     public class TestRunCallbackAttribute : Attribute

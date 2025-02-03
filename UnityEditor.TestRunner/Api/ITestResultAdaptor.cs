@@ -20,44 +20,44 @@ namespace UnityEditor.TestTools.TestRunner.Api
         /// <summary>
         /// Gets the full name of the test result
         /// </summary>
-        ///<returns>
+        ///<value>
         ///The name of the test result.
-        ///</returns>
+        ///</value>
         string FullName { get; }
         ///<summary>
         ///Gets the state of the result as a string.
         ///</summary>
-        ///<returns>
+        ///<value>
         ///It returns one of these values: `Inconclusive`, `Skipped`, `Skipped:Ignored`, `Skipped:Explicit`, `Passed`, `Failed`, `Failed:Error`, `Failed:Cancelled`, `Failed:Invalid`
-        ///</returns>
+        ///</value>
         string ResultState { get; }
         ///<summary>
         ///Gets the status of the test as an enum.
         ///</summary>
-        ///<returns>
+        ///<value>
         ///It returns one of these values:`Inconclusive`, `Skipped`, `Passed`, or `Failed`
-        ///</returns>
+        ///</value>
         TestStatus TestStatus { get; }
         /// <summary>
         /// Gets the elapsed time for running the test in seconds
         /// </summary>
-        /// <returns>
+        /// <value>
         /// Time in seconds.
-        /// </returns>
+        /// </value>
         double Duration { get; }
         /// <summary>
         /// Gets or sets the time the test started running.
         /// </summary>
-        ///<returns>
+        ///<value>
         ///A DataTime object.
-        ///</returns>
+        ///</value>
         DateTime StartTime { get; }
         ///<summary>
         ///Gets or sets the time the test finished running.
         ///</summary>
-        ///<returns>
+        ///<value>
         ///A DataTime object.
-        ///</returns>
+        ///</value>
         DateTime EndTime { get; }
 
         /// <summary>
@@ -98,7 +98,7 @@ namespace UnityEditor.TestTools.TestRunner.Api
         /// <summary>
         /// Accessing HasChildren should not force creation of the Children collection in classes implementing this interface.
         /// </summary>
-        /// <returns>True if this result has any child results.</returns>
+        /// <value>True if this result has any child results.</value>
         bool HasChildren { get; }
 
         /// <summary>

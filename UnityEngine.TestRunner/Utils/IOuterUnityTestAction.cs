@@ -8,8 +8,9 @@ namespace UnityEngine.TestTools
     /// An attribute can implement this interface to provide actions to execute before setup and after teardown of tests.
     /// </summary>
     /// <example>
-    /// ## IOuterUnityTestAction Example
+    /// <para>## IOuterUnityTestAction Example</para>
     /// <code>
+    /// // 
     /// <![CDATA[
     /// using System.Collections;
     /// using NUnit.Framework;
@@ -41,9 +42,7 @@ namespace UnityEngine.TestTools
     /// }
     /// ]]>
     /// </code>
-    /// </example>
-    /// <example>
-    /// ## Test actions with domain reload example
+    /// <para>Test actions with domain reload example</para>
     /// <code>
     /// <![CDATA[
     /// using NUnit.Framework.Interfaces;

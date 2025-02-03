@@ -46,6 +46,17 @@ namespace UnityEngine.TestTools.TestRunner.Callbacks
             }
         }
 
+        public int QueueSize
+        {
+            get
+            {
+                lock (m_LockQueue)
+                {
+                    return m_SendQueue.Count;
+                }
+            }
+        }
+
         public void RunFinished(ITestResult testResults)
         {
             var data = SerializeObject(m_TestResultDataFactory.CreateFromTestResult(testResults));

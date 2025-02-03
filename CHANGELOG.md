@@ -1,4 +1,17 @@
 # Changelog
+
+## [1.4.6] - 2025-02-03
+- Fixed an issue where the architecture flag would not be parsed for the StandaloneOSX platform.
+- Fixed an issue where the test results ui and progress bar would not update before a user input, such as mouse movement, was detected (UTF-609).
+- Fixed an issue where root of the test tree was marked as NotRun, when all the tests were run and at least one test is ignore.
+- Ensure that an error is raised and the test run is stopped if a playmode test method exits playmode (DSTR-1091). 
+- Async editmode tests are no longer throw error when yielding a different value than null (DSTR-1066)
+- Fixed an issue where the "C# Test Script" button was always disabled in One Column view in Project tab. (DSTR-1083)
+- Async and UnityTest can now use ParametrizedIgnore attribute. (DSTR-1068)
+- Corrected Timeout to only apply to the test method and not the teardown methods, ensuring that TearDown is always run if a test case times out (DSTR-1077).
+- Added a queue size indicator in the player side test result ui. This can be used to track the progress of sending back result data to the editor.
+- Parent node of the test tree is now updated after all children finish running and have a result. 
+
 ## [1.4.5] - 2024-07-02
 - Fixed an issue where batchmode test runs would never finish if a test yielded WaitForEndOfFrame (DSTR-1009).
 - Fixed an issue where the location prompt was required when using the Install all tests in 'build' folder option during test builds.

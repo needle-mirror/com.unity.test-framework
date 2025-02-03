@@ -96,7 +96,7 @@ namespace UnityEngine.TestTools
         }
 
         /// <summary>Set this property to `true` to prevent unexpected error log messages from triggering an assertion. By default, it is `false`.</summary>
-        /// <returns>The value of the ignoreFailingMessages boolean property.</returns>
+        /// <value>The value of the ignoreFailingMessages boolean property.</value>
         public static bool ignoreFailingMessages
         {
             get

@@ -105,6 +105,7 @@ namespace UnityEditor.TestTools.TestRunner.GUI
         private void UpdateProgressStatus(TestRunProgress progress)
         {
             runProgress = progress;
+            TestRunnerWindow.s_Instance.Repaint();
         }
 
         private IMonoCecilHelper MonoCecilHelper { get; set; }

@@ -16,7 +16,7 @@ namespace UnityEngine.TestTools.TestRunner.Callbacks
             {
                 gameObject.AddComponent<Camera>();
             }
-            m_ResultRenderer = new TestResultRenderer(testResults);
+            m_ResultRenderer = new TestResultRenderer(testResults, gameObject.GetComponent<RemoteTestResultSender>());
             m_ResultRenderer.ShowResults();
         }
 

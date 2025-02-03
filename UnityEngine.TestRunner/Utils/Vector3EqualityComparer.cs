@@ -37,7 +37,7 @@ namespace UnityEngine.TestTools.Utils
         /// <param name="actual">The actual Vector3 to test</param>
         /// <returns>True if the vectors are equals, false otherwise.</returns>
         /// <example>
-        /// The following example shows how to verify if two Vector3 are equals
+        /// <para>The following example shows how to verify if two Vector3 are equals</para>
         /// <code>
         /// [TestFixture]
         /// public class Vector3Test

@@ -31,9 +31,7 @@ namespace UnityEngine.TestTools
     /// }
     /// ]]>
     /// </code>
-    /// </example>
-    /// <example>
-    /// ## Base and Derived class example
+    /// <para>## Base and Derived class example</para>
     /// <code>
     /// <![CDATA[
     /// public class BaseClass
@@ -127,9 +125,7 @@ namespace UnityEngine.TestTools
     /// }
     /// ]]>
     /// </code>
-    /// </example>
-    /// <example>
-    /// ## Domain reload example
+    /// <para>## Domain reload example</para>
     /// <code>
     /// <![CDATA[
     /// public class BaseClass
@@ -224,8 +220,8 @@ namespace UnityEngine.TestTools
     ///    }
     /// }
     /// ]]>
-/// </code>
-/// </example>
+    /// </code>
+    /// </example>
     [AttributeUsage(AttributeTargets.Method)]
     public class UnitySetUpAttribute : NUnitAttribute
     {

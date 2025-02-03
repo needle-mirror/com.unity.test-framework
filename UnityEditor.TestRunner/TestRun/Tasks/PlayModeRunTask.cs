@@ -53,6 +53,12 @@ namespace UnityEditor.TestTools.TestRunner.TestRun.Tasks
                 {
                     throw controller.RaisedException;
                 }
+
+                if (!Application.isPlaying)
+                {
+                    throw new Exception("Playmode tests were aborted because the player was stopped.");
+                }
+                
                 yield return null;
             }
 
